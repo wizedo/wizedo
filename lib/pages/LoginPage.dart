@@ -130,23 +130,41 @@ class _LoginPageState extends State<LoginPage> {
                   //email textfield
                   MyTextField(
                       controller: emailController,
-                      hintText: 'Email',
-                      obsecureText: false),
-                  const SizedBox(height: 10,),
+                      label: 'Email',
+                      obsecureText: false,
+                      prefixIcon: Icon(
+                        Icons.mail,
+                        color: Colors.white,
+                      ),
+                  ),
+                  const SizedBox(height: 25,),
 
                   //password textfield
                   MyTextField(
                       controller: passController,
-                      hintText: 'Password',
-                      obsecureText: true),
-                  const SizedBox(height: 25,),
+                      label: 'Password',
+                      obsecureText: true,
+                    prefixIcon: Icon(
+                      Icons.password,
+                      color: Colors.white,
+                    ),
+                  ),
+
+                  Padding(
+                    padding: const EdgeInsets.only(left: 200),
+                    child: MyTextButton(onPressed: (){
+                    },
+                      buttonText: 'Forgot Password?',
+                      fontSize: 13,
+                    ),
+                  ),
+                  const SizedBox(height: 2,),
+
                   //sign in button
                   MyElevatedButton(onPressed: (){
                     // login(context);
                   },
-                  buttonText: 'Sign In',
-                    width: 150, // Custom width
-                    height: 16,
+                    buttonText: 'Login',
                   ),
                   const SizedBox(height: 50),
                   Row(
