@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart'; // Import the Google Fonts package
 
 class MyTextButton extends StatelessWidget {
   final VoidCallback onPressed;
@@ -17,8 +18,10 @@ class MyTextButton extends StatelessWidget {
       onPressed: onPressed,
       style: TextButton.styleFrom(
         primary: Color(0xFF955AF2), // Customize the text color
-        textStyle: TextStyle(
-          fontSize: fontSize ?? 16, // Use provided font size or default value (16)
+        textStyle: GoogleFonts.mPlusRounded1c( // Apply the custom font here
+          textStyle: TextStyle(
+            fontSize: fontSize ?? 16, // Use provided font size or default value (16)
+          ),
         ),
       ),
       child: Text(buttonText),
