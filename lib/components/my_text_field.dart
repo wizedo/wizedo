@@ -30,9 +30,14 @@ class MyTextField extends StatelessWidget {
         obscureText: obsecureText,
         style: TextStyle(color: Colors.white), // Set text color to white
         decoration: InputDecoration(
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(10),
-          ), // Remove the default border
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(15),
+            borderSide: BorderSide(color: backgroundColor),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(15),
+            borderSide: BorderSide(color: backgroundColor),
+          ),
           labelText: label, // Use label text instead of hint text
           labelStyle: TextStyle(
             color: Color(0xFFEEEEEE),

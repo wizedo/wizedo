@@ -7,9 +7,11 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:wizedo/components/white_text.dart';
 import '../components/colors/sixty.dart';
 import '../components/my_elevatedbutton.dart';
 import '../components/my_textbutton.dart';
+import '../components/purple_text.dart';
 
 
 
@@ -107,92 +109,137 @@ class _LoginPageState extends State<LoginPage> {
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 25),
             child: SingleChildScrollView(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const SizedBox(height: 50,),
+              child: Container(
+                width: 308,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const SizedBox(height: 50,),
 
-                  //logo
-                  Icon(
-                    Icons.supervised_user_circle_outlined,
-                    size: 90,
-                    color: Colors.grey[800],
-                  ),
-                  const SizedBox(height: 50,),
-                  //welcome back message
-                  Text(
-                    "Welcome back you've been missed",
-                    style: TextStyle(
-                        fontSize: 16
-                    ),),
-                  const SizedBox(height: 25,),
+                    //logo
+                    Icon(
+                      Icons.supervised_user_circle_outlined,
+                      size: 90,
+                      color: Colors.grey[800],
+                    ),
+                    const SizedBox(height: 50,),
+                    //welcome back message
+                    Align(
+                      alignment: Alignment.topLeft,
+                      child: WhiteText('Login',fontSize: 36 ,),
+                    ),
+                    Align(
+                      alignment: Alignment.topLeft,
+                      child: WhiteText('Please login in to continue',fontSize: 16,),
+                    ),
+                    const SizedBox(height: 25,),
 
-                  //email textfield
-                  MyTextField(
-                      controller: emailController,
-                      label: 'Email',
-                      obsecureText: false,
+                    //email textfield
+                    MyTextField(
+                        controller: emailController,
+                        label: 'Email',
+                        obsecureText: false,
+                        prefixIcon: Icon(
+                          Icons.mail,
+                          color: Colors.white,
+                        ),
+                    ),
+                    const SizedBox(height: 25,),
+
+                    //password textfield
+                    MyTextField(
+                        controller: passController,
+                        label: 'Password',
+                        obsecureText: true,
                       prefixIcon: Icon(
-                        Icons.mail,
+                        Icons.password,
                         color: Colors.white,
                       ),
-                  ),
-                  const SizedBox(height: 25,),
-
-                  //password textfield
-                  MyTextField(
-                      controller: passController,
-                      label: 'Password',
-                      obsecureText: true,
-                    prefixIcon: Icon(
-                      Icons.password,
-                      color: Colors.white,
                     ),
-                  ),
 
-                  Padding(
-                    padding: const EdgeInsets.only(left: 200),
-                    child: MyTextButton(onPressed: (){
-                    },
-                      buttonText: 'Forgot Password?',
-                      fontSize: 13,
-                    ),
-                  ),
-                  const SizedBox(height: 2,),
-
-                  //sign in button
-                  MyElevatedButton(onPressed: (){
-                    // login(context);
-                  },
-                    buttonText: 'Login',
-                  ),
-                  const SizedBox(height: 50),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text('Not a member?'),
-                      const SizedBox(width:5,),
-                      MyTextButton(onPressed: (){
-                        // Get.to(RegisterPage());
-                      }, buttonText: 'Register Now'),
-                    ],
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      GestureDetector(
-                        onTap: () {
-                          // _authService.signInWithGoogle();
-                        },
-                        child: Image.asset(
-                          'lib/images/google.png', // Replace with your Google Sign-In button image
-                          width: 50,
-                          height: 50,
-                        ),
+                    Align(
+                      alignment: Alignment.topRight,
+                      child: MyTextButton(onPressed: (){
+                        //login function call
+                      },
+                        buttonText: 'Forgot Password?',
+                        fontSize: 15,
                       ),
-                    ],
-                  )
-                ],
+                    ),
+                    const SizedBox(height: 19,),
+
+                    //sign in button
+                    MyElevatedButton(onPressed: (){
+                      // login(context);
+                    },
+                      buttonText: 'Login',
+                    ),
+                    const SizedBox(height: 19),
+                    Row(
+                      children: [
+                        Expanded(
+                          flex: 2,
+                          child: Column(
+                            children: [
+                              Divider(
+                                color: Color(0xFF955AF2),
+                                thickness: 1.5,
+                              )
+                            ],
+                          ),
+                        ),
+                        Expanded(
+                          flex: 4,
+                          child: Column(
+                            children: [
+                              PurpleText('Or Continue with',fontSize: 15)
+                            ],
+                          ),
+                        ),
+                        Expanded(
+                          flex: 2,
+                          child: Column(
+                            children: [
+                              Divider(
+                                color: Color(0xFF955AF2),
+                                thickness: 1.5,
+                              )
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    const SizedBox(height: 25),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        GestureDetector(
+                          onTap: () {
+                            // _authService.signInWithGoogle();
+                          },
+                          child: Image.asset(
+                            'lib/images/google.png', // Replace with your Google Sign-In button image
+                            width: 50,
+                            height: 50,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 19),
+                    Center(
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          WhiteText('Not a member?',fontSize: 15,),
+                          MyTextButton(onPressed: (){
+                            // Get.to(RegisterPage());
+                          }, buttonText: 'Register Now',fontSize: 17,),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),

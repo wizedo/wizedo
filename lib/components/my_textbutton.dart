@@ -18,7 +18,6 @@ class MyTextButton extends StatelessWidget {
       style: TextButton.styleFrom(
         primary: Color(0xFF955AF2), // Customize the text color
         textStyle: TextStyle(
-          fontWeight: FontWeight.bold,
           fontSize: fontSize ?? 16, // Use provided font size or default value (16)
         ),
       ),
