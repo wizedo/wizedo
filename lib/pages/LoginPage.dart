@@ -1,6 +1,7 @@
 // import 'package:wizedo/Pages/homepage.dart';
 // import 'package:wizedo/Pages/register_page.dart';
 // import 'package:wizedo/Services/AuthService.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:wizedo/components/my_button.dart';
 import 'package:wizedo/components/my_text_field.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -103,140 +104,148 @@ class _LoginPageState extends State<LoginPage> {
     Color backgroundColor = ColorUtil.hexToColor(hexColor);
 
     return Scaffold(
-      backgroundColor: backgroundColor,
-      body: SafeArea( // this will just avoid notch bit
+      backgroundColor: Color(0xFF211B2E),
+      body: SafeArea(
         child: Center(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 25),
             child: SingleChildScrollView(
               child: Container(
-                width: 308,
+                width: 310,
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const SizedBox(height: 50,),
-
-                    //logo
-                    Icon(
-                      Icons.supervised_user_circle_outlined,
-                      size: 90,
-                      color: Colors.grey[800],
-                    ),
-                    const SizedBox(height: 50,),
-                    //welcome back message
-                    Align(
-                      alignment: Alignment.topLeft,
-                      child: WhiteText('Login',fontSize: 36 ,),
+                    SizedBox(height: 50),
+                    Image.asset(
+                      'lib/images/login_animation.png',
+                      width: 400,
+                      height: 160,
                     ),
                     Align(
                       alignment: Alignment.topLeft,
-                      child: WhiteText('Please login in to continue',fontSize: 16,),
+                      child: WhiteText(
+                        'Login',
+                        fontSize: 36,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                    const SizedBox(height: 25,),
-
-                    //email textfield
-                    MyTextField(
-                        controller: emailController,
-                        label: 'Email',
-                        obsecureText: false,
-                        prefixIcon: Icon(
-                          Icons.mail,
-                          color: Colors.white,
-                        ),
+                    Align(
+                      alignment: Alignment.topLeft,
+                      child: WhiteText('Please login to continue', fontSize: 16),
                     ),
-                    const SizedBox(height: 25,),
+                    SizedBox(height: 25),
 
-                    //password textfield
                     MyTextField(
-                        controller: passController,
-                        label: 'Password',
-                        obsecureText: true,
+                      controller: emailController,
+                      label: 'Email',
+                      obsecureText: false,
+                      prefixIcon: Icon(
+                        Icons.mail,
+                        color: Colors.white,
+                      ),
+                      fontSize: 11.5,
+                    ),
+                    SizedBox(height: 25),
+
+                    MyTextField(
+                      controller: passController,
+                      label: 'Password',
+                      obsecureText: true,
                       prefixIcon: Icon(
                         Icons.password,
                         color: Colors.white,
                       ),
+                      fontSize: 11.5,
                     ),
 
                     Align(
                       alignment: Alignment.topRight,
-                      child: MyTextButton(onPressed: (){
-                        //login function call
-                      },
+                      child: MyTextButton(
+                        onPressed: () {
+                          // Handle forgot password logic
+                        },
                         buttonText: 'Forgot Password?',
-                        fontSize: 15,
+                        fontSize: 12,
                       ),
                     ),
-                    const SizedBox(height: 19,),
+                    SizedBox(height: 15),
 
-                    //sign in button
-                    MyElevatedButton(onPressed: (){
-                      // login(context);
-                    },
-                      buttonText: 'Login',
-                    ),
-                    const SizedBox(height: 19),
+                    MyElevatedButton(onPressed: (){}, buttonText: 'Login',fontWeight: FontWeight.bold,),
+
+                    SizedBox(height: 19),
                     Row(
                       children: [
                         Expanded(
-                          flex: 2,
-                          child: Column(
-                            children: [
-                              Divider(
-                                color: Color(0xFF955AF2),
-                                thickness: 1.5,
-                              )
-                            ],
+                          flex: 3,
+                          child: Container(
+                            height: 1.5,
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                begin: Alignment.centerLeft,
+                                end: Alignment.centerRight,
+                                stops: [0.0, 0.5, 1.0, 1.0],
+                                colors: [
+                                  Colors.transparent,
+                                  Color(0xFF955AF2),
+                                  Color(0xFF955AF2),
+                                  Colors.transparent,
+                                ],
+                              ),
+                            ),
                           ),
                         ),
                         Expanded(
-                          flex: 4,
-                          child: Column(
-                            children: [
-                              PurpleText('Or Continue with',fontSize: 15)
-                            ],
+                          flex: 5,
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 8),
+                            child: PurpleText(
+                              'Or Continue with',
+                              fontSize: 12,
+                              textAlign: TextAlign.center,
+                            ),
                           ),
                         ),
                         Expanded(
-                          flex: 2,
-                          child: Column(
-                            children: [
-                              Divider(
-                                color: Color(0xFF955AF2),
-                                thickness: 1.5,
-                              )
-                            ],
+                          flex: 3,
+                          child: Container(
+                            height: 1.5,
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                begin: Alignment.centerLeft,
+                                end: Alignment.centerRight,
+                                stops: [0.0, 0.0, 0.5, 1.0],
+                                colors: [
+                                  Colors.transparent,
+                                  Color(0xFF955AF2),
+                                  Color(0xFF955AF2),
+                                  Colors.transparent,
+                                ],
+                              ),
+                            ),
                           ),
                         ),
                       ],
                     ),
 
-                    const SizedBox(height: 25),
+                    SizedBox(height: 25),
+                    GestureDetector(
+                      onTap: () {
+                        // Handle Google sign-in logic
+                      },
+                      child: Image.asset(
+                        'lib/images/google.png',
+                        width: 45,
+                        height: 45,
+                      ),
+                    ),
+
+                    SizedBox(height: 15),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        GestureDetector(
-                          onTap: () {
-                            // _authService.signInWithGoogle();
-                          },
-                          child: Image.asset(
-                            'lib/images/google.png', // Replace with your Google Sign-In button image
-                            width: 50,
-                            height: 50,
-                          ),
-                        ),
+                        WhiteText('Not a member?', fontSize: 12),
+                        MyTextButton(onPressed: (){}, buttonText: 'Register Now',fontSize: 12,)
                       ],
-                    ),
-                    const SizedBox(height: 19),
-                    Center(
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          WhiteText('Not a member?',fontSize: 15,),
-                          MyTextButton(onPressed: (){
-                            // Get.to(RegisterPage());
-                          }, buttonText: 'Register Now',fontSize: 17,),
-                        ],
-                      ),
                     ),
                   ],
                 ),
