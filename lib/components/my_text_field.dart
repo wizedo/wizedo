@@ -1,25 +1,38 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-class MyTextField extends StatelessWidget {
+class MyTextField extends StatefulWidget {
   final TextEditingController controller;
   final String? label;
-  final bool obsecureText;
-  final Icon? prefixIcon; // Optional prefix icon parameter
-  final double? fontSize; // Optional font size parameter
+  final bool obscureText;
+  final Widget? prefixIcon;
+  final Widget? suffixIcon;
+  final double? iconWidth;
+  final double? iconHeight;
+  final double? fontSize;
+  final TextInputType keyboardType; // New parameter for specifying keyboard type
 
   const MyTextField({
     Key? key,
     required this.controller,
     this.label,
-    required this.obsecureText,
+    required this.obscureText,
     this.prefixIcon,
-    this.fontSize, // Optional font size parameter
+    this.suffixIcon,
+    this.iconWidth,
+    this.iconHeight,
+    this.fontSize,
+    this.keyboardType = TextInputType.text, // Default to text input type
   }) : super(key: key);
 
   @override
+  _MyTextFieldState createState() => _MyTextFieldState();
+}
+
+class _MyTextFieldState extends State<MyTextField> {
+  @override
   Widget build(BuildContext context) {
-    Color backgroundColor = Color(0xFF39304D); // Custom color from hex code
+    Color backgroundColor = Color(0xFF39304D);
 
     return Container(
       width: 308,
@@ -29,12 +42,13 @@ class MyTextField extends StatelessWidget {
         color: backgroundColor,
       ),
       child: TextField(
-        controller: controller,
-        obscureText: obsecureText,
+        controller: widget.controller,
+        obscureText: widget.obscureText,
+        keyboardType: widget.keyboardType, // Set the specified keyboard type
         style: GoogleFonts.mPlusRounded1c(
           textStyle: TextStyle(
             color: Colors.white,
-            fontSize: fontSize ?? 12, // Use provided font size or default to 16
+            fontSize: widget.fontSize ?? 16,
           ),
         ),
         decoration: InputDecoration(
@@ -46,14 +60,24 @@ class MyTextField extends StatelessWidget {
             borderRadius: BorderRadius.circular(15),
             borderSide: BorderSide(color: backgroundColor),
           ),
-          labelText: label,
+          labelText: widget.label,
           labelStyle: TextStyle(
             color: Color(0xFFEEEEEE),
             fontWeight: FontWeight.normal,
-            fontSize: 16,
+            fontSize: 12,
           ),
           contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-          prefixIcon: prefixIcon,
+          prefixIcon: widget.prefixIcon != null
+              ? Padding(
+            padding: EdgeInsets.all(8.0),
+            child: SizedBox(
+              width: widget.iconWidth ?? 23,
+              height: widget.iconHeight ?? 23,
+              child: widget.prefixIcon,
+            ),
+          )
+              : null,
+          suffixIcon: widget.suffixIcon,
         ),
       ),
     );

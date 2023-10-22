@@ -13,6 +13,7 @@ import '../components/colors/sixty.dart';
 import '../components/my_elevatedbutton.dart';
 import '../components/my_textbutton.dart';
 import '../components/purple_text.dart';
+import 'RegisterPage.dart';
 
 
 
@@ -25,6 +26,8 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
+
+  bool passwordVisibility = false;
 
   String hexColor = '#211b2e';
   // RxBool loading = false.obs;
@@ -138,7 +141,8 @@ class _LoginPageState extends State<LoginPage> {
                     MyTextField(
                       controller: emailController,
                       label: 'Email',
-                      obsecureText: false,
+                      obscureText: false,
+                      keyboardType: TextInputType.emailAddress,
                       prefixIcon: Icon(
                         Icons.mail,
                         color: Colors.white,
@@ -150,10 +154,22 @@ class _LoginPageState extends State<LoginPage> {
                     MyTextField(
                       controller: passController,
                       label: 'Password',
-                      obsecureText: true,
+                      obscureText: !passwordVisibility,
                       prefixIcon: Icon(
                         Icons.password,
                         color: Colors.white,
+                      ),
+                      suffixIcon: GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            passwordVisibility = !passwordVisibility; // Toggle visibility for password field
+                          });
+                        },
+                        child: Icon(
+                          passwordVisibility ? Icons.visibility_off : Icons.visibility,
+                          color: Colors.white,
+                          size: 20,
+                        ),
                       ),
                       fontSize: 11.5,
                     ),
@@ -244,7 +260,9 @@ class _LoginPageState extends State<LoginPage> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         WhiteText('Not a member?', fontSize: 12),
-                        MyTextButton(onPressed: (){}, buttonText: 'Register Now',fontSize: 12,)
+                        MyTextButton(onPressed: (){
+                          Get.to(() => RegisterPage());
+                        }, buttonText: 'Register Now',fontSize: 12,)
                       ],
                     ),
                   ],
