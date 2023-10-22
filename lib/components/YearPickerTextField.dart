@@ -4,13 +4,15 @@ import 'package:intl/intl.dart';
 class YearSelector extends StatefulWidget {
   final TextEditingController controller;
   final String? label;
-  final Widget? suffixIcon; // New parameter for suffix icon
+  final Widget? suffixIcon;
+  final Widget? prefixIcon; // New parameter for prefix icon
 
   const YearSelector({
     Key? key,
     required this.controller,
     this.label,
-    this.suffixIcon, // Include suffixIcon parameter
+    this.suffixIcon,
+    this.prefixIcon, // Include prefixIcon parameter
   }) : super(key: key);
 
   @override
@@ -57,13 +59,18 @@ class _YearSelectorState extends State<YearSelector> {
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Row(
               children: [
+                if (widget.prefixIcon != null) // Display prefix icon if provided
+                  Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: widget.prefixIcon,
+                  ),
                 Expanded(
                   child: TextField(
                     controller: widget.controller,
                     keyboardType: TextInputType.number,
                     style: TextStyle(
                       color: Colors.white,
-                      fontSize: 16,
+                      fontSize: 12,
                     ),
                     decoration: InputDecoration(
                       enabledBorder: OutlineInputBorder(

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:wizedo/pages/BottomNavigation.dart';
 import 'package:wizedo/pages/UserDetailsPage.dart';
 import '../components/my_elevatedbutton.dart';
 import '../components/my_text_field.dart';

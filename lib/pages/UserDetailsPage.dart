@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:slide_to_act/slide_to_act.dart';
 import 'package:swipeable_button_view/swipeable_button_view.dart';
+import 'package:wizedo/pages/BottomNavigation.dart';
 import '../components/YearPickerTextField.dart';
 import '../components/colors/sixty.dart';
 import '../components/my_text_field.dart';
@@ -59,7 +60,7 @@ class _UserDetailsState extends State<UserDetails> {
                         alignment: Alignment.topLeft,
                         child: WhiteText(
                           "Let's Get To Know You!",
-                          fontSize: 25,
+                          fontSize: 20,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -252,7 +253,7 @@ class _UserDetailsState extends State<UserDetails> {
                               context,
                               PageTransition(
                                   type: PageTransitionType.fade,
-                                  child: const LoginPage()));
+                                  child: BottomNavigation()));
 
                           setState(() {
                             isFinished = false;

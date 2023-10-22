@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:wizedo/pages/LoginPage.dart';
 import 'package:wizedo/pages/detailsPage.dart';
+
+import 'controller/BottomNavigationController.dart';
 void main() {
   runApp(const MyApp());
 }
@@ -14,6 +16,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return GetMaterialApp(
       title: 'Flutter Demo',
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
         //this a wizedo project
 
@@ -24,6 +27,9 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
       ),
       home: LoginPage(),
+      initialBinding: BindingsBuilder(() {
+        Get.put(BottomNavigationController());
+      }),
     );
   }
 }
