@@ -49,6 +49,7 @@ dependencies:
   swipeable_button_view: ^0.0.2
   page_transition: ^2.1.0
   google_nav_bar: ^5.0.6
+  gradient_slide_to_act: ^0.0.2
 
 
 dev_dependencies:
@@ -76,6 +77,7 @@ flutter:
     - lib/images/phoneno.png
     - lib/images/password.png
     - lib/images/signup.png
+    - lib/images/pdf.png
     - lib/images/userdetails.png
 
   # An image asset can refer to one or more resolution-specific "variants", see

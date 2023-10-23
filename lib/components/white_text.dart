@@ -4,9 +4,10 @@ import 'package:google_fonts/google_fonts.dart';
 class WhiteText extends StatelessWidget {
   final String text;
   final double? fontSize; // Make the font size optional
-  final FontWeight? fontWeight; // Make the font weight optional
+  final FontWeight? fontWeight;
+  final TextAlign? textAlignment;
 
-  const WhiteText(this.text, {this.fontSize, this.fontWeight}); // Make the font size and weight optional
+  const WhiteText(this.text, {this.fontSize, this.fontWeight,this.textAlignment}); // Make the font size and weight optional
 
   @override
   Widget build(BuildContext context) {
@@ -16,9 +17,10 @@ class WhiteText extends StatelessWidget {
         textStyle: TextStyle(
           color: Color(0xFFFFFFFF),
           fontSize: fontSize, // Set the font size if provided, otherwise use the default size
-          fontWeight: fontWeight ?? FontWeight.normal, // Set the font weight if provided, otherwise use normal
+          fontWeight: fontWeight ?? FontWeight.normal,
         ),
       ),
+      textAlign: textAlignment,
     );
   }
 }

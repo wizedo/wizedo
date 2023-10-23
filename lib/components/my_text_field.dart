@@ -10,12 +10,14 @@ class MyTextField extends StatefulWidget {
   final double? iconWidth;
   final double? iconHeight;
   final double? fontSize;
+  final String? hint;
   final TextInputType keyboardType; // New parameter for specifying keyboard type
 
   const MyTextField({
     Key? key,
     required this.controller,
     this.label,
+    this.hint,
     required this.obscureText,
     this.prefixIcon,
     this.suffixIcon,
@@ -52,6 +54,8 @@ class _MyTextFieldState extends State<MyTextField> {
           ),
         ),
         decoration: InputDecoration(
+          hintText: widget.hint,
+          hintStyle: TextStyle(color: Colors.white),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(15),
             borderSide: BorderSide(color: backgroundColor),

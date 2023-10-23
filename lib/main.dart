@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:get/get_navigation/src/root/get_material_app.dart';
 import 'package:get/get.dart';
 import 'package:wizedo/pages/LoginPage.dart';
+import 'package:wizedo/pages/UserDetailsPage.dart';
 import 'package:wizedo/pages/detailsPage.dart';
-
-import 'controller/BottomNavigationController.dart';
+import 'package:wizedo/pages/registerScreen.dart';
 void main() {
   runApp(const MyApp());
 }
@@ -16,7 +17,6 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return GetMaterialApp(
       title: 'Flutter Demo',
-      debugShowCheckedModeBanner: false,
       theme: ThemeData(
         //this a wizedo project
 
@@ -26,10 +26,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: LoginPage(),
-      initialBinding: BindingsBuilder(() {
-        Get.put(BottomNavigationController());
-      }),
+      home: DetailsScreen(),
     );
   }
 }

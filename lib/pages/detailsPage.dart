@@ -1,28 +1,59 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:get/get.dart';
 import 'package:wizedo/Widgets/colors.dart';
-import 'package:wizedo/components/mPlusRoundedText.dart';
+import 'package:intl/intl.dart';
+import 'package:wizedo/components/YearPickerTextField.dart';
+import 'package:wizedo/components/white_text.dart';
+import 'package:wizedo/pages/registerScreen.dart';
 import '../components/boxDecoration.dart';
-import '../components/colors/sixty.dart';
+import '../components/datePickerTextField.dart';
+import '../components/mPlusRoundedText.dart';
+import '../components/my_text_field.dart';
+import '../components/searchable_dropdown.dart';
 
 class DetailsScreen extends StatefulWidget {
-  const DetailsScreen({super.key});
+  const DetailsScreen({Key? key}) : super(key: key);
+
+  @override
   State<DetailsScreen> createState() => _DetailsScreenState();
 }
 
 class _DetailsScreenState extends State<DetailsScreen> {
+  final TextEditingController _projectName = TextEditingController();
+  final TextEditingController _descriptionText = TextEditingController();
+  final TextEditingController _datePicker = TextEditingController();
+  final TextEditingController _paymentDetails = TextEditingController();
+
+  String _selectedCategory = '';
+  bool _isNumberOfPagesVisible = false;
+
+  DateTime _selectedDate = DateTime.now();
+
+  Future<void> _selectDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: _selectedDate,
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2101),
+    );
+    if (picked != null && picked != _selectedDate) {
+      setState(() {
+        _selectedDate = picked;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    String hexColor = '#211b2e';
-    Color backgroundColor = ColorUtil.hexToColor(hexColor);
     return Scaffold(
       backgroundColor: backgroundColor,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () {},
+          onPressed: () {
+            Get.back();
+          },
         ),
         title: Text(
           'Details',
@@ -168,7 +199,9 @@ class _DetailsScreenState extends State<DetailsScreen> {
       bottomNavigationBar: Container(
         padding: const EdgeInsets.symmetric(horizontal: 25),
         child: ElevatedButton.icon(
-          onPressed: () {},
+          onPressed: () {
+            Get.to(RegisterScreen());
+          },
           icon: Icon(Icons.done, size: 20, color: Colors.white),
           label: Text(
             'Apply',
@@ -182,6 +215,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
           ),
         ),
       ),
+
     );
   }
 }
