@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:wizedo/pages/HomePage.dart';
 import 'package:wizedo/pages/LoginPage.dart';
 import 'package:wizedo/pages/detailsPage.dart';
 

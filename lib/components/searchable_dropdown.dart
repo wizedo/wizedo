@@ -32,12 +32,20 @@ class SearchableDropdownTextField extends StatefulWidget {
   final String labelText;
   final Function(String)? onSelected;
   final Widget? suffix;
+  final double width;
+  final double height;
+  final double enabledBorderRadius;
+  final double focusedBorderRadius;
 
   SearchableDropdownTextField({
     required this.items,
     required this.labelText,
     required this.onSelected,
     this.suffix,
+    this.width = 308, // Default width
+    this.height = 51, // Default height
+    this.enabledBorderRadius = 15, // Default enabled border radius
+    this.focusedBorderRadius = 15, // Default focused border radius
   });
 
   @override
@@ -78,74 +86,78 @@ class _SearchableDropdownTextFieldState extends State<SearchableDropdownTextFiel
 
     return GestureDetector(
       onTap: () => _focusNode.requestFocus(),
-      child: Stack(
-        children: [
-          TypeAheadFormField(
-            textFieldConfiguration: TextFieldConfiguration(
-              focusNode: _focusNode,
-              controller: _textEditingController,
-              style: TextStyle(color: Colors.white, fontSize: 11.5),
-              decoration: InputDecoration(
-                labelText: widget.labelText,
-                labelStyle: TextStyle(color: Colors.white, fontSize: 12),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(15),
-                  borderSide: BorderSide(color: backgroundColor),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(15),
-                  borderSide: BorderSide(color: backgroundColor),
-                ),
-                filled: true,
-                fillColor: backgroundColor,
-                suffixIcon: widget.suffix,
-              ),
-            ),
-            suggestionsCallback: (pattern) {
-              return pattern.isEmpty
-                  ? []
-                  : widget.items.where((item) => item.toLowerCase().contains(pattern.toLowerCase())).toList();
-            },
-            itemBuilder: (BuildContext context, dynamic suggestion) {
-              String suggestionString = suggestion as String;
-              return CustomSuggestionWidget(
-                suggestion: suggestionString,
-                backgroundColor: backgroundColor,
-              );
-            },
-            onSuggestionSelected: (dynamic suggestion) {
-              String suggestionString = suggestion as String;
-              _textEditingController.text = suggestionString;
-              widget.onSelected?.call(suggestionString);
-            },
-            noItemsFoundBuilder: (BuildContext context) {
-              if (_showNotFoundMessage) {
-                return ListTile(
-                  title: Text(
-                    'Not found',
-                    style: TextStyle(color: Colors.white),
+      child: Container(
+        width: widget.width,
+        height: widget.height,
+        child: Stack(
+          children: [
+            TypeAheadFormField(
+              textFieldConfiguration: TextFieldConfiguration(
+                focusNode: _focusNode,
+                controller: _textEditingController,
+                style: TextStyle(color: Colors.white, fontSize: 11.5),
+                decoration: InputDecoration(
+                  labelText: widget.labelText,
+                  labelStyle: TextStyle(color: Colors.white, fontSize: 12),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(widget.enabledBorderRadius),
+                    borderSide: BorderSide(color: backgroundColor),
                   ),
-                );
-              } else {
-                return SizedBox.shrink(); // Hide the message initially
-              }
-            },
-          ),
-          if (_isKeyboardVisible)
-            Positioned.fill(
-              child: GestureDetector(
-                onTap: () {
-                  setState(() {
-                    _showNotFoundMessage = false; // Hide the "Not found" message when tapped outside
-                  });
-                  _toggleKeyboardVisibility(false);
-                },
-                child: Container(
-                  color: Colors.transparent,
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(widget.focusedBorderRadius),
+                    borderSide: BorderSide(color: backgroundColor),
+                  ),
+                  filled: true,
+                  fillColor: backgroundColor,
+                  suffixIcon: widget.suffix,
                 ),
               ),
+              suggestionsCallback: (pattern) {
+                return pattern.isEmpty
+                    ? []
+                    : widget.items.where((item) => item.toLowerCase().contains(pattern.toLowerCase())).toList();
+              },
+              itemBuilder: (BuildContext context, dynamic suggestion) {
+                String suggestionString = suggestion as String;
+                return CustomSuggestionWidget(
+                  suggestion: suggestionString,
+                  backgroundColor: backgroundColor,
+                );
+              },
+              onSuggestionSelected: (dynamic suggestion) {
+                String suggestionString = suggestion as String;
+                _textEditingController.text = suggestionString;
+                widget.onSelected?.call(suggestionString);
+              },
+              noItemsFoundBuilder: (BuildContext context) {
+                if (_showNotFoundMessage) {
+                  return ListTile(
+                    title: Text(
+                      'Not found',
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  );
+                } else {
+                  return SizedBox.shrink(); // Hide the message initially
+                }
+              },
             ),
-        ],
+            if (_isKeyboardVisible)
+              Positioned.fill(
+                child: GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      _showNotFoundMessage = false; // Hide the "Not found" message when tapped outside
+                    });
+                    _toggleKeyboardVisibility(false);
+                  },
+                  child: Container(
+                    color: Colors.transparent,
+                  ),
+                ),
+              ),
+          ],
+        ),
       ),
     );
   }
