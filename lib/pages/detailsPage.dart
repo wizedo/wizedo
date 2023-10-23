@@ -4,7 +4,7 @@ import 'package:wizedo/Widgets/colors.dart';
 import 'package:intl/intl.dart';
 import 'package:wizedo/components/YearPickerTextField.dart';
 import 'package:wizedo/components/white_text.dart';
-import 'package:wizedo/pages/registerScreen.dart';
+import 'package:wizedo/pages/PostPage.dart';
 import '../components/boxDecoration.dart';
 import '../components/datePickerTextField.dart';
 import '../components/mPlusRoundedText.dart';

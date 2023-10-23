@@ -5,7 +5,7 @@ import 'package:wizedo/pages/HomePage.dart';
 import 'package:wizedo/pages/LoginPage.dart';
 import 'package:wizedo/pages/UserDetailsPage.dart';
 import 'package:wizedo/pages/detailsPage.dart';
-import 'package:wizedo/pages/registerScreen.dart';
+import 'package:wizedo/pages/PostPage.dart';
 void main() {
   runApp(const MyApp());
 }
