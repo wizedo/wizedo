@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get_navigation/src/root/get_material_app.dart';
 import 'package:get/get.dart';
+import 'package:wizedo/pages/HomePage.dart';
 import 'package:wizedo/pages/LoginPage.dart';
 import 'package:wizedo/pages/UserDetailsPage.dart';
 import 'package:wizedo/pages/detailsPage.dart';
