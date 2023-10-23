@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 
 class CustomSuggestionWidget extends StatelessWidget {
@@ -32,12 +31,16 @@ class SearchableDropdownTextField extends StatefulWidget {
   final String labelText;
   final Function(String)? onSelected;
   final Widget? suffix;
+  final double? width; // Optional width parameter
+  final double? height; // Optional height parameter
 
   SearchableDropdownTextField({
     required this.items,
     required this.labelText,
     required this.onSelected,
     this.suffix,
+    this.width, // Optional width parameter
+    this.height, // Optional height parameter
   });
 
   @override
@@ -46,106 +49,73 @@ class SearchableDropdownTextField extends StatefulWidget {
 
 class _SearchableDropdownTextFieldState extends State<SearchableDropdownTextField> {
   late TextEditingController _textEditingController;
-  late FocusNode _focusNode;
-  bool _isKeyboardVisible = false;
   bool _showNotFoundMessage = false;
 
   @override
   void initState() {
     super.initState();
     _textEditingController = TextEditingController();
-    _focusNode = FocusNode();
-    _focusNode.addListener(() => _toggleKeyboardVisibility(_focusNode.hasFocus));
   }
 
   @override
   void dispose() {
     _textEditingController.dispose();
-    _focusNode.dispose();
     super.dispose();
-  }
-
-  void _toggleKeyboardVisibility(bool isVisible) {
-    setState(() {
-      _isKeyboardVisible = isVisible;
-      if (!_isKeyboardVisible) SystemChannels.textInput.invokeMethod('TextInput.hide');
-    });
   }
 
   @override
   Widget build(BuildContext context) {
     Color backgroundColor = Color(0xFF39304D);
 
-    return GestureDetector(
-      onTap: () => _focusNode.requestFocus(),
-      child: Stack(
-        children: [
-          TypeAheadFormField(
-            textFieldConfiguration: TextFieldConfiguration(
-              focusNode: _focusNode,
-              controller: _textEditingController,
-              style: TextStyle(color: Colors.white, fontSize: 11.5),
-              decoration: InputDecoration(
-                labelText: widget.labelText,
-                labelStyle: TextStyle(color: Colors.white, fontSize: 12),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(15),
-                  borderSide: BorderSide(color: backgroundColor),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(15),
-                  borderSide: BorderSide(color: backgroundColor),
-                ),
-                filled: true,
-                fillColor: backgroundColor,
-                suffixIcon: widget.suffix,
-              ),
+    return Container(
+      width: widget.width, // Set width if provided (can be null for default width)
+      height: widget.height, // Set height if provided (can be null for default height)
+      child: TypeAheadField<String>(
+        textFieldConfiguration: TextFieldConfiguration(
+          controller: _textEditingController,
+          style: TextStyle(color: Colors.white, fontSize: 11.5),
+          decoration: InputDecoration(
+            labelText: widget.labelText,
+            labelStyle: TextStyle(color: Colors.white, fontSize: 12),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(15),
+              borderSide: BorderSide(color: backgroundColor),
             ),
-            suggestionsCallback: (pattern) {
-              return pattern.isEmpty
-                  ? []
-                  : widget.items.where((item) => item.toLowerCase().contains(pattern.toLowerCase())).toList();
-            },
-            itemBuilder: (BuildContext context, dynamic suggestion) {
-              String suggestionString = suggestion as String;
-              return CustomSuggestionWidget(
-                suggestion: suggestionString,
-                backgroundColor: backgroundColor,
-              );
-            },
-            onSuggestionSelected: (dynamic suggestion) {
-              String suggestionString = suggestion as String;
-              _textEditingController.text = suggestionString;
-              widget.onSelected?.call(suggestionString);
-            },
-            noItemsFoundBuilder: (BuildContext context) {
-              if (_showNotFoundMessage) {
-                return ListTile(
-                  title: Text(
-                    'Not found',
-                    style: TextStyle(color: Colors.white),
-                  ),
-                );
-              } else {
-                return SizedBox.shrink(); // Hide the message initially
-              }
-            },
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(15),
+              borderSide: BorderSide(color: backgroundColor),
+            ),
+            filled: true,
+            fillColor: backgroundColor,
+            suffixIcon: widget.suffix,
           ),
-          if (_isKeyboardVisible)
-            Positioned.fill(
-              child: GestureDetector(
-                onTap: () {
-                  setState(() {
-                    _showNotFoundMessage = false; // Hide the "Not found" message when tapped outside
-                  });
-                  _toggleKeyboardVisibility(false);
-                },
-                child: Container(
-                  color: Colors.transparent,
-                ),
+        ),
+        suggestionsCallback: (pattern) {
+          // Return all options when the input is empty
+          return pattern.isEmpty ? widget.items : widget.items.where((item) => item.toLowerCase().contains(pattern.toLowerCase())).toList();
+        },
+        itemBuilder: (BuildContext context, String suggestion) {
+          return CustomSuggestionWidget(
+            suggestion: suggestion,
+            backgroundColor: backgroundColor,
+          );
+        },
+        onSuggestionSelected: (String suggestion) {
+          _textEditingController.text = suggestion;
+          widget.onSelected?.call(suggestion);
+        },
+        noItemsFoundBuilder: (BuildContext context) {
+          if (_showNotFoundMessage) {
+            return ListTile(
+              title: Text(
+                'Not found',
+                style: TextStyle(color: Colors.white),
               ),
-            ),
-        ],
+            );
+          } else {
+            return SizedBox.shrink();
+          }
+        },
       ),
     );
   }
