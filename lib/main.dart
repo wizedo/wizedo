@@ -3,6 +3,7 @@ import 'package:get/get_navigation/src/root/get_material_app.dart';
 import 'package:get/get.dart';
 import 'package:wizedo/pages/HomePage.dart';
 import 'package:wizedo/pages/LoginPage.dart';
+import 'package:wizedo/pages/MyHomePage.dart';
 import 'package:wizedo/pages/UserDetailsPage.dart';
 import 'package:wizedo/pages/detailsPage.dart';
 import 'package:wizedo/pages/PostPage.dart';
@@ -19,6 +20,7 @@ class MyApp extends StatelessWidget {
     return GetMaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
+        
         //this a wizedo project
 
 //naresh is gay
@@ -27,7 +29,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: DetailsScreen(),
+      home: LoginPage(),
     );
   }
 }
