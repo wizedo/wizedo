@@ -26,7 +26,7 @@ class FilterChipWidget extends StatelessWidget {
       width: width,
       height: height,
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 5.0),
+        padding: const EdgeInsets.symmetric(horizontal: 2.0),
         child: FilterChip(
           label: Padding(
             padding: const EdgeInsets.only(bottom: 5),

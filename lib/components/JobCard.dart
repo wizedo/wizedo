@@ -25,7 +25,7 @@ class _JobCardState extends State<JobCard> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 350,
+      width: 370,
       height: 150,
       child: Stack(
         children: [
@@ -42,8 +42,8 @@ class _JobCardState extends State<JobCard> {
                 gradient: LinearGradient(
                   begin: Alignment.centerLeft,
                   end: Alignment.centerRight,
-                  colors: [Colors.transparent, Color(0xFF39304D).withOpacity(1), Color(0xFF14141E)],
-                  stops: [0.8, 0.5,0.8],
+                  colors: [Colors.transparent, Color(0xFF14141E)],
+                  stops: [0.1,1],
                 ),
               ),
               child: Padding(

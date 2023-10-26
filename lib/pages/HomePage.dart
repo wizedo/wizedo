@@ -219,51 +219,11 @@ class _HomePageState extends State<HomePage> {
                           height: 30,
                         ),
                         FilterChipWidget(
-                          label: 'Politics',
+                          label: 'Assignment',
                           selectedCategory: _selectedCategory,
                           onTap: () {
                             setState(() {
                               _selectedCategory = 'Politics';
-                            });
-                            print('Example Chip tapped!');
-                          },
-                        ),
-                        FilterChipWidget(
-                          label: 'Politics',
-                          selectedCategory: _selectedCategory,
-                          onTap: () {
-                            setState(() {
-                              _selectedCategory = 'Politics';
-                            });
-                            print('Politics Chip tapped!');
-                          },
-                        ),
-                        FilterChipWidget(
-                          label: 'Example Chip',
-                          selectedCategory: _selectedCategory,
-                          onTap: () {
-                            setState(() {
-                              _selectedCategory = 'Example Chip';
-                            });
-                            print('Example Chip tapped!');
-                          },
-                        ),
-                        FilterChipWidget(
-                          label: 'Politics',
-                          selectedCategory: _selectedCategory,
-                          onTap: () {
-                            setState(() {
-                              _selectedCategory = 'Politics';
-                            });
-                            print('Politics Chip tapped!');
-                          },
-                        ),
-                        FilterChipWidget(
-                          label: 'Example Chip',
-                          selectedCategory: _selectedCategory,
-                          onTap: () {
-                            setState(() {
-                              _selectedCategory = 'Example Chip';
                             });
                             print('Example Chip tapped!');
                           },
@@ -287,50 +247,104 @@ class _HomePageState extends State<HomePage> {
               ],
             ),
             Container(
-              child: SingleChildScrollView(
-                scrollDirection: Axis.vertical,
-                child: Column(
-                  children: [
-                    JobCard(
-                      subject: 'Android Development',
-                      postedTime: '2 hours ago',
-                      description: 'Looking for an experienced Android developer for a mobile app project.',
-                      priceRange: 'Rs. 100 - 200',
-                      userName: 'naresh',
-                    ),
-                    JobCard(
-                      subject: 'iOS Development',
-                      postedTime: '3 hours ago',
-                      description: 'iOS developer needed for a new app development project.',
-                      priceRange: 'Rs. 150 - 250',
-                      userName: 'Vishnu',
-                    ),
-                    JobCard(
-                      subject: 'iOS Development',
-                      postedTime: '3 hours ago',
-                      description: 'iOS developer needed for a new app development project.',
-                      priceRange: 'Rs. 150 - 250',
-                      userName: 'Avinash',
-                    ),
+              child: Expanded(
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.vertical,
+                  child: Column(
+                    children: [
+                      JobCard(
+                        subject: 'Android Development',
+                        postedTime: '2 hours ago',
+                        description: 'Looking for an experienced Android developer for a mobile app project.',
+                        priceRange: 'Rs. 100 - 200',
+                        userName: 'naresh',
+                      ),
+                      JobCard(
+                        subject: 'iOS Development',
+                        postedTime: '3 hours ago',
+                        description: 'iOS developer needed for a new app development project  mobile app project ...',
+                        priceRange: 'Rs. 150 - 250',
+                        userName: 'Vishnu',
+                      ),
+                      JobCard(
+                        subject: 'iOS Development',
+                        postedTime: '3 hours ago',
+                        description: 'iOS developer needed for a new app development project.',
+                        priceRange: 'Rs. 150 - 250',
+                        userName: 'Avinash',
+                      ),
+                      JobCard(
+                        subject: 'iOS Development',
+                        postedTime: '3 hours ago',
+                        description: 'iOS developer needed for a new app development project.',
+                        priceRange: 'Rs. 150 - 250',
+                        userName: 'Vishnu',
+                      ),
+                      JobCard(
+                        subject: 'iOS Development',
+                        postedTime: '3 hours ago',
+                        description: 'iOS developer needed for a new app development project.',
+                        priceRange: 'Rs. 150 - 250',
+                        userName: 'Avinash',
+                      ),
+                      JobCard(
+                        subject: 'iOS Development',
+                        postedTime: '3 hours ago',
+                        description: 'iOS developer needed for a new app development project.',
+                        priceRange: 'Rs. 150 - 250',
+                        userName: 'Vishnu',
+                      ),
+                      JobCard(
+                        subject: 'iOS Development',
+                        postedTime: '3 hours ago',
+                        description: 'iOS developer needed for a new app development project.',
+                        priceRange: 'Rs. 150 - 250',
+                        userName: 'Avinash',
+                      ),
 
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),
 
-            Expanded(
-              child: ListView.builder(
-                itemCount: selectedCategoryNews.length,
-                itemBuilder: (context, index) {
-                  return Padding(
-                    padding: const EdgeInsets.only(top: 25,left: 25,right: 25),
-                    child: ListTile(
-                      title: Text(selectedCategoryNews[index],style: TextStyle(color: Colors.white),),
+            // Bottom banner ad
+            Padding(
+              padding: const EdgeInsets.all(10.0),
+              child: Positioned(
+                bottom: 0,
+                child: Container(
+                  width: MediaQuery.of(context).size.width,
+                  height: 60, // Adjust the height of the ad container as needed
+                  decoration: BoxDecoration(
+                    color: Colors.grey, // Change the background color of the ad container
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                  child: Center(
+                    child: Text(
+                      'Ad',
+                      style: TextStyle(color: Colors.grey.shade50,fontSize: 12),
                     ),
-                  );
-                },
+                  ),
+                ),
               ),
             ),
+
+            // this the code to filter through chip
+            // Expanded(
+            //   flex: 1,
+            //   child: ListView.builder(
+            //     itemCount: selectedCategoryNews.length,
+            //     itemBuilder: (context, index) {
+            //       return Padding(
+            //         padding: const EdgeInsets.only(top: 25,left: 25,right: 25),
+            //         child: ListTile(
+            //           title: Text(selectedCategoryNews[index],style: TextStyle(color: Colors.white),),
+            //         ),
+            //       );
+            //     },
+            //   ),
+            // ),
 
             // to select category
 
