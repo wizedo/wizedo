@@ -44,7 +44,7 @@ class settingScreen extends StatelessWidget {
                       Row(
                         children: [
                           Container(
-                            width: 100,
+                            width: 80,
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
                               color: Color(0xFF955AF2),
@@ -53,7 +53,7 @@ class settingScreen extends StatelessWidget {
                               child: Text(
                                 'N',
                                 style: GoogleFonts.rubikMicrobe(
-                                  fontSize: 70,
+                                  fontSize: 50,
                                   color: Colors.white,
                                 ),
                               ),
