@@ -65,10 +65,10 @@ class _DateSelectorState extends State<DateSelector> {
                     keyboardType: TextInputType.number,
                     style: TextStyle(
                       color: Colors.white,
-                      fontSize: 16,
+                      fontSize: 13,
                     ),
                     decoration: InputDecoration(
-                      hintStyle: TextStyle(color: Colors.white,fontWeight: FontWeight.normal,fontSize: 16),
+                      hintStyle: TextStyle(color: Colors.white,fontWeight: FontWeight.normal,fontSize: 13,),
                       hintText: widget.hint,
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(15),

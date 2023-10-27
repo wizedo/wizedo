@@ -55,7 +55,7 @@ class _MyTextFieldState extends State<MyTextField> {
         ),
         decoration: InputDecoration(
           hintText: widget.hint,
-          hintStyle: TextStyle(color: Colors.white),
+          hintStyle: TextStyle(color: Colors.white,fontSize: 13),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(15),
             borderSide: BorderSide(color: backgroundColor),

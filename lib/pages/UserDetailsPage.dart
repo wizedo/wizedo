@@ -269,7 +269,9 @@ class _UserDetailsState extends State<UserDetails> {
                         },
                         activeColor: Color(0xFF955AF2), // Set active color to orange
                         buttonWidget: Icon(Icons.arrow_forward_rounded,color: Colors.white,), // Set the widget inside the button
-                        buttonText: 'Swipe to Join', borderRadius: 15, // Set the button text
+                        buttonText: 'Swipe to Join',
+                        borderRadius: 15,
+                         // Set the button text
                         // borderRadius: 10.0, // Set the border radius of the button
                       ),
                     ),
