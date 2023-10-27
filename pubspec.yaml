@@ -50,6 +50,7 @@ dependencies:
   page_transition: ^2.1.0
   google_nav_bar: ^5.0.6
   gradient_slide_to_act: ^0.0.2
+  shimmer: ^3.0.0
 
 
 dev_dependencies:

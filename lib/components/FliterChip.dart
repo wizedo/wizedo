@@ -13,7 +13,7 @@ class FilterChipWidget extends StatelessWidget {
     required this.label,
     required this.selectedCategory,
     required this.onTap,
-    this.width = 140,
+    this.width = 100,
     this.height = 30,
     this.fontSize,
   });

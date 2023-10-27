@@ -3,10 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:wizedo/components/CustomRichText.dart';
 import 'package:wizedo/components/searchable_dropdown.dart';
 import 'package:wizedo/components/white_text.dart';
+import 'package:shimmer/shimmer.dart';
+
 
 import '../components/FliterChip.dart';
 import '../components/JobCard.dart';
-import 'MyHomePage.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key});
@@ -203,7 +204,7 @@ class _HomePageState extends State<HomePage> {
                             });
                             print('Technology Chip tapped!');
                           },
-                          width: 150,
+                          width: 140,
                           height: 30,
                         ),
                         FilterChipWidget(
@@ -215,18 +216,20 @@ class _HomePageState extends State<HomePage> {
                             });
                             print('Politics Chip tapped!');
                           },
-                          width: 200,
+                          width: 160,
                           height: 30,
                         ),
                         FilterChipWidget(
-                          label: 'Assignment',
+                          label: 'Coding Club',
                           selectedCategory: _selectedCategory,
                           onTap: () {
                             setState(() {
-                              _selectedCategory = 'Politics';
+                              _selectedCategory = 'Coding Club';
                             });
-                            print('Example Chip tapped!');
+                            print('Politics Chip tapped!');
                           },
+                          width: 120,
+                          height: 30,
                         ),
                       ],
                     ),
