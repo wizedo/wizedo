@@ -235,6 +235,7 @@ class _HomePageState extends State<HomePage> {
                     ),
                   ),
                 ),
+
                 Container(
                   height: 40,
                   color: Color(0xFF211B2E),
@@ -247,6 +248,7 @@ class _HomePageState extends State<HomePage> {
                     ),
                   ),
                 ),
+
               ],
             ),
             Container(
@@ -307,10 +309,10 @@ class _HomePageState extends State<HomePage> {
 
                     ],
                   ),
+
                 ),
               ),
             ),
-
             // Bottom banner ad
             Padding(
               padding: const EdgeInsets.all(10.0),
@@ -332,6 +334,8 @@ class _HomePageState extends State<HomePage> {
                 ),
               ),
             ),
+
+
 
             // this the code to filter through chip
             // Expanded(

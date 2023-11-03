@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "744019466360",
+    "project_id": "wizedo-d5d09",
+    "storage_bucket": "wizedo-d5d09.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:744019466360:android:3bc73bbaed6df26d28358d",
+        "android_client_info": {
+          "package_name": "com.example.wizedo"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAXnPciD8bkdqQY03XPCV0h6_hzVDgGjhA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,5 +1,5 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
+
 import '../components/colors/sixty.dart';
 
 //background color
