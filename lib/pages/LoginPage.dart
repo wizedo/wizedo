@@ -9,10 +9,14 @@ import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:wizedo/components/white_text.dart';
+import 'package:wizedo/pages/UserDetailsPage.dart';
+import 'package:wizedo/pages/detailsPage.dart';
 import '../components/colors/sixty.dart';
 import '../components/my_elevatedbutton.dart';
 import '../components/my_textbutton.dart';
 import '../components/purple_text.dart';
+import 'BottomNavigation.dart';
+import 'HomePage.dart';
 import 'RegisterPage.dart';
 
 
@@ -28,51 +32,53 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
 
   bool passwordVisibility = false;
-
+  FocusNode myFocusNode = FocusNode();
   String hexColor = '#211b2e';
-  // RxBool loading = false.obs;
-  //
-  // //instance of auth
-  // FirebaseAuth _auth=FirebaseAuth.instance;  //creaing instance for easier use through _auth
-  //
-  // //instance of firestore
-  // final FirebaseFirestore _firestore=FirebaseFirestore.instance;
+  RxBool loading = false.obs;
+
+
+  //instance of auth
+  FirebaseAuth _auth=FirebaseAuth.instance;  //creaing instance for easier use through _auth
+
+  //instance of firestore
+  final FirebaseFirestore _firestore=FirebaseFirestore.instance;
   //
   //signin user
   final emailController =TextEditingController();
   final passController =TextEditingController();
 
+  //this below code is to sign in with google - currently under test
   // final AuthService _authService = AuthService();
 
 
-  //signin logic
-  // Future<void> login(BuildContext context) async {
-  //   try {
-  //     UserCredential userCredential = await _auth.signInWithEmailAndPassword(
-  //       email: emailController.text,
-  //       password: passController.text,
-  //     );
-  //
-  //     // Check if the user is linked with a Google account
-  //     if (userCredential.user != null && userCredential.user!.providerData.any((userInfo) => userInfo.providerId == 'google.com')) {
-  //       Get.snackbar('Error', 'This email is associated with a Google account. Please sign in with Google.');
-  //       return;
-  //     }
-  //
-  //     // after creating the user, create a new document for the user in the users collection
-  //     _firestore.collection('users').doc(userCredential.user!.uid).set({
-  //       'uid': userCredential.user!.uid,
-  //       'email': emailController.text,
-  //     });
-  //     Get.snackbar('Success', 'Sign in successful');
-  //     // Navigate to the next screen upon successful sign-in.
-  //     // Get.offAll(() => HomePage());
-  //   } catch (error) {
-  //     Get.snackbar('Error', 'Error signing in: $error');
-  //   } finally {
-  //     loading.value = false;
-  //   }
-  // }
+  // signin logic
+  Future<void> login(BuildContext context) async {
+    try {
+      UserCredential userCredential = await _auth.signInWithEmailAndPassword(
+        email: emailController.text,
+        password: passController.text,
+      );
+
+      // Check if the user is linked with a Google account
+      if (userCredential.user != null && userCredential.user!.providerData.any((userInfo) => userInfo.providerId == 'google.com')) {
+        Get.snackbar('Error', 'This email is associated with a Google account. Please sign in with Google.');
+        return;
+      }
+
+      // after creating the user, create a new document for the user in the users collection
+      _firestore.collection('users').doc(userCredential.user!.uid).set({
+        'uid': userCredential.user!.uid,
+        'email': emailController.text,
+      });
+      Get.snackbar('Success', 'Sign in successful');
+      // Navigate to the next screen upon successful sign-in.
+      Get.offAll(() => UserDetails());
+    } catch (error) {
+      Get.snackbar('Error', 'Error signing in: $error');
+    } finally {
+      loading.value = false;
+    }
+  }
 
 
 
@@ -137,7 +143,6 @@ class _LoginPageState extends State<LoginPage> {
                       child: WhiteText('Please login to continue', fontSize: 16),
                     ),
                     SizedBox(height: 25),
-
                     MyTextField(
                       controller: emailController,
                       label: 'Email',
@@ -178,6 +183,7 @@ class _LoginPageState extends State<LoginPage> {
                       alignment: Alignment.topRight,
                       child: MyTextButton(
                         onPressed: () {
+                          Get.to(BottomNavigation());
                           // Handle forgot password logic
                         },
                         buttonText: 'Forgot Password?',
@@ -186,7 +192,9 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                     SizedBox(height: 15),
 
-                    MyElevatedButton(onPressed: (){}, buttonText: 'Login',fontWeight: FontWeight.bold,),
+                    MyElevatedButton(onPressed: (){
+                      login(context);
+                    }, buttonText: 'Login',fontWeight: FontWeight.bold,),
 
                     SizedBox(height: 19),
                     Row(

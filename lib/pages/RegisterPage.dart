@@ -1,10 +1,14 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:wizedo/pages/HomePage.dart';
 import '../components/my_elevatedbutton.dart';
 import '../components/my_text_field.dart';
 import '../components/my_textbutton.dart';
 import '../components/white_text.dart';
+import '../services/email_verification_page.dart';
 import 'LoginPage.dart';
 import 'UserDetailsPage.dart';
 
@@ -23,8 +27,13 @@ class _RegisterPageState extends State<RegisterPage> {
   final phonenoController = TextEditingController();
   final emailController = TextEditingController();
   final passController = TextEditingController();
-  final confirmpassword = TextEditingController();
+  final confirmController = TextEditingController();
 
+  //instance of firestore
+  final FirebaseFirestore _firestore=FirebaseFirestore.instance;
+
+
+  //terms and conditions instructions agreement
   Future<void> showTermsOfServiceDialog() async {
     return showDialog(
       context: context,
@@ -226,6 +235,43 @@ class _RegisterPageState extends State<RegisterPage> {
     );
   }
 
+  //signup user
+  Future<void> registerWithEmailAndPassword(BuildContext context) async {
+    try {
+      if (passController.text == confirmController.text) {
+        UserCredential userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
+          email: emailController.text,
+          password: passController.text,
+        );
+
+        // Create a new document for the user in the 'users' collection
+        await _firestore.collection('users').doc(userCredential.user!.uid).set({
+          'uid': userCredential.user!.uid,
+          'email': emailController.text, // Fixed typo in 'email'
+        }, SetOptions(merge: true));
+
+        // Show a Snackbar indicating successful signup
+        Get.snackbar('Success', 'Signup successful');
+
+        Get.to(() => EmailVerificationScreen(userEmail: emailController.text));
+      } else {
+        Get.snackbar('', 'Passwords do not match...');
+      }
+    } catch (error) {
+      print('Error registering user: $error');
+      // Display an error message to the user.
+
+      // Check if the error message indicates that the user is already registered
+      if (error.toString().contains('email-already-in-use')) {
+        // Show a Snackbar indicating that the user is already registered
+        Get.snackbar('Invalid', 'User is already registered. Click below to login Now.');
+      } else {
+        // Show a generic error Snackbar
+        Get.snackbar('Error', 'Registration failed. Please try again later.');
+      }
+    }
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -294,7 +340,7 @@ class _RegisterPageState extends State<RegisterPage> {
                     ),
                     SizedBox(height: 25),
                     MyTextField(
-                      controller: confirmpassword,
+                      controller: confirmController,
                       label: 'Confirm Password',
                       obscureText: !confirmPasswordVisibility,
                       prefixIcon: Icon(
@@ -371,7 +417,7 @@ class _RegisterPageState extends State<RegisterPage> {
                     MyElevatedButton(
                       onPressed: () {
                         if (isTermsAccepted) {
-                          Get.to(() => UserDetails());
+                          registerWithEmailAndPassword(context);
                         } else {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(

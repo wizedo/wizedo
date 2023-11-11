@@ -1,13 +1,16 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
 import 'package:wizedo/components/CustomRichText.dart';
 import 'package:wizedo/components/searchable_dropdown.dart';
 import 'package:wizedo/components/white_text.dart';
 import 'package:shimmer/shimmer.dart';
-
-
 import '../components/FliterChip.dart';
 import '../components/JobCard.dart';
+import '../controller/BottomNavigationController.dart';
+import 'LoginPage.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key});
@@ -17,6 +20,8 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+
+  final FirebaseAuth _auth = FirebaseAuth.instance;
   String _selectedCategory = 'College Project';
   List<String> _technologyNews = ['Tech News 1', 'Tech News 2', 'Tech News 3'];
   List<String> _politicsNews = [
@@ -43,6 +48,16 @@ class _HomePageState extends State<HomePage> {
   ];
 
   List<String> _scienceNews = ['Science News 1', 'Science News 2', 'Science News 3'];
+
+  Future<void> _signOut(BuildContext context) async {
+    try {
+      await _auth.signOut();
+      Get.snackbar('Success', 'Sign out successful');
+      Get.offAll(() => LoginPage());
+    } catch (error) {
+      Get.snackbar('Error', 'Error signing out: $error');
+    }
+  }
 
 
   @override
@@ -223,6 +238,7 @@ class _HomePageState extends State<HomePage> {
                           label: 'Coding Club',
                           selectedCategory: _selectedCategory,
                           onTap: () {
+                            _signOut(context);//remove this later
                             setState(() {
                               _selectedCategory = 'Coding Club';
                             });
