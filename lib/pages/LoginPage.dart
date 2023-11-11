@@ -15,6 +15,7 @@ import '../components/colors/sixty.dart';
 import '../components/my_elevatedbutton.dart';
 import '../components/my_textbutton.dart';
 import '../components/purple_text.dart';
+import '../services/AuthService.dart';
 import 'BottomNavigation.dart';
 import 'HomePage.dart';
 import 'RegisterPage.dart';
@@ -48,7 +49,7 @@ class _LoginPageState extends State<LoginPage> {
   final passController =TextEditingController();
 
   //this below code is to sign in with google - currently under test
-  // final AuthService _authService = AuthService();
+  final AuthService _authService = AuthService();
 
 
   // signin logic
@@ -83,28 +84,28 @@ class _LoginPageState extends State<LoginPage> {
 
 
   //loginwithgoogle
-  // Future<void> signInWithGoogle(BuildContext context) async {
-  //   try {
-  //     UserCredential? userCredential = await _authService.signInWithGoogle();
-  //     if (userCredential != null) {
-  //       // Create a new document for the user in the 'users' collection
-  //       await FirebaseFirestore.instance.collection('users').doc(userCredential.user!.uid).set({
-  //         'uid': userCredential.user!.uid,
-  //         'email': userCredential.user!.email,
-  //         // Add other user details as needed
-  //       });
-  //
-  //       Get.snackbar('Success', 'Sign in with Google successful');
-  //
-  //       // Navigate to the next screen upon successful sign-in.
-  //       Get.offAll(() => HomePage());
-  //     }
-  //   } catch (error) {
-  //     Get.snackbar('Error', 'Error signing in with Google: $error');
-  //   } finally {
-  //     loading.value = false;
-  //   }
-  // }
+  Future<void> signInWithGoogle(BuildContext context) async {
+    try {
+      UserCredential? userCredential = await _authService.signInWithGoogle();
+      if (userCredential != null) {
+        // Create a new document for the user in the 'users' collection
+        await FirebaseFirestore.instance.collection('users').doc(userCredential.user!.uid).set({
+          'uid': userCredential.user!.uid,
+          'email': userCredential.user!.email,
+          // Add other user details as needed
+        });
+
+        Get.snackbar('Success', 'Sign in with Google successful');
+
+        // Navigate to the next screen upon successful sign-in.
+        Get.offAll(() => HomePage());
+      }
+    } catch (error) {
+      Get.snackbar('Error', 'Error signing in with Google: $error');
+    } finally {
+      loading.value = false;
+    }
+  }
 
 
 
@@ -255,6 +256,7 @@ class _LoginPageState extends State<LoginPage> {
                     GestureDetector(
                       onTap: () {
                         // Handle Google sign-in logic
+                        _authService.signInWithGoogle();
                       },
                       child: Image.asset(
                         'lib/images/google.png',
