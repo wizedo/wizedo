@@ -250,9 +250,6 @@ class _RegisterPageState extends State<RegisterPage> {
           'email': emailController.text, // Fixed typo in 'email'
         }, SetOptions(merge: true));
 
-        // Show a Snackbar indicating successful signup
-        Get.snackbar('Success', 'Signup successful');
-
         Get.to(() => EmailVerificationScreen(userEmail: emailController.text));
       } else {
         Get.snackbar('', 'Passwords do not match...');
