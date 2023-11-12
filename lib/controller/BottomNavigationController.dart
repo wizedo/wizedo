@@ -7,6 +7,7 @@ import 'package:wizedo/pages/RegisterPage.dart';
 import 'package:wizedo/pages/UserDetailsPage.dart';
 import 'package:wizedo/pages/settings.dart';
 
+import '../pages/ChatHomePage.dart';
 import '../pages/detailsPage.dart';
 
 class BottomNavigationController extends GetxController {

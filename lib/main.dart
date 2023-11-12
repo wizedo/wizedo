@@ -22,6 +22,7 @@ class MyApp extends StatelessWidget {
       data: MediaQueryData.fromWindow(WidgetsBinding.instance!.window).copyWith(textScaleFactor: 1.2),
       child: GetMaterialApp(
         title: 'Flutter Demo',
+        debugShowCheckedModeBanner: false,
         theme: ThemeData(
           // This a wizedo project
           // Naresh is gay

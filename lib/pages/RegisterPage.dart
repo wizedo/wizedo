@@ -239,12 +239,14 @@ class _RegisterPageState extends State<RegisterPage> {
   Future<void> registerWithEmailAndPassword(BuildContext context) async {
     try {
       if (passController.text == confirmController.text) {
+        //this will create the id in authetication this n creation of doucment v need to happend after verifcation
         UserCredential userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
           email: emailController.text,
           password: passController.text,
         );
 
         // Create a new document for the user in the 'users' collection
+        //this doucment creation is used for chatapp
         await _firestore.collection('users').doc(userCredential.user!.uid).set({
           'uid': userCredential.user!.uid,
           'email': emailController.text, // Fixed typo in 'email'
