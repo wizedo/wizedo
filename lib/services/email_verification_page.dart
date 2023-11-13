@@ -48,9 +48,16 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
       // Handle error creating account or sending verification email
       // If an error occurs, delete the created user account
       await FirebaseAuth.instance.currentUser?.delete();
-
+      // Check if the error message indicates that the user is already registered
+      if (e.toString().contains('email-already-in-use')) {
+        // Show a Snackbar indicating that the user is already registered
+        Get.snackbar('Invalid', 'User is already registered. Click below to login Now.');
+        Get.to(() => LoginPage());
+      } else {
+        // Show a generic error Snackbar
+        Get.snackbar('Error', 'Registration failed. Please try again later.');
+      }
       // Optionally, navigate back to the login page or display an error message
-      Get.to(() => LoginPage());
     }
   }
 
