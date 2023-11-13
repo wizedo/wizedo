@@ -4,25 +4,66 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:wizedo/pages/LoginPage.dart';
+import '../pages/UserDetailsPage.dart';
 
 class EmailVerificationScreen extends StatefulWidget {
   final String userEmail;
+  final String userPassword;
+  final String userConfirmPassword;
 
-  const EmailVerificationScreen({Key? key, required this.userEmail}) : super(key: key);
+  const EmailVerificationScreen({
+    Key? key,
+    required this.userEmail,
+    required this.userPassword,
+    required this.userConfirmPassword,
+  }) : super(key: key);
 
   @override
-  State<EmailVerificationScreen> createState() => _EmailVerificationScreenState();
+  State<EmailVerificationScreen> createState() =>
+      _EmailVerificationScreenState();
 }
 
 class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
   bool isEmailVerified = false;
   Timer? timer;
+  int countdown = 30; // Countdown duration in seconds
 
   @override
   void initState() {
     super.initState();
-    FirebaseAuth.instance.currentUser?.sendEmailVerification();
-    timer = Timer.periodic(const Duration(seconds: 3), (_) => checkEmailVerified());
+    createAccountAndSendEmailVerification();
+    timer = Timer.periodic(const Duration(seconds: 1), (_) => updateCountdown());
+  }
+
+  createAccountAndSendEmailVerification() async {
+    try {
+      await FirebaseAuth.instance.createUserWithEmailAndPassword(
+        email: widget.userEmail,
+        password: widget.userPassword,
+      );
+      // Send email verification
+      await FirebaseAuth.instance.currentUser?.sendEmailVerification();
+    } catch (e) {
+      debugPrint('$e');
+      // Handle error creating account or sending verification email
+      // If an error occurs, delete the created user account
+      await FirebaseAuth.instance.currentUser?.delete();
+
+      // Optionally, navigate back to the login page or display an error message
+      Get.to(() => LoginPage());
+    }
+  }
+
+  updateCountdown() {
+    checkEmailVerified();
+    if (countdown > 0) {
+      setState(() {
+        countdown--;
+      });
+    } else {
+      // Countdown reached, delete the user and perform any additional actions
+      deleteAndNavigate();
+    }
   }
 
   checkEmailVerified() async {
@@ -33,12 +74,19 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
     });
 
     if (isEmailVerified) {
-      // TODO: implement your code after email verification
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text("Email Successfully Verified")));
-      Get.to(LoginPage());
+      // Redirect to UserDetailsPage after email is verified
+      Get.to(() => UserDetails(userEmail: widget.userEmail));
       timer?.cancel();
     }
+  }
+
+  deleteAndNavigate() async {
+    await FirebaseAuth.instance.currentUser?.delete();
+    // Optionally, navigate back to the login page or display an error message
+    Get.to(() => LoginPage());
+    timer?.cancel();
   }
 
   @override
@@ -98,6 +146,14 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
                       debugPrint('$e');
                     }
                   },
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Resend in $countdown seconds',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18,
                 ),
               ),
             ],

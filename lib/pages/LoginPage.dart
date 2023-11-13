@@ -19,6 +19,8 @@ import '../services/AuthService.dart';
 import 'BottomNavigation.dart';
 import 'HomePage.dart';
 import 'RegisterPage.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
 
 
 
@@ -37,7 +39,6 @@ class _LoginPageState extends State<LoginPage> {
   String hexColor = '#211b2e';
   RxBool loading = false.obs;
 
-
   //instance of auth
   FirebaseAuth _auth=FirebaseAuth.instance;  //creaing instance for easier use through _auth
 
@@ -50,7 +51,6 @@ class _LoginPageState extends State<LoginPage> {
 
   //this below code is to sign in with google - currently under test
   final AuthService _authService = AuthService();
-
 
   // signin logic
   Future<void> login(BuildContext context) async {
@@ -73,13 +73,14 @@ class _LoginPageState extends State<LoginPage> {
       });
       Get.snackbar('Success', 'Sign in successful');
       // Navigate to the next screen upon successful sign-in.
-      Get.offAll(() => UserDetails());
+      Get.offAll(() => HomePage());
     } catch (error) {
       Get.snackbar('Error', 'Error signing in: $error');
     } finally {
       loading.value = false;
     }
   }
+
 
 
 
@@ -106,6 +107,9 @@ class _LoginPageState extends State<LoginPage> {
       loading.value = false;
     }
   }
+
+
+
 
 
 
