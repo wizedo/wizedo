@@ -242,7 +242,6 @@ class _RegisterPageState extends State<RegisterPage> {
         Get.to(() => EmailVerificationScreen(
           userEmail: emailController.text,
           userPassword: passController.text,
-          userConfirmPassword: confirmController.text,
         ));
       } else {
         Get.snackbar('', 'Passwords do not match...');

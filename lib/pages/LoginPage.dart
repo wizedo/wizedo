@@ -39,12 +39,14 @@ class _LoginPageState extends State<LoginPage> {
   FocusNode myFocusNode = FocusNode();
   String hexColor = '#211b2e';
   RxBool loading = false.obs;
+  bool userDetailsfilled = false; // Initialize userDetailsfilled as false
 
   //instance of auth
   FirebaseAuth _auth=FirebaseAuth.instance;  //creaing instance for easier use through _auth
 
   //instance of firestore
   final FirebaseFirestore _firestore=FirebaseFirestore.instance;
+
   //
   //signin user
   final emailController =TextEditingController();
@@ -65,19 +67,31 @@ class _LoginPageState extends State<LoginPage> {
       );
 
       // Check if the user is linked with a Google account
-      if (userCredential.user != null && userCredential.user!.providerData.any((userInfo) => userInfo.providerId == 'google.com')) {
-        Get.snackbar('Error', 'This email is associated with a Google account. Please sign in with Google.');
+      if (userCredential.user != null &&
+          userCredential.user!.providerData.any(
+                (userInfo) => userInfo.providerId == 'google.com',
+          )) {
+        Get.snackbar('Error',
+            'This email is associated with a Google account. Please sign in with Google.');
         return;
       }
+      DocumentSnapshot userDoc =
+      await _firestore.collection('users').doc(emailController.text).get();
 
-      // after creating the user, create a new document for the user in the users collection
-      _firestore.collection('users').doc(userCredential.user!.uid).set({
-        'uid': userCredential.user!.uid,
-        'email': emailController.text,
-      });
+      bool userDetailsfilled = userDoc.get('userDetailsfilled') ?? false;
+
+
       Get.snackbar('Success', 'Sign in successful');
+      if (userDetailsfilled==true) {
+        print(userDetailsfilled);
+        print('homepage');
+        Get.offAll(() => HomePage());
+      } else {
+        print('userdetails');
+        Get.to(() => UserDetails(userEmail: emailController.text));
+        // User details are not filled, send to userdetailspage
+      }
       // Navigate to the next screen upon successful sign-in.
-      Get.offAll(() => HomePage());
     } catch (error) {
       Get.snackbar('Error', 'Error signing in: $error');
     } finally {
@@ -86,33 +100,19 @@ class _LoginPageState extends State<LoginPage> {
   }
 
 
-
-
   //loginwithgoogle
   Future<void> signInWithGoogle(BuildContext context) async {
     try {
       UserCredential? userCredential = await _authService.signInWithGoogle();
-      if (userCredential != null) {
-        // Create a new document for the user in the 'users' collection
-        await FirebaseFirestore.instance.collection('users').doc(userCredential.user!.uid).set({
-          'uid': userCredential.user!.uid,
-          'email': userCredential.user!.email,
-          // Add other user details as needed
-        });
-
         Get.snackbar('Success', 'Sign in with Google successful');
-
         // Navigate to the next screen upon successful sign-in.
         Get.offAll(() => HomePage());
-      }
     } catch (error) {
       Get.snackbar('Error', 'Error signing in with Google: $error');
     } finally {
       loading.value = false;
     }
   }
-
-
 
 
   @override

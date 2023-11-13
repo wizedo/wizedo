@@ -1,21 +1,20 @@
 import 'dart:async';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:get/get_core/src/get_main.dart';
 import 'package:wizedo/pages/LoginPage.dart';
 import '../pages/UserDetailsPage.dart';
 
 class EmailVerificationScreen extends StatefulWidget {
   final String userEmail;
-  final String userPassword;
-  final String userConfirmPassword;
+  final String userPassword; // Make password optional
+  // Remove userConfirmPassword since it's no longer needed
 
   const EmailVerificationScreen({
     Key? key,
     required this.userEmail,
-    required this.userPassword,
-    required this.userConfirmPassword,
+    this.userPassword = '', // Provide a default value for userPassword
   }) : super(key: key);
 
   @override
@@ -27,6 +26,16 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
   bool isEmailVerified = false;
   Timer? timer;
   int countdown = 30; // Countdown duration in seconds
+  //instance of auth
+  FirebaseAuth _auth=FirebaseAuth.instance;  //creaing instance for easier use through _auth
+
+  //instance of firestore
+  final FirebaseFirestore _firestore=FirebaseFirestore.instance;
+  final fireStore=FirebaseFirestore.instance.collection('users').snapshots();
+  //collection for firstore
+  CollectionReference ref=FirebaseFirestore.instance.collection('usersDetails');
+
+
 
   @override
   void initState() {
@@ -84,6 +93,19 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
     if (isEmailVerified) {
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text("Email Successfully Verified")));
+      // Creating a collection
+      final fireStore = FirebaseFirestore.instance.collection('usersDetails');
+      // Get the current user
+      User? user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        String email = user.email!;
+        fireStore.doc(email).set({
+          'id': email,
+          'userDetailsfilled': false,
+        }).then((value) {
+          Get.snackbar('Success', 'Updated successfully');
+        });
+      }
       // Redirect to UserDetailsPage after email is verified
       Get.to(() => UserDetails(userEmail: widget.userEmail));
       timer?.cancel();
