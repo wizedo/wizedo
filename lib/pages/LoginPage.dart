@@ -2,6 +2,7 @@
 // import 'package:wizedo/Pages/register_page.dart';
 // import 'package:wizedo/Services/AuthService.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:wizedo/components/my_button.dart';
 import 'package:wizedo/components/my_text_field.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -51,6 +52,9 @@ class _LoginPageState extends State<LoginPage> {
 
   //this below code is to sign in with google - currently under test
   final AuthService _authService = AuthService();
+  final GoogleSignIn googleSignIn = GoogleSignIn();
+
+
 
   // signin logic
   Future<void> login(BuildContext context) async {
@@ -107,8 +111,6 @@ class _LoginPageState extends State<LoginPage> {
       loading.value = false;
     }
   }
-
-
 
 
 

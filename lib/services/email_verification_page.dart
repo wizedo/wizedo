@@ -44,6 +44,7 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
       // Send email verification
       await FirebaseAuth.instance.currentUser?.sendEmailVerification();
     } catch (e) {
+      // print(e);
       debugPrint('$e');
       // Handle error creating account or sending verification email
       // If an error occurs, delete the created user account
