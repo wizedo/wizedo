@@ -250,14 +250,6 @@ class _RegisterPageState extends State<RegisterPage> {
     } catch (error) {
       print('Error registering user: $error');
       // Display an error message to the user.
-      // Check if the error message indicates that the user is already registered
-      if (error.toString().contains('email-already-in-use')) {
-        // Show a Snackbar indicating that the user is already registered
-        Get.snackbar('Invalid', 'User is already registered. Click below to login Now.');
-      } else {
-        // Show a generic error Snackbar
-        Get.snackbar('Error', 'Registration failed. Please try again later.');
-      }
     }
   }
 
