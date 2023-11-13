@@ -75,11 +75,6 @@ class _LoginPageState extends State<LoginPage> {
             'This email is associated with a Google account. Please sign in with Google.');
         return;
       }
-      DocumentSnapshot userDoc =
-      await _firestore.collection('users').doc(emailController.text).get();
-
-      bool userDetailsfilled = userDoc.get('userDetailsfilled') ?? false;
-
 
       Get.snackbar('Success', 'Sign in successful');
       if (userDetailsfilled==true) {
