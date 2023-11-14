@@ -47,7 +47,7 @@ class _LoginPageState extends State<LoginPage> {
   //instance of firestore
   final FirebaseFirestore _firestore=FirebaseFirestore.instance;
 
-  //
+
   //signin user
   final emailController =TextEditingController();
   final passController =TextEditingController();
@@ -56,6 +56,31 @@ class _LoginPageState extends State<LoginPage> {
   final AuthService _authService = AuthService();
   final GoogleSignIn googleSignIn = GoogleSignIn();
 
+  Future<bool> getUserDetailsFilled(String userEmail) async {
+    try {
+      // Get a reference to the document for the specific user
+      DocumentReference userDocRef = _firestore.collection('usersDetails').doc(userEmail);
+
+      // Get the document snapshot
+      DocumentSnapshot userDocSnapshot = await userDocRef.get();
+
+      // Check if the document exists
+      if (userDocSnapshot.exists) {
+        // Extract the userDetailsfilled value from the document data
+        bool userDetailsfilled = userDocSnapshot['userDetailsfilled'];
+
+        // Print userDetailsfilled value to the console for debugging
+        print('userDetailsfilled value for $userEmail: $userDetailsfilled');
+        return userDetailsfilled ?? false; // Default to false if userDetailsfilled is not present
+      } else {
+        // Document does not exist, return false
+        return false;
+      }
+    } catch (error) {
+      print('Error getting user details: $error');
+      return false;
+    }
+  }
 
 
   // signin logic
@@ -75,12 +100,12 @@ class _LoginPageState extends State<LoginPage> {
             'This email is associated with a Google account. Please sign in with Google.');
         return;
       }
-
       Get.snackbar('Success', 'Sign in successful');
+      bool userDetailsfilled = await getUserDetailsFilled(emailController.text);
       if (userDetailsfilled==true) {
         print(userDetailsfilled);
         print('homepage');
-        Get.offAll(() => HomePage());
+        Get.offAll(() => BottomNavigation());
       } else {
         print('userdetails');
         Get.to(() => UserDetails(userEmail: emailController.text));
@@ -95,19 +120,52 @@ class _LoginPageState extends State<LoginPage> {
   }
 
 
-  //loginwithgoogle
+  // loginwithgoogle
   Future<void> signInWithGoogle(BuildContext context) async {
     try {
-      UserCredential? userCredential = await _authService.signInWithGoogle();
-        Get.snackbar('Success', 'Sign in with Google successful');
-        // Navigate to the next screen upon successful sign-in.
-        Get.offAll(() => HomePage());
+      GoogleSignInAccount? googleSignInAccount = await _authService.signInWithGoogle();
+      print('gmail signin');
+      if (googleSignInAccount != null) {
+        print('user is signed through gmail ');
+        // Get the user email from the GoogleSignInAccount
+        String userEmail = googleSignInAccount.email ?? '';
+
+        // Print the user email for debugging
+        print('User signed in with Google. Email: $userEmail');
+
+        // Check if a document already exists for this user
+        DocumentSnapshot userDocSnapshot = await _firestore.collection('usersDetails').doc(userEmail).get();
+
+        if (!userDocSnapshot.exists) {
+          // If the document does not exist, create one
+          await _firestore.collection('usersDetails').doc(userEmail).set({
+            'id': userEmail,
+            'userDetailsfilled': false,
+          });
+          print('User document created for $userEmail');
+        }
+        // Check userDetailsfilled for the retrieved email
+        bool userDetailsfilled = await getUserDetailsFilled(userEmail);
+
+        if (userDetailsfilled==true) {
+          // print('Homepage');
+          // Get.offAll(() => HomePage());
+        } else {
+          print('Userdetails');
+          Get.to(() => UserDetails(userEmail: userEmail));
+          // User details are not filled, send to userdetailspage
+        }
+      } else {
+        Get.snackbar('Error', 'Failed to sign in with Google.');
+      }
     } catch (error) {
       Get.snackbar('Error', 'Error signing in with Google: $error');
     } finally {
       loading.value = false;
     }
   }
+
+
 
 
   @override

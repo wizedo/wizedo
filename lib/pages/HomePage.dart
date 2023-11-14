@@ -140,7 +140,12 @@ class _HomePageState extends State<HomePage> {
                                         child: FloatingActionButton(
                                           backgroundColor: Colors.transparent,
                                           onPressed: () {
-                                            // Add your onPressed logic here
+                                            if (_auth.currentUser != null) {
+                                              String userEmail = _auth.currentUser!.email ?? "No email available";
+                                              Get.snackbar('Current User', 'Email: $userEmail');
+                                            } else {
+                                              Get.snackbar('Error', 'No user signed in');
+                                            }
                                             print('Redirected to Post Page');
                                           },
                                           tooltip: 'Increment',
@@ -329,29 +334,26 @@ class _HomePageState extends State<HomePage> {
                 ),
               ),
             ),
+
             // Bottom banner ad
-            Padding(
-              padding: const EdgeInsets.all(10.0),
-              child: Positioned(
-                bottom: 0,
-                child: Container(
-                  width: MediaQuery.of(context).size.width,
-                  height: 60, // Adjust the height of the ad container as needed
-                  decoration: BoxDecoration(
-                    color: Colors.grey, // Change the background color of the ad container
-                    borderRadius: BorderRadius.circular(15),
-                  ),
-                  child: Center(
-                    child: Text(
-                      'Ad',
-                      style: TextStyle(color: Colors.grey.shade50,fontSize: 12),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-
-
+            // With this corrected code
+            // Positioned(
+            //   bottom: 0,
+            //   child: Container(
+            //     width: MediaQuery.of(context).size.width,
+            //     height: 60, // Adjust the height of the ad container as needed
+            //     decoration: BoxDecoration(
+            //       color: Colors.grey, // Change the background color of the ad container
+            //       borderRadius: BorderRadius.circular(15),
+            //     ),
+            //     child: Center(
+            //       child: Text(
+            //         'Ad',
+            //         style: TextStyle(color: Colors.grey.shade50, fontSize: 12),
+            //       ),
+            //     ),
+            //   ),
+            // ),
 
             // this the code to filter through chip
             // Expanded(
