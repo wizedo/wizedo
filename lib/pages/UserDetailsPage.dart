@@ -4,8 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:slide_to_act/slide_to_act.dart';
-import 'package:swipeable_button_view/swipeable_button_view.dart';
 import 'package:wizedo/components/YearPickerTextField.dart';
 import 'package:wizedo/components/colors/sixty.dart';
 import 'package:wizedo/components/my_text_field.dart';
@@ -24,7 +22,9 @@ class UserDetails extends StatefulWidget {
 }
 
 class _UserDetailsState extends State<UserDetails> {
-  String? _selectedCountry;
+  String? _selectedState;
+  String? _selectedCollege;
+  String? _selectedCourse;
   bool isFinished = false;
   late AnimationController _controller;
   final TextEditingController _searchController = TextEditingController();
@@ -35,7 +35,27 @@ class _UserDetailsState extends State<UserDetails> {
   bool _sliderValue = false;
 
   String hexColor = '#211b2e';
-  bool userDetailsfilled=false;
+  bool userDetailsfilled = false;
+
+  Future<void> setUserDetailsFilledLocally(bool value) async {
+    try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('userDetailsFilled', value); // Change the key to 'userDetailsFilled'
+    } catch (error) {
+      print('Error setting user details locally: $error');
+    }
+  }
+
+  Future<bool> getUserDetailsFilledLocally() async {
+    try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      bool userDetailsFilledLocally = prefs.getBool('userDetailsFilled') ?? false; // Change the key to 'userDetailsFilled'
+      return userDetailsFilledLocally;
+    } catch (error) {
+      print('Error getting user details locally: $error');
+      return false;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -47,7 +67,6 @@ class _UserDetailsState extends State<UserDetails> {
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
-            // with this
             child: Container(
               constraints: BoxConstraints(
                 minHeight: MediaQuery.of(context).size.height -
@@ -85,6 +104,18 @@ class _UserDetailsState extends State<UserDetails> {
                             color: Colors.white,
                           ),
                           fontSize: 12,
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Name is required';
+                            }
+                            if (!RegExp(r'^[a-zA-Z]+$').hasMatch(value)) {
+                              return 'Enter only alphabets';
+                            }
+                            if (value.length > 30) {
+                              return 'Maximum characters allowed is 30';
+                            }
+                            return null;
+                          },
                         ),
                         SizedBox(height: 25),
                         MyTextField(
@@ -101,8 +132,6 @@ class _UserDetailsState extends State<UserDetails> {
                           fontSize: 12,
                         ),
                         SizedBox(height: 25),
-                        // Remember to fetch the items list from firestore
-                        // searchabledropdownforstate
                         SizedBox(
                           width: 310,
                           height: 51,
@@ -139,7 +168,9 @@ class _UserDetailsState extends State<UserDetails> {
                             ],
                             labelText: 'Current College State',
                             onSelected: (selectedItem) {
-                              // Handle the selected item here
+                              setState(() {
+                                _selectedState = selectedItem;
+                              });
                               print('Selected item: $selectedItem');
                             },
                             suffix: Icon(
@@ -150,7 +181,6 @@ class _UserDetailsState extends State<UserDetails> {
                           ),
                         ),
                         SizedBox(height: 25),
-                        // Searchabledropdownforcollege
                         SizedBox(
                           width: 310,
                           height: 51,
@@ -187,7 +217,9 @@ class _UserDetailsState extends State<UserDetails> {
                             ],
                             labelText: 'Select Your College',
                             onSelected: (selectedItem) {
-                              // Handle the selected item here
+                              setState(() {
+                                _selectedCollege = selectedItem;
+                              });
                               print('Selected item: $selectedItem');
                             },
                             suffix: Icon(
@@ -198,7 +230,6 @@ class _UserDetailsState extends State<UserDetails> {
                           ),
                         ),
                         SizedBox(height: 25),
-                        // Searchabledropdownforcourse
                         SizedBox(
                           width: 310,
                           height: 51,
@@ -230,7 +261,9 @@ class _UserDetailsState extends State<UserDetails> {
                             ],
                             labelText: 'Select Your Course',
                             onSelected: (selectedItem) {
-                              // Handle the selected item here
+                              setState(() {
+                                _selectedCourse = selectedItem;
+                              });
                               print('Selected item: $selectedItem');
                             },
                             suffix: Icon(
@@ -241,7 +274,6 @@ class _UserDetailsState extends State<UserDetails> {
                           ),
                         ),
                         SizedBox(height: 25),
-                        // YearSelector widget
                         YearSelector(
                           controller: userYearController,
                           label: 'When did your course begin?',
@@ -259,55 +291,71 @@ class _UserDetailsState extends State<UserDetails> {
                     child: Container(
                       width: 308,
                       height: 51,
-                      child: SwipeableButtonView(
-                        onFinish: () async {
+                      child: ElevatedButton(
+                        onPressed: () async {
+                          if (_validateInputs()) {
+                            final fireStore = FirebaseFirestore.instance.collection('usersDetails');
+                            User? user = FirebaseAuth.instance.currentUser;
+                            if (user != null) {
+                              String email = user.email!;
+                              String phoneNumberString = phonenoController.text;
+                              int phoneNumber = int.tryParse(phoneNumberString) ?? 0;
 
-                          // Creating a collection
-                          final fireStore = FirebaseFirestore.instance.collection('usersDetails');
-// Get the current user
-                          User? user = FirebaseAuth.instance.currentUser;
-                          if (user != null) {
-                            String email = user.email!;
-                            String phoneNumberString = phonenoController.text;
-                            int phoneNumber = int.tryParse(phoneNumberString) ?? 0; // Use 0 as a default value or handle it based on your requirements
-                            fireStore.doc(email).set({
-                              'id': email,
-                              'name': unameController.text.toString(),
-                              'phoneNumber': phoneNumber,
-                              'userDetailsfilled': true
-                            }).then((value) {
-                              Get.snackbar('Success', 'Updated successfully');
-                            });
-                          }
+                              fireStore.doc(email).set({
+                                'id': email,
+                                'name': unameController.text.toString(),
+                                'phoneNumber': phoneNumber,
+                                'country': _selectedState,
+                                'college': _selectedCollege,
+                                'course': _selectedCourse,
+                                'courseStartYear': userYearController.text,
+                                'userDetailsfilled': true,
+                              }).then((value) async {
+                                await setUserDetailsFilledLocally(true);
+                                bool userDetailsFilledLocally = await getUserDetailsFilledLocally();
+                                print('userDetailsFilledLocally: $userDetailsFilledLocally');
+                                Get.snackbar('Success', 'Updated successfully');
+                              }).catchError((error) {
+                                print('Error updating user details: $error');
+                                Get.snackbar('Error', 'Failed to update user details');
+                              });
 
-
-                          await Navigator.push(
-                              context,
-                              PageTransition(
+                              await Navigator.push(
+                                context,
+                                PageTransition(
                                   type: PageTransitionType.fade,
-                                  child: BottomNavigation()));
-                          setState(() {
-                            isFinished = false;
-                          });
+                                  child: BottomNavigation(),
+                                ),
+                              );
+                              setState(() {
+                                isFinished = false;
+                              });
+                            }
+                          }
                         },
-                        isFinished: isFinished,
-                        onWaitingProcess: () {
-                          Future.delayed(Duration(seconds: 0), () {
-                            setState(() {
-                              isFinished = true;
-                            });
-                          });
-                        },
-                        activeColor: Color(0xFF955AF2),
-                        // Set active color to orange
-                        buttonWidget: Icon(
-                          Icons.arrow_forward_rounded,
-                          color: Colors.white,
+                        style: ElevatedButton.styleFrom(
+                          primary: Color(0xFF955AF2),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(15),
+                          ),
                         ),
-                        buttonText: 'Swipe to Join',
-                        borderRadius: 15,
-                        // Set the button text
-                        // borderRadius: 10.0, // Set the border radius of the button
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            // Icon(
+                            //   Icons.arrow_forward_rounded,
+                            //   color: Colors.white,
+                            // ),
+                            // SizedBox(width: 10),
+                            Text(
+                              'Swipe to Join',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),
@@ -318,5 +366,18 @@ class _UserDetailsState extends State<UserDetails> {
         ),
       ),
     );
+  }
+
+  bool _validateInputs() {
+    if (unameController.text.isEmpty ||
+        phonenoController.text.isEmpty ||
+        _selectedState == null ||
+        _selectedCollege == null ||
+        _selectedCourse == null ||
+        userYearController.text.isEmpty) {
+      Get.snackbar('Error', 'Please fill in all the required fields.');
+      return false;
+    }
+    return true;
   }
 }

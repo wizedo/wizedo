@@ -99,7 +99,7 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
       User? user = FirebaseAuth.instance.currentUser;
       if (user != null) {
         String email = user.email!;
-        fireStore.doc(email).set({
+        await fireStore.doc(email).set({
           'id': email,
           'userDetailsfilled': false,
         }).then((value) {
@@ -111,6 +111,7 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
       timer?.cancel();
     }
   }
+
 
   deleteAndNavigate() async {
     await FirebaseAuth.instance.currentUser?.delete();

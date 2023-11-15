@@ -12,6 +12,7 @@ class MyTextField extends StatefulWidget {
   final double? fontSize;
   final String? hint;
   final TextInputType keyboardType; // New parameter for specifying keyboard type
+  final String? Function(String?)? validator; // New parameter for validation
 
   const MyTextField({
     Key? key,
@@ -25,6 +26,7 @@ class MyTextField extends StatefulWidget {
     this.iconHeight,
     this.fontSize,
     this.keyboardType = TextInputType.text, // Default to text input type
+    this.validator, // Validator function
   }) : super(key: key);
 
   @override
@@ -43,10 +45,11 @@ class _MyTextFieldState extends State<MyTextField> {
         borderRadius: BorderRadius.circular(15),
         color: backgroundColor,
       ),
-      child: TextField(
+      child: TextFormField(
         controller: widget.controller,
         obscureText: widget.obscureText,
         keyboardType: widget.keyboardType, // Set the specified keyboard type
+        validator: widget.validator, // Set the validation function
         style: GoogleFonts.mPlusRounded1c(
           textStyle: TextStyle(
             color: Colors.white,
@@ -55,7 +58,7 @@ class _MyTextFieldState extends State<MyTextField> {
         ),
         decoration: InputDecoration(
           hintText: widget.hint,
-          hintStyle: TextStyle(color: Colors.white,fontSize: 13),
+          hintStyle: TextStyle(color: Colors.white, fontSize: 13),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(15),
             borderSide: BorderSide(color: backgroundColor),

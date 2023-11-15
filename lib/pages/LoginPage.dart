@@ -1,6 +1,3 @@
-// import 'package:wizedo/Pages/homepage.dart';
-// import 'package:wizedo/Pages/register_page.dart';
-// import 'package:wizedo/Services/AuthService.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:wizedo/components/my_button.dart';
@@ -11,7 +8,6 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:wizedo/components/white_text.dart';
 import 'package:wizedo/pages/UserDetailsPage.dart';
-import 'package:wizedo/pages/detailsPage.dart';
 import '../components/colors/sixty.dart';
 import '../components/my_elevatedbutton.dart';
 import '../components/my_textbutton.dart';
@@ -22,10 +18,6 @@ import 'HomePage.dart';
 import 'RegisterPage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-
-
-
-
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
 
@@ -34,46 +26,31 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-
   bool passwordVisibility = false;
   FocusNode myFocusNode = FocusNode();
   String hexColor = '#211b2e';
   RxBool loading = false.obs;
-  bool userDetailsfilled = false; // Initialize userDetailsfilled as false
+  bool userDetailsfilled = false;
 
-  //instance of auth
-  FirebaseAuth _auth=FirebaseAuth.instance;  //creaing instance for easier use through _auth
+  FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  //instance of firestore
-  final FirebaseFirestore _firestore=FirebaseFirestore.instance;
+  final emailController = TextEditingController();
+  final passController = TextEditingController();
 
-
-  //signin user
-  final emailController =TextEditingController();
-  final passController =TextEditingController();
-
-  //this below code is to sign in with google - currently under test
   final AuthService _authService = AuthService();
   final GoogleSignIn googleSignIn = GoogleSignIn();
 
   Future<bool> getUserDetailsFilled(String userEmail) async {
     try {
-      // Get a reference to the document for the specific user
       DocumentReference userDocRef = _firestore.collection('usersDetails').doc(userEmail);
-
-      // Get the document snapshot
       DocumentSnapshot userDocSnapshot = await userDocRef.get();
 
-      // Check if the document exists
       if (userDocSnapshot.exists) {
-        // Extract the userDetailsfilled value from the document data
         bool userDetailsfilled = userDocSnapshot['userDetailsfilled'];
-
-        // Print userDetailsfilled value to the console for debugging
         print('userDetailsfilled value for $userEmail: $userDetailsfilled');
-        return userDetailsfilled ?? false; // Default to false if userDetailsfilled is not present
+        return userDetailsfilled ?? false;
       } else {
-        // Document does not exist, return false
         return false;
       }
     } catch (error) {
@@ -82,8 +59,16 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
+  Future<bool> getUserDetailsFilledLocally() async {
+    try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      return prefs.getBool('userDetailsFilled') ?? false;
+    } catch (error) {
+      print('Error getting user details locally: $error');
+      return false;
+    }
+  }
 
-  // signin logic
   Future<void> login(BuildContext context) async {
     try {
       UserCredential userCredential = await _auth.signInWithEmailAndPassword(
@@ -91,27 +76,26 @@ class _LoginPageState extends State<LoginPage> {
         password: passController.text,
       );
 
-      // Check if the user is linked with a Google account
       if (userCredential.user != null &&
           userCredential.user!.providerData.any(
                 (userInfo) => userInfo.providerId == 'google.com',
           )) {
-        Get.snackbar('Error',
-            'This email is associated with a Google account. Please sign in with Google.');
+        Get.snackbar('Error', 'This email is associated with a Google account. Please sign in with Google.');
         return;
       }
+
       Get.snackbar('Success', 'Sign in successful');
+
+      // Save user Gmail ID locally using shared preferences
+      await saveUserEmailLocally(emailController.text);
+
       bool userDetailsfilled = await getUserDetailsFilled(emailController.text);
-      if (userDetailsfilled==true) {
-        print(userDetailsfilled);
-        print('homepage');
+
+      if (userDetailsfilled == true) {
         Get.offAll(() => BottomNavigation());
       } else {
-        print('userdetails');
         Get.to(() => UserDetails(userEmail: emailController.text));
-        // User details are not filled, send to userdetailspage
       }
-      // Navigate to the next screen upon successful sign-in.
     } catch (error) {
       Get.snackbar('Error', 'Error signing in: $error');
     } finally {
@@ -119,54 +103,54 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
-
-  // loginwithgoogle
-  Future<void> signInWithGoogle(BuildContext context) async {
+  Future<void> saveUserEmailLocally(String userEmail) async {
     try {
-      GoogleSignInAccount? googleSignInAccount = await _authService.signInWithGoogle();
-      print('gmail signin');
-      if (googleSignInAccount != null) {
-        print('user is signed through gmail ');
-        // Get the user email from the GoogleSignInAccount
-        String userEmail = googleSignInAccount.email ?? '';
-
-        // Print the user email for debugging
-        print('User signed in with Google. Email: $userEmail');
-
-        // Check if a document already exists for this user
-        DocumentSnapshot userDocSnapshot = await _firestore.collection('usersDetails').doc(userEmail).get();
-
-        if (!userDocSnapshot.exists) {
-          // If the document does not exist, create one
-          await _firestore.collection('usersDetails').doc(userEmail).set({
-            'id': userEmail,
-            'userDetailsfilled': false,
-          });
-          print('User document created for $userEmail');
-        }
-        // Check userDetailsfilled for the retrieved email
-        bool userDetailsfilled = await getUserDetailsFilled(userEmail);
-
-        if (userDetailsfilled==true) {
-          // print('Homepage');
-          // Get.offAll(() => HomePage());
-        } else {
-          print('Userdetails');
-          Get.to(() => UserDetails(userEmail: userEmail));
-          // User details are not filled, send to userdetailspage
-        }
-      } else {
-        Get.snackbar('Error', 'Failed to sign in with Google.');
-      }
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      await prefs.setString('userEmail', userEmail);
     } catch (error) {
-      Get.snackbar('Error', 'Error signing in with Google: $error');
-    } finally {
-      loading.value = false;
+      print('Error saving user email locally: $error');
     }
   }
 
-
-
+  Future<void> signInWithGoogle(BuildContext context) async {
+    Get.snackbar('Message', 'Under Maintence');
+    // try {
+    //   GoogleSignInAccount? googleSignInAccount = await _authService.signInWithGoogle();
+    //   print('gmail signin');
+    //   if (googleSignInAccount != null) {
+    //     print('user is signed through gmail ');
+    //     String userEmail = googleSignInAccount.email ?? '';
+    //
+    //     print('User signed in with Google. Email: $userEmail');
+    //
+    //     DocumentSnapshot userDocSnapshot = await _firestore.collection('usersDetails').doc(userEmail).get();
+    //
+    //     if (!userDocSnapshot.exists) {
+    //       await _firestore.collection('usersDetails').doc(userEmail).set({
+    //         'id': userEmail,
+    //         'userDetailsfilled': false,
+    //       });
+    //       print('User document created for $userEmail');
+    //     }
+    //
+    //     bool userDetailsfilled = await getUserDetailsFilled(userEmail);
+    //
+    //     if (userDetailsfilled == true) {
+    //       // print('Homepage');
+    //       // Get.offAll(() => HomePage());
+    //     } else {
+    //       print('Userdetails');
+    //       Get.to(() => UserDetails(userEmail: userEmail));
+    //     }
+    //   } else {
+    //     Get.snackbar('Error', 'Failed to sign in with Google.');
+    //   }
+    // } catch (error) {
+    //   Get.snackbar('Error', 'Error signing in with Google: $error');
+    // } finally {
+    //   loading.value = false;
+    // }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -227,7 +211,7 @@ class _LoginPageState extends State<LoginPage> {
                       suffixIcon: GestureDetector(
                         onTap: () {
                           setState(() {
-                            passwordVisibility = !passwordVisibility; // Toggle visibility for password field
+                            passwordVisibility = !passwordVisibility;
                           });
                         },
                         child: Icon(
@@ -244,7 +228,6 @@ class _LoginPageState extends State<LoginPage> {
                       child: MyTextButton(
                         onPressed: () {
                           Get.to(BottomNavigation());
-                          // Handle forgot password logic
                         },
                         buttonText: 'Forgot Password?',
                         fontSize: 12,
@@ -252,9 +235,9 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                     SizedBox(height: 15),
 
-                    MyElevatedButton(onPressed: (){
+                    MyElevatedButton(onPressed: () {
                       login(context);
-                    }, buttonText: 'Login',fontWeight: FontWeight.bold,),
+                    }, buttonText: 'Login', fontWeight: FontWeight.bold,),
 
                     SizedBox(height: 19),
                     Row(
@@ -314,8 +297,7 @@ class _LoginPageState extends State<LoginPage> {
                     SizedBox(height: 25),
                     GestureDetector(
                       onTap: () {
-                        // Handle Google sign-in logic
-                        _authService.signInWithGoogle();
+                        signInWithGoogle(context);
                       },
                       child: Image.asset(
                         'lib/images/google.png',
@@ -329,9 +311,9 @@ class _LoginPageState extends State<LoginPage> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         WhiteText('Not a member?', fontSize: 12),
-                        MyTextButton(onPressed: (){
+                        MyTextButton(onPressed: () {
                           Get.to(() => RegisterPage());
-                        }, buttonText: 'Register Now',fontSize: 12,)
+                        }, buttonText: 'Register Now', fontSize: 12,)
                       ],
                     ),
                   ],
@@ -343,7 +325,4 @@ class _LoginPageState extends State<LoginPage> {
       ),
     );
   }
-
-
-
 }

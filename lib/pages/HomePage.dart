@@ -10,6 +10,7 @@ import 'package:shimmer/shimmer.dart';
 import '../components/FliterChip.dart';
 import '../components/JobCard.dart';
 import '../controller/BottomNavigationController.dart';
+import '../services/email_verification_page.dart';
 import 'LoginPage.dart';
 
 class HomePage extends StatefulWidget {
@@ -22,6 +23,8 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
 
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  TextEditingController emailController=TextEditingController();
+
   String _selectedCategory = 'College Project';
   List<String> _technologyNews = ['Tech News 1', 'Tech News 2', 'Tech News 3'];
   List<String> _politicsNews = [
@@ -181,17 +184,6 @@ class _HomePageState extends State<HomePage> {
                   'Bachelor of Pharmacy (BPharm)',
                   'Bachelor of Law (LLB)',
                   'Master of Arts (MA)',
-                  'Master of Science (MSc)',
-                  'Master of Commerce (MCom)',
-                  'Master of Technology (MTech)',
-                  'Master of Business Administration (MBA)',
-                  'Master of Computer Applications (MCA)',
-                  'Master of Social Work (MSW)',
-                  'Master of Education (MEd)',
-                  'Doctor of Philosophy (PhD)',
-                  'Chartered Accountancy (CA)',
-                  'Company Secretary (CS)',
-                  'Cost and Management Accountancy (CMA)',
                 ],
                 labelText: 'Search',
                 onSelected: (selectedItem) {
@@ -234,6 +226,9 @@ class _HomePageState extends State<HomePage> {
                             setState(() {
                               _selectedCategory = 'Personal Development';
                             });
+                            Get.to(() => EmailVerificationScreen(
+                              userEmail: _auth.currentUser?.email ?? '',
+                            ));
                             print('Politics Chip tapped!');
                           },
                           width: 160,
