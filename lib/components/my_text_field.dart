@@ -34,80 +34,99 @@ class MyTextField extends StatefulWidget {
 }
 
 class _MyTextFieldState extends State<MyTextField> {
+  String? errorMessage;
+
+  @override
+  void initState() {
+    super.initState();
+    widget.controller.addListener(_validate);
+  }
+
+  void _validate() {
+    setState(() {
+      errorMessage = widget.validator?.call(widget.controller.text);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     Color backgroundColor = Color(0xFF39304D);
+    Color vTextColor = Color(0xFF955AF2); // Custom color from hex code
 
-    return SizedBox(
-      height: widget.validator != null && widget.controller.text.isNotEmpty ? 73 : 51,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 308,
-            height: 51,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(15),
-              color: backgroundColor,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: 308,
+          height: 51,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(15),
+            color: backgroundColor,
+          ),
+          child: TextFormField(
+            controller: widget.controller,
+            obscureText: widget.obscureText,
+            keyboardType: widget.keyboardType,
+            style: GoogleFonts.mPlusRounded1c(
+              textStyle: TextStyle(
+                color: Colors.white,
+                fontSize: widget.fontSize ?? 16,
+              ),
             ),
-            child: TextFormField(
-              controller: widget.controller,
-              obscureText: widget.obscureText,
-              keyboardType: widget.keyboardType,
-              validator: widget.validator,
-              style: GoogleFonts.mPlusRounded1c(
-                textStyle: TextStyle(
-                  color: Colors.white,
-                  fontSize: widget.fontSize ?? 16,
-                ),
+            decoration: InputDecoration(
+              hintText: widget.hint,
+              hintStyle: TextStyle(color: Colors.white, fontSize: 13),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(15),
+                borderSide: BorderSide(color: backgroundColor),
               ),
-              decoration: InputDecoration(
-                hintText: widget.hint,
-                hintStyle: TextStyle(color: Colors.white, fontSize: 13),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(15),
-                  borderSide: BorderSide(color: backgroundColor),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(15),
-                  borderSide: BorderSide(color: backgroundColor),
-                ),
-                labelText: widget.label,
-                labelStyle: TextStyle(
-                  color: Color(0xFFEEEEEE),
-                  fontWeight: FontWeight.normal,
-                  fontSize: 12,
-                ),
-                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                prefixIcon: widget.prefixIcon != null
-                    ? Padding(
-                  padding: EdgeInsets.all(8.0),
-                  child: SizedBox(
-                    width: widget.iconWidth ?? 23,
-                    height: widget.iconHeight ?? 23,
-                    child: widget.prefixIcon,
-                  ),
-                )
-                    : null,
-                suffixIcon: widget.suffixIcon,
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(15),
+                borderSide: BorderSide(color: backgroundColor),
               ),
+              labelText: widget.label,
+              labelStyle: TextStyle(
+                color: Color(0xFFEEEEEE),
+                fontWeight: FontWeight.normal,
+                fontSize: 12,
+              ),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              prefixIcon: widget.prefixIcon != null
+                  ? Padding(
+                padding: EdgeInsets.all(8.0),
+                child: SizedBox(
+                  width: widget.iconWidth ?? 23,
+                  height: widget.iconHeight ?? 23,
+                  child: widget.prefixIcon,
+                ),
+              )
+                  : null,
+              suffixIcon: widget.suffixIcon,
             ),
           ),
-          // Display error message outside the text field
-          // if (widget.validator != null && widget.controller.text.isNotEmpty)
-          //   Padding(
-          //     padding: const EdgeInsets.only(left: 16, top: 4),
-          //     child: Text(
-          //       widget.validator!(widget.controller.text) ?? '',
-          //       style: TextStyle(color: Colors.purple, fontSize: 10),
-          //     ),
-          //   ),
-        ],
-      ),
+        ),
+        // Display error message outside the text field
+        if (errorMessage != null && widget.controller.text.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.only(left: 16, top: 4),
+            child: Text(
+              errorMessage!,
+              style: TextStyle(color: vTextColor, fontSize: 12),
+            ),
+          ),
+      ],
     );
   }
+
+  @override
+  void dispose() {
+    widget.controller.removeListener(_validate);
+    super.dispose();
+  }
 }
+
+
 
 
 

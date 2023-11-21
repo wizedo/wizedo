@@ -21,31 +21,34 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GetMaterialApp(
-      title: 'Flutter Demo',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
-      ),
-      home: StreamBuilder(
-        stream: FirebaseAuth.instance.authStateChanges(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.active) {
-            User? user = snapshot.data as User?;
-            if (user == null) {
-              // If the user is not authenticated, redirect to LoginPage
-              return LoginPage();
+    return MediaQuery(
+      data: MediaQueryData.fromWindow(WidgetsBinding.instance!.window).copyWith(textScaleFactor: 1.2),
+      child: GetMaterialApp(
+        title: 'Flutter Demo',
+        debugShowCheckedModeBanner: false,
+        theme: ThemeData(
+          colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+          useMaterial3: true,
+        ),
+        home: StreamBuilder(
+          stream: FirebaseAuth.instance.authStateChanges(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.active) {
+              User? user = snapshot.data as User?;
+              if (user == null) {
+                // If the user is not authenticated, redirect to LoginPage
+                return LoginPage();
+              } else {
+                // If the user is authenticated, check userDetailsFilled locally
+                return checkUserDetailsFilledLocally(context, user.email);
+              }
             } else {
-              // If the user is authenticated, check userDetailsFilled locally
-              return checkUserDetailsFilledLocally(context, user.email);
+              return Scaffold(
+                body: Center(child: CircularProgressIndicator()),
+              );
             }
-          } else {
-            return Scaffold(
-              body: Center(child: CircularProgressIndicator()),
-            );
-          }
-        },
+          },
+        ),
       ),
     );
   }

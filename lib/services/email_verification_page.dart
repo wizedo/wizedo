@@ -28,7 +28,6 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
   int countdown = 30; // Countdown duration in seconds
   //instance of auth
   FirebaseAuth _auth=FirebaseAuth.instance;  //creaing instance for easier use through _auth
-
   //instance of firestore
   final FirebaseFirestore _firestore=FirebaseFirestore.instance;
   final fireStore=FirebaseFirestore.instance.collection('users').snapshots();
