@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
-import 'package:wizedo/components/mPlusRoundedText.dart';
 import '../controller/BottomNavigationController.dart';
 import 'detailsPage.dart'; // Import your BottomNavigationController file here
-
 
 class BottomNavigation extends StatelessWidget {
   final BottomNavigationController controller = Get.put(BottomNavigationController());
@@ -52,6 +50,7 @@ class BottomNavigation extends StatelessWidget {
                         color: Color(0xFF955AF2),
                       ),
                       child: FloatingActionButton(
+                        heroTag: 'bottom_navigation_fab_hero_tag',
                         backgroundColor: Colors.transparent,
                         onPressed: () {
                           // Add your onPressed logic here
