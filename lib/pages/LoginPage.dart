@@ -1,25 +1,23 @@
-import 'package:google_fonts/google_fonts.dart';
-import 'package:google_sign_in/google_sign_in.dart';
-import 'package:wizedo/components/my_button.dart';
-import 'package:wizedo/components/my_text_field.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:get/get.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:get/get.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:wizedo/components/white_text.dart';
-import 'package:wizedo/pages/UserDetailsPage.dart';
-import '../components/colors/sixty.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:wizedo/components/colors/sixty.dart';
 import '../components/my_elevatedbutton.dart';
+import '../components/my_text_field.dart';
 import '../components/my_textbutton.dart';
+import '../components/white_text.dart';
 import '../components/purple_text.dart';
 import '../services/AuthService.dart';
 import 'BottomNavigation.dart';
 import 'HomePage.dart';
 import 'RegisterPage.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'UserDetailsPage.dart';
 
 class LoginPage extends StatefulWidget {
-  const LoginPage({super.key});
+  const LoginPage({Key? key}) : super(key: key);
 
   @override
   State<LoginPage> createState() => _LoginPageState();
@@ -27,47 +25,11 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   bool passwordVisibility = false;
-  FocusNode myFocusNode = FocusNode();
-  String hexColor = '#211b2e';
-  RxBool loading = false.obs;
-  bool userDetailsfilled = false;
-
   FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-
   final emailController = TextEditingController();
   final passController = TextEditingController();
-
   final AuthService _authService = AuthService();
-  final GoogleSignIn googleSignIn = GoogleSignIn();
-
-  Future<bool> getUserDetailsFilled(String userEmail) async {
-    try {
-      DocumentReference userDocRef = _firestore.collection('usersDetails').doc(userEmail);
-      DocumentSnapshot userDocSnapshot = await userDocRef.get();
-
-      if (userDocSnapshot.exists) {
-        bool userDetailsfilled = userDocSnapshot['userDetailsfilled'];
-        print('userDetailsfilled value for $userEmail: $userDetailsfilled');
-        return userDetailsfilled ?? false;
-      } else {
-        return false;
-      }
-    } catch (error) {
-      print('Error getting user details: $error');
-      return false;
-    }
-  }
-
-  Future<bool> getUserDetailsFilledLocally() async {
-    try {
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      return prefs.getBool('userDetailsFilled') ?? false;
-    } catch (error) {
-      print('Error getting user details locally: $error');
-      return false;
-    }
-  }
 
   Future<void> login(BuildContext context) async {
     try {
@@ -97,11 +59,52 @@ class _LoginPageState extends State<LoginPage> {
         Get.to(() => UserDetails(userEmail: emailController.text));
       }
     } catch (error) {
-      Get.snackbar('Error', 'Error signing in: $error');
-    } finally {
-      loading.value = false;
+      String errorMessage = _handleFirebaseError(error);
+      Get.snackbar('Error', errorMessage);
+
+      // Handle the specific FirebaseAuthException
+      if (error is FirebaseAuthException && error.code == 'account-exists-with-different-credential') {
+        // Display a Snackbar with a brief description
+        Get.snackbar('Error', 'Account exists with a different credential.');
+      }
     }
   }
+
+
+  String _handleFirebaseError(dynamic error) {
+    if (error is FirebaseAuthException) {
+      print(error.code);
+      switch (error.code) {
+        case 'user-not-found':
+          print('Debug: User not found for email ${emailController.text}');
+          return 'Account not found';
+        case 'INVALID_LOGIN_CREDENTIALS':
+          return 'Check you credentials..your email or password is wrong';
+        case 'network-request-failed':
+          return 'Network error. Please check your internet connection and try again.';
+        default:
+          return 'An unexpected error occurred. Please try again later.';
+      }
+    } else if (error is PlatformException) {
+      switch (error.code) {
+        case 'NETWORK_ERROR':
+          return 'Network error. Please check your internet connection and try again.';
+        case 'DEVICE_NOT_SUPPORTED':
+          return 'Your device is not supported. Please try again on a different device.';
+
+      // Add more cases for specific PlatformException errors
+
+        default:
+          return 'An unexpected error occurred. Please try again later.';
+      }
+    } else {
+      return 'An unexpected error occurred. Please try again later.';
+    }
+  }
+
+
+
+
 
   Future<void> saveUserEmailLocally(String userEmail) async {
     try {
@@ -112,49 +115,27 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
-  Future<void> signInWithGoogle(BuildContext context) async {
-    Get.snackbar('Message', 'Under Maintence');
-    // try {
-    //   GoogleSignInAccount? googleSignInAccount = await _authService.signInWithGoogle();
-    //   print('gmail signin');
-    //   if (googleSignInAccount != null) {
-    //     print('user is signed through gmail ');
-    //     String userEmail = googleSignInAccount.email ?? '';
-    //
-    //     print('User signed in with Google. Email: $userEmail');
-    //
-    //     DocumentSnapshot userDocSnapshot = await _firestore.collection('usersDetails').doc(userEmail).get();
-    //
-    //     if (!userDocSnapshot.exists) {
-    //       await _firestore.collection('usersDetails').doc(userEmail).set({
-    //         'id': userEmail,
-    //         'userDetailsfilled': false,
-    //       });
-    //       print('User document created for $userEmail');
-    //     }
-    //
-    //     bool userDetailsfilled = await getUserDetailsFilled(userEmail);
-    //
-    //     if (userDetailsfilled == true) {
-    //       // print('Homepage');
-    //       // Get.offAll(() => HomePage());
-    //     } else {
-    //       print('Userdetails');
-    //       Get.to(() => UserDetails(userEmail: userEmail));
-    //     }
-    //   } else {
-    //     Get.snackbar('Error', 'Failed to sign in with Google.');
-    //   }
-    // } catch (error) {
-    //   Get.snackbar('Error', 'Error signing in with Google: $error');
-    // } finally {
-    //   loading.value = false;
-    // }
+  Future<bool> getUserDetailsFilled(String userEmail) async {
+    try {
+      DocumentReference userDocRef = _firestore.collection('usersDetails').doc(userEmail);
+      DocumentSnapshot userDocSnapshot = await userDocRef.get();
+
+      if (userDocSnapshot.exists) {
+        bool userDetailsfilled = userDocSnapshot['userDetailsfilled'];
+        print('userDetailsfilled value for $userEmail: $userDetailsfilled');
+        return userDetailsfilled ?? false;
+      } else {
+        return false;
+      }
+    } catch (error) {
+      print('Error getting user details: $error');
+      return false;
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    Color backgroundColor = ColorUtil.hexToColor(hexColor);
+    Color backgroundColor = ColorUtil.hexToColor('#211b2e');
 
     return Scaffold(
       backgroundColor: Color(0xFF211B2E),
@@ -199,7 +180,6 @@ class _LoginPageState extends State<LoginPage> {
                       fontSize: 11.5,
                     ),
                     SizedBox(height: 25),
-
                     MyTextField(
                       controller: passController,
                       label: 'Password',
@@ -222,7 +202,6 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                       fontSize: 11.5,
                     ),
-
                     Align(
                       alignment: Alignment.topRight,
                       child: MyTextButton(
@@ -234,11 +213,13 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                     ),
                     SizedBox(height: 15),
-
-                    MyElevatedButton(onPressed: () {
-                      login(context);
-                    }, buttonText: 'Login', fontWeight: FontWeight.bold,),
-
+                    MyElevatedButton(
+                      onPressed: () {
+                        login(context);
+                      },
+                      buttonText: 'Login',
+                      fontWeight: FontWeight.bold,
+                    ),
                     SizedBox(height: 19),
                     Row(
                       children: [
@@ -293,11 +274,12 @@ class _LoginPageState extends State<LoginPage> {
                         ),
                       ],
                     ),
-
                     SizedBox(height: 25),
                     GestureDetector(
                       onTap: () {
-                        signInWithGoogle(context);
+                        // Uncomment the following line when the Google sign-in functionality is implemented.
+                        // signInWithGoogle(context);
+                        Get.snackbar('Message', 'Under Maintenance');
                       },
                       child: Image.asset(
                         'lib/images/google.png',
@@ -305,15 +287,18 @@ class _LoginPageState extends State<LoginPage> {
                         height: 45,
                       ),
                     ),
-
                     SizedBox(height: 15),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         WhiteText('Not a member?', fontSize: 12),
-                        MyTextButton(onPressed: () {
-                          Get.to(() => RegisterPage());
-                        }, buttonText: 'Register Now', fontSize: 12,)
+                        MyTextButton(
+                          onPressed: () {
+                            Get.to(() => RegisterPage());
+                          },
+                          buttonText: 'Register Now',
+                          fontSize: 12,
+                        ),
                       ],
                     ),
                   ],
