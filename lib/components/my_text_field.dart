@@ -13,6 +13,7 @@ class MyTextField extends StatefulWidget {
   final String? hint;
   final TextInputType keyboardType;
   final String? Function(String?)? validator;
+  final Color? textColor; // Added parameter for text color
 
   const MyTextField({
     Key? key,
@@ -27,6 +28,7 @@ class MyTextField extends StatefulWidget {
     this.fontSize,
     this.keyboardType = TextInputType.text,
     this.validator,
+    this.textColor,
   }) : super(key: key);
 
   @override
@@ -51,7 +53,7 @@ class _MyTextFieldState extends State<MyTextField> {
   @override
   Widget build(BuildContext context) {
     Color backgroundColor = Color(0xFF39304D);
-    Color vTextColor = Color(0xFF955AF2); // Custom color from hex code
+    Color vTextColor = Color(0xFF955AF2);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -70,7 +72,7 @@ class _MyTextFieldState extends State<MyTextField> {
             keyboardType: widget.keyboardType,
             style: GoogleFonts.mPlusRounded1c(
               textStyle: TextStyle(
-                color: Colors.white,
+                color: widget.textColor ?? Colors.white, // Use optional text color
                 fontSize: widget.fontSize ?? 16,
               ),
             ),
@@ -91,7 +93,8 @@ class _MyTextFieldState extends State<MyTextField> {
                 fontWeight: FontWeight.normal,
                 fontSize: 12,
               ),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              contentPadding:
+              const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
               prefixIcon: widget.prefixIcon != null
                   ? Padding(
                 padding: EdgeInsets.all(8.0),
@@ -125,9 +128,3 @@ class _MyTextFieldState extends State<MyTextField> {
     super.dispose();
   }
 }
-
-
-
-
-
-

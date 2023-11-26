@@ -63,59 +63,69 @@ class _SearchableDropdownTextFieldState extends State<SearchableDropdownTextFiel
     super.dispose();
   }
 
+  void _onTapGesture() {
+    // Hide the keyboard when tapping outside the text field
+    FocusScope.of(context).requestFocus(FocusNode());
+  }
+
   @override
   Widget build(BuildContext context) {
     Color backgroundColor = Color(0xFF39304D);
 
-    return Container(
-      width: widget.width, // Set width if provided (can be null for default width)
-      height: widget.height, // Set height if provided (can be null for default height)
-      child: TypeAheadField<String>(
-        textFieldConfiguration: TextFieldConfiguration(
-          controller: _textEditingController,
-          style: TextStyle(color: Colors.white, fontSize: 11.5),
-          decoration: InputDecoration(
-            labelText: widget.labelText,
-            labelStyle: TextStyle(color: Colors.white, fontSize: 12),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(15),
-              borderSide: BorderSide(color: backgroundColor),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(15),
-              borderSide: BorderSide(color: backgroundColor),
-            ),
-            filled: true,
-            fillColor: backgroundColor,
-            suffixIcon: widget.suffix,
-          ),
-        ),
-        suggestionsCallback: (pattern) {
-          // Return all options when the input is empty
-          return pattern.isEmpty ? widget.items : widget.items.where((item) => item.toLowerCase().contains(pattern.toLowerCase())).toList();
-        },
-        itemBuilder: (BuildContext context, String suggestion) {
-          return CustomSuggestionWidget(
-            suggestion: suggestion,
-            backgroundColor: backgroundColor,
-          );
-        },
-        onSuggestionSelected: (String suggestion) {
-          _textEditingController.text = suggestion;
-          widget.onSelected?.call(suggestion);
-        },
-        noItemsFoundBuilder: (BuildContext context) {
-          if (_showNotFoundMessage) {
-            return ListTile(
-              title: Text(
-                'Not found',
-                style: TextStyle(color: Colors.white),
+    return GestureDetector(
+      onTap: _onTapGesture,
+      child: Container(
+        width: widget.width, // Set width if provided (can be null for default width)
+        height: widget.height, // Set height if provided (can be null for default height)
+        child: TypeAheadField<String>(
+          textFieldConfiguration: TextFieldConfiguration(
+            controller: _textEditingController,
+            style: TextStyle(color: Colors.white, fontSize: 11.5),
+            decoration: InputDecoration(
+              labelText: widget.labelText,
+              labelStyle: TextStyle(color: Colors.white, fontSize: 12),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(15),
+                borderSide: BorderSide(color: backgroundColor),
               ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(15),
+                borderSide: BorderSide(color: backgroundColor),
+              ),
+              filled: true,
+              fillColor: backgroundColor,
+              suffixIcon: widget.suffix,
+            ),
+          ),
+          suggestionsCallback: (pattern) {
+            // Return all options when the input is empty
+            return pattern.isEmpty
+                ? widget.items
+                : widget.items.where((item) => item.toLowerCase().contains(pattern.toLowerCase())).toList();
+          },
+          itemBuilder: (BuildContext context, String suggestion) {
+            return CustomSuggestionWidget(
+              suggestion: suggestion,
+              backgroundColor: backgroundColor,
             );
-          } else {
-            return SizedBox.shrink();
-          }
-        },
+          },
+          onSuggestionSelected: (String suggestion) {
+            _textEditingController.text = suggestion;
+            widget.onSelected?.call(suggestion);
+          },
+          noItemsFoundBuilder: (BuildContext context) {
+            if (_showNotFoundMessage) {
+              return ListTile(
+                title: Text(
+                  'Not found',
+                  style: TextStyle(color: Colors.white),
+                ),
+              );
+            } else {
+              return SizedBox.shrink();
+            }
+          },
+        ),
       ),
     );
   }
