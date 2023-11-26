@@ -1,7 +1,3 @@
-<<<<<<< HEAD
-
-=======
->>>>>>> a1e5b8a (aaj ki raath)
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -14,10 +10,7 @@ import 'package:wizedo/components/colors/sixty.dart';
 import 'package:wizedo/components/my_text_field.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:wizedo/components/white_text.dart';
-<<<<<<< HEAD
-=======
 import '../components/CollegeData.dart';
->>>>>>> a1e5b8a (aaj ki raath)
 import 'LoginPage.dart';
 import 'BottomNavigation.dart';
 
@@ -31,6 +24,8 @@ class UserDetails extends StatefulWidget {
 }
 
 class _UserDetailsState extends State<UserDetails> {
+  List<String> errors = [];
+  List<String> collegeItems = [];
   String? _selectedState;
   String? _selectedCollege;
   String? _selectedCourse;
@@ -40,9 +35,10 @@ class _UserDetailsState extends State<UserDetails> {
   final TextEditingController unameController = TextEditingController();
   final TextEditingController phonenoController = TextEditingController();
   final TextEditingController userYearController = TextEditingController();
+  bool _sliderValue = false;
+  final _formKey = GlobalKey<FormState>();
 
   String hexColor = '#211b2e';
-  bool userDetailsfilled = false;
 
   Future<void> setUserDetailsFilledLocally(bool value) async {
     try {
@@ -64,122 +60,29 @@ class _UserDetailsState extends State<UserDetails> {
     }
   }
 
+  void addError({required String error}) {
+    if (!errors.contains(error)) {
+      setState(() {
+        errors.add(error);
+      });
+    }
+  }
+
+  void removeError({required String error}) {
+    if (errors.contains(error)) {
+      setState(() {
+        errors.remove(error);
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    final MediaQueryData mediaQueryData = MediaQuery.of(context);
     Color backgroundColor = ColorUtil.hexToColor(hexColor);
     String email = widget.userEmail;
-
+    print('User email in UserDetails: ${widget.userEmail}');
     return Scaffold(
-
       backgroundColor: Color(0xFF211B2E),
-<<<<<<< HEAD
-      body: Center(
-        child: Padding(
-          padding: mediaQueryData.viewInsets,
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-
-                Container(
-                  width: 310,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Image.asset(
-                        'lib/images/userdetails.png',
-                        width: 300,
-                        height: 150,
-                      ),
-                      Align(
-                        alignment: Alignment.topLeft,
-                        child: WhiteText(
-                          "Let's Get To Know You!",
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      SizedBox(height: 20),
-                      MyTextField(
-                        controller: unameController,
-                        label: 'Your Name',
-                        obscureText: false,
-                        keyboardType: TextInputType.name,
-                        prefixIcon: Image.asset(
-                          'lib/images/uname.png',
-                          color: Colors.white,
-                        ),
-                        fontSize: 12,
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Name is required';
-                          }
-                          if (!RegExp(r'^[a-zA-Z]+$').hasMatch(value)) {
-                            return 'Enter only alphabets';
-                          }
-                          if (value.length > 30) {
-                            return 'Maximum characters allowed is 30';
-                          }
-                          return null;
-                        },
-                      ),
-                      SizedBox(height: 25),
-                      MyTextField(
-                        controller: phonenoController,
-                        label: 'Phone Number',
-                        obscureText: false,
-                        keyboardType: TextInputType.number,
-                        prefixIcon: Center(
-                          child: Text(
-                            '+91',
-                            style: TextStyle(fontSize: 12, color: Colors.white),
-                          ),
-                        ),
-                        fontSize: 12,
-                      ),
-                      SizedBox(height: 25),
-                      SizedBox(
-                        width: 310,
-                        height: 51,
-                        child: SearchableDropdownTextField(
-                          items: [
-                            'Andhra Pradesh',
-                            'Arunachal Pradesh',
-                            'Assam',
-                            'Bihar',
-                            'Chhattisgarh',
-                            'Goa',
-                            'Gujarat',
-                            'Haryana',
-                            'Himachal Pradesh',
-                            'Jharkhand',
-                            'Karnataka',
-                            'Kerala',
-                            'Madhya Pradesh',
-                            'Maharashtra',
-                            'Manipur',
-                            'Meghalaya',
-                            'Mizoram',
-                            'Nagaland',
-                            'Odisha',
-                            'Punjab',
-                            'Rajasthan',
-                            'Sikkim',
-                            'Tamil Nadu',
-                            'Telangana',
-                            'Tripura',
-                            'Uttar Pradesh',
-                            'Uttarakhand',
-                            'West Bengal'
-                          ],
-                          labelText: 'Current College State',
-                          onSelected: (selectedItem) {
-                            setState(() {
-                              _selectedState = selectedItem;
-=======
       body: SingleChildScrollView(
         child: Container(
           child: Form(
@@ -340,67 +243,10 @@ class _UserDetailsState extends State<UserDetails> {
                               _selectedState = value;
                               collegeItems = CollegeData.getCollegesByState(_selectedState!);
                               _selectedCollege = null;
->>>>>>> a1e5b8a (aaj ki raath)
                             });
                           },
                         ),
                       ),
-<<<<<<< HEAD
-                      SizedBox(height: 25),
-                      SizedBox(
-                        width: 310,
-                        height: 51,
-                        child: SearchableDropdownTextField(
-                          items: [
-                            'Andhra Pradesh',
-                            'Arunachal Pradesh',
-                            'Assam',
-                            'Bihar',
-                            'Chhattisgarh',
-                            'Goa',
-                            'Gujarat',
-                            'Haryana',
-                            'Himachal Pradesh',
-                            'Jharkhand',
-                            'Karnataka',
-                            'Kerala',
-                            'Madhya Pradesh',
-                            'Maharashtra',
-                            'Manipur',
-                            'Meghalaya',
-                            'Mizoram',
-                            'Nagaland',
-                            'Odisha',
-                            'Punjab',
-                            'Rajasthan',
-                            'Sikkim',
-                            'Tamil Nadu',
-                            'Telangana',
-                            'Tripura',
-                            'Uttar Pradesh',
-                            'Uttarakhand',
-                            'West Bengal'
-                          ],
-                          labelText: 'Select Your College',
-                          onSelected: (selectedItem) {
-                            setState(() {
-                              _selectedCollege = selectedItem;
-                            });
-                            print('Selected item: $selectedItem');
-                          },
-                          suffix: Icon(
-                            Icons.location_on_rounded,
-                            color: Colors.white,
-                            size: 20,
-                          ),
-                        ),
-                      ),
-                      SizedBox(height: 25),
-                      SizedBox(
-                        width: 310,
-                        height: 51,
-                        child: SearchableDropdownTextField(
-=======
                     ),
                   ],
                 ),
@@ -521,7 +367,6 @@ class _UserDetailsState extends State<UserDetails> {
                             ],
                           ),
                           value: _selectedCourse,
->>>>>>> a1e5b8a (aaj ki raath)
                           items: [
                             'Bachelor of Arts (BA)',
                             'Bachelor of Science (BSc)',
@@ -562,100 +407,6 @@ class _UserDetailsState extends State<UserDetails> {
                             setState(() {
                               _selectedCourse = value;
                             });
-<<<<<<< HEAD
-                            print('Selected item: $selectedItem');
-                          },
-                          suffix: Icon(
-                            Icons.book,
-                            color: Colors.white,
-                            size: 20,
-                          ),
-                        ),
-                      ),
-                      SizedBox(height: 25),
-                      YearSelector(
-                        controller: userYearController,
-                        label: 'When did your course begin?',
-                        suffixIcon: Icon(
-                          Icons.calendar_month_rounded,
-                          color: Colors.white,
-                        ),
-                      ),
-                      SizedBox(height: 25),
-                    ],
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 30),
-                  child: Container(
-                    width: 308,
-                    height: 51,
-                    child: ElevatedButton(
-                      onPressed: () async {
-                        if (_validateInputs()) {
-                          final fireStore = FirebaseFirestore.instance.collection('usersDetails');
-                          User? user = FirebaseAuth.instance.currentUser;
-                          if (user != null) {
-                            String email = user.email!;
-                            String phoneNumberString = phonenoController.text;
-                            int phoneNumber = int.tryParse(phoneNumberString) ?? 0;
-
-                            fireStore.doc(email).set({
-                              'id': email,
-                              'name': unameController.text.toString(),
-                              'phoneNumber': phoneNumber,
-                              'country': _selectedState,
-                              'college': _selectedCollege,
-                              'course': _selectedCourse,
-                              'courseStartYear': userYearController.text,
-                              'userDetailsfilled': true,
-                            }).then((value) async {
-                              await setUserDetailsFilledLocally(true);
-                              bool userDetailsFilledLocally = await getUserDetailsFilledLocally();
-                              print('userDetailsFilledLocally: $userDetailsFilledLocally');
-                              Get.snackbar('Success', 'Updated successfully');
-                            }).catchError((error) {
-                              print('Error updating user details: $error');
-                              Get.snackbar('Error', 'Failed to update user details');
-                            });
-
-                            await Navigator.push(
-                              context,
-                              PageTransition(
-                                type: PageTransitionType.fade,
-                                child: BottomNavigation(),
-                              ),
-                            );
-                            setState(() {
-                              isFinished = false;
-                            });
-                          }
-                        }
-                      },
-                      style: ElevatedButton.styleFrom(
-                        primary: Color(0xFF955AF2),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(15),
-                        ),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            'Swipe to Join',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-
-              ],
-=======
                           },
                           style: TextStyle(color: Colors.white),
                           decoration: InputDecoration(
@@ -749,7 +500,6 @@ class _UserDetailsState extends State<UserDetails> {
                   ),
                 ],
               ),
->>>>>>> a1e5b8a (aaj ki raath)
             ),
           ),
         ),
@@ -757,24 +507,11 @@ class _UserDetailsState extends State<UserDetails> {
   }
 
   bool _validateInputs() {
-<<<<<<< HEAD
-    if (unameController.text.isEmpty ||
-        phonenoController.text.isEmpty ||
-        _selectedState == null ||
-        _selectedCollege == null ||
-        _selectedCourse == null ||
-        userYearController.text.isEmpty) {
-      Get.snackbar('Error', 'Please fill in all the required fields.');
-      return false;
-    }
-    return true;
-=======
     bool isValid = errors.isEmpty;
 
     if (!isValid) {
       Get.rawSnackbar(message: "Please Give a valid INPUT");
     }
     return isValid;
->>>>>>> a1e5b8a (aaj ki raath)
   }
 }
