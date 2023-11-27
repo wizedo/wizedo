@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
+import 'package:wizedo/pages/PostPage.dart';
 import '../controller/BottomNavigationController.dart';
 import 'detailsPage.dart'; // Import your BottomNavigationController file here
 
@@ -55,7 +56,7 @@ class BottomNavigation extends StatelessWidget {
                         onPressed: () {
                           // Add your onPressed logic here
                           print('Redirected to Post Page');
-                          Get.to(DetailsScreen());
+                          Get.to(RegisterScreen());
                         },
                         tooltip: 'Apply',
                         child: Icon(Icons.add_rounded, color: Colors.white, size: 20.0),
@@ -94,7 +95,7 @@ class BottomNavigation extends StatelessWidget {
                 },
               ),
               GButton(
-                icon: Icons.favorite,
+                icon: Icons.bookmark,
                 text: 'Favorites',
                 textStyle: TextStyle(fontSize: 12, color: Colors.white),
                 iconSize: 24, // Adjust the icon size if necessary

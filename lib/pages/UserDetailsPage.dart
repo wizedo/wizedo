@@ -246,11 +246,20 @@ class _UserDetailsState extends State<UserDetails> {
                                 _selectedCollege = null;
                               });
                             },
+                            validator: (value) {
+                              if (value == null) {
+                                addError(error: 'Please select your state');
+                              } else {
+                                removeError(error: 'Please select your state');
+                              }
+                              return null;
+                            },
                           ),
                         ),
                       ),
                     ],
                   ),
+
                   SizedBox(height: 10),
 
                   // DropdownButton2 for college
@@ -317,6 +326,14 @@ class _UserDetailsState extends State<UserDetails> {
                                   border: InputBorder.none,
                                   contentPadding: EdgeInsets.symmetric(horizontal: 15),
                                 ),
+                                validator: (value) {
+                                  if (value == null) {
+                                    addError(error: 'Please select your college');
+                                  }else {
+                                    removeError(error: 'Please select your college');
+                                  }
+                                  return null;
+                                },
                               ),
                             ),
                           ],
@@ -324,8 +341,6 @@ class _UserDetailsState extends State<UserDetails> {
                       ),
                     ],
                   ),
-
-
 
                   SizedBox(height: 10),
 
@@ -414,15 +429,19 @@ class _UserDetailsState extends State<UserDetails> {
                               border: InputBorder.none,
                               contentPadding: EdgeInsets.symmetric(horizontal: 15),
                             ),
+                            validator: (value) {
+                              if (value == null) {
+                                addError(error: 'Please select your course');
+                              }else {
+                                removeError(error: 'Please select your course');
+                              }
+                              return null;
+                            },
                           ),
                         ),
                       ),
                     ],
                   ),
-
-
-
-
 
                   SizedBox(height: 20),
 
@@ -433,69 +452,95 @@ class _UserDetailsState extends State<UserDetails> {
                       Icons.calendar_month_rounded,
                       color: Colors.white,
                     ),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        addError(error: 'Please select your course begin date');
+                      }else {
+                        removeError(error: 'Please select your course begin date');
+                      }
+                      return null;
+                    },
                   ),
-                  SizedBox(height: 50),
+
+                  SizedBox(height: 35),
 
                     Padding(
                       padding: const EdgeInsets.only(bottom: 30),
                       child: Container(
                         width: 308,
                         height: 51,
-                        child: SwipeableButtonView(
-                          onFinish: () async {
-                            if (_formKey.currentState!.validate() && _validateInputs()) {
+                        child: ElevatedButton(
+                          onPressed: () async {
+                            if (_formKey.currentState!.validate()) {
                               _formKey.currentState!.save();
-                              final fireStore = FirebaseFirestore.instance.collection('usersDetails');
-                              User? user = FirebaseAuth.instance.currentUser;
-                              if (user != null) {
-                                String email = user.email!;
-                                String phoneNumberString = phonenoController.text;
-                                int phoneNumber = int.tryParse(phoneNumberString) ?? 0;
 
-                                fireStore.doc(email).set({
-                                  'id': email,
-                                  'name': unameController.text.toString(),
-                                  'phoneNumber': phoneNumber,
-                                  'country': _selectedState,
-                                  'college': _selectedCollege,
-                                  'course': _selectedCourse,
-                                  'courseStartYear': userYearController.text,
-                                  'userDetailsfilled': true,
-                                }).then((value) async {
-                                  await setUserDetailsFilledLocally(true);
-                                  bool userDetailsFilledLocally = await getUserDetailsFilledLocally();
-                                  print('userDetailsFilledLocally: $userDetailsFilledLocally');
-                                  Get.snackbar('Success', 'Updated successfully');
-                                }).catchError((error) {
-                                  print('Error updating user details: $error');
-                                  Get.snackbar('Error', 'Failed to update your details');
-                                });
+                              bool isValid = _validateInputs();
 
-                                await Navigator.push(
-                                  context,
-                                  PageTransition(
-                                    type: PageTransitionType.fade,
-                                    child: BottomNavigation(),
-                                  ),
-                                );
-                                setState(() {
-                                  isFinished = false;
-                                });
+                              if (isValid) {
+                                final fireStore = FirebaseFirestore.instance.collection('usersDetails');
+                                User? user = FirebaseAuth.instance.currentUser;
+
+                                if (user != null) {
+                                  String email = user.email!;
+                                  String phoneNumberString = phonenoController.text;
+                                  int phoneNumber = int.tryParse(phoneNumberString) ?? 0;
+
+                                  try {
+                                    await fireStore.doc(email).set({
+                                      'id': email,
+                                      'name': unameController.text.toString(),
+                                      'phoneNumber': phoneNumber,
+                                      'country': _selectedState,
+                                      'college': _selectedCollege,
+                                      'course': _selectedCourse,
+                                      'courseStartYear': userYearController.text,
+                                      'userDetailsfilled': true,
+                                    });
+
+                                    await setUserDetailsFilledLocally(true);
+                                    bool userDetailsFilledLocally = await getUserDetailsFilledLocally();
+                                    print('userDetailsFilledLocally: $userDetailsFilledLocally');
+
+                                    Get.snackbar('Success', 'Updated successfully');
+
+                                    await Navigator.push(
+                                      context,
+                                      PageTransition(
+                                        type: PageTransitionType.fade,
+                                        child: BottomNavigation(),
+                                      ),
+                                    );
+
+                                    setState(() {
+                                      isFinished = false;
+                                    });
+                                  } catch (error) {
+                                    print('Error updating user details: $error');
+                                    Get.snackbar('Error', 'Failed to update user details');
+                                  }
+                                }
                               }
                             }
                           },
-                          isFinished: isFinished,
-                          buttonText: 'Swipe to Join',
-                          borderRadius: 15,
-                          onWaitingProcess: () {
-                            Future.delayed(Duration(seconds: 0), () {
-                              setState(() {
-                                isFinished = true;
-                              });
-                            });
-                          },
-                          activeColor: Color(0xFF955AF2),
-                          buttonWidget: Icon(Icons.arrow_forward_rounded,color: Colors.white,), // Set active color to orange
+
+                          style: ElevatedButton.styleFrom(
+                            primary: Color(0xFF955AF2),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(15),
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                'Tap to Join',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 16,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ),
@@ -516,4 +561,6 @@ class _UserDetailsState extends State<UserDetails> {
     }
     return isValid;
   }
+
+
 }
