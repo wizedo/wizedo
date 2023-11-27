@@ -207,6 +207,27 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       height: 120,
                       width: 400,
                       fontSize: 12,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          addError(error: 'Description is required');
+                          return 'Description is required';
+                        } else {
+                          removeError(error: 'Description is required');
+                        }
+                        if (value != null && value.length < 100) {
+                          addError(error: 'Description should be of at least 100 characters');
+                          return 'Description should be of at least 100 characters';
+                        } else {
+                          removeError(error: 'Description should be of at least 100 characters');
+                        }
+                        if (value != null && value.length > 250 ) {
+                          addError(error: 'Maximum characters allowed is 250');
+                          return 'Maximum characters allowed is 250';
+                        } else {
+                          removeError(error: 'Maximum characters allowed is 250');
+                        }
+                        return null;
+                      },
                     ),
                   ),
                   if (_isNumberOfPagesVisible)
