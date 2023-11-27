@@ -15,6 +15,7 @@ import 'package:wizedo/components/searchable_dropdown.dart';
 import 'package:wizedo/components/white_text.dart';
 
 import '../components/boxDecoration.dart';
+import '../components/my_elevatedbutton.dart';
 import '../components/my_textmultiline_field.dart';
 import 'BottomNavigation.dart';
 
@@ -145,6 +146,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         });
                         print('Selected item: $value');
                       },
+                      validator: (value) {
+                        if (value == null) {
+                          addError(error: 'Please select your category');
+                        } else {
+                          removeError(error: 'Please select your category');
+                        }
+                        return null;
+                      },
                     ),
                   ),
 
@@ -204,7 +213,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       obscureText: false,
                       hint: 'Description (max 150 words)',
                       keyboardType: TextInputType.name,
-                      height: 120,
+                      height: 185,
                       width: 400,
                       fontSize: 12,
                       validator: (value) {
@@ -230,12 +239,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       },
                     ),
                   ),
+                  SizedBox(height: 10),
+
                   if (_isNumberOfPagesVisible)
                     Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        SizedBox(height: 10),
                         Text(
-                          'Total/Approx pages requiring assistance',
+                          'Total/Approx pages requiring assistance:',
                           style: mPlusRoundedText.copyWith(fontSize: 12),
                         ),
                         SizedBox(height: 10),
@@ -245,9 +256,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             controller: _descriptionText,
                             obscureText: false,
                             hint: 'Number of pages',
-                            keyboardType: TextInputType.name,
+                            keyboardType: TextInputType.number,
+                            fontSize: 12,
                             suffixIcon: IconButton(
-                              icon: Icon(Icons.info, color: Colors.blue),
+                              icon: Icon(Icons.info,color: Colors.deepPurple,),
                               onPressed: () {},
                             ),
                           ),
@@ -273,6 +285,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             Icons.calendar_month,
                             color: Colors.deepPurple,
                           ),
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                addError(error: 'Due date is required');
+                                return 'Due date is required';
+                              } else {
+                                removeError(error: 'Due date is required');
+                              }
+                              return null;
+                            },
                         )
                       ],
                     ),
@@ -284,6 +305,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   ),
                   SizedBox(height: 10),
                   Container(
+                    width: 310,
                     decoration: boxDecoration,
                     padding: EdgeInsets.all(15),
                     child: Row(
@@ -305,78 +327,43 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   Container(
                     width: double.infinity,
                     child: MyTextField(
+                      prefixIcon: Icon(Icons.currency_rupee_rounded, color: Colors.yellow),
                       fontSize: 12,
                       controller: _paymentDetails,
                       obscureText: false,
                       hint: 'Enter Expected pay',
                       keyboardType: TextInputType.number,
-                      suffixIcon: Icon(Icons.attach_money, color: Colors.yellow),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          addError(error: 'Expected pay is required');
+                          return 'Expected pay is required';
+                        } else {
+                          removeError(error: 'Expected pay is required');
+                        }
+                        return null;
+                      },
                     ),
                   ),
-                  SizedBox(height: 20),
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 30),
-                    child: Container(
-                      width: double.infinity,
-                      height: 51,
-                      child: SwipeableButtonView(
-                        onFinish: () async {
-                          if(_formKey.currentState!.validate() && _validateInputs()){
-                            _formKey.currentState!.save();
-                            print("updated post detials");
-
-                          }
-                          await Navigator.push(
-                              context,
-                              PageTransition(
-                                  type: PageTransitionType.fade,
-                                  child: BottomNavigation()));
-
-                          setState(() {
-                            isFinished = false;
-                          });
-                        },
-                        isFinished: isFinished,
-                        onWaitingProcess: () {
-                          Future.delayed(Duration(seconds: 0), () {
-                            setState(() {
-                              isFinished = true;
-                            });
-                          });
-                        },
-                        activeColor: Color(0xFF955AF2),
-                        buttonWidget: Icon(Icons.arrow_forward_rounded, color: Colors.white),
-                        buttonText: 'Swipe to Join',
-                        borderRadius: 15,
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: 30),
+                  SizedBox(height: 10),
                 ],
 
               ),
             ),
           ),
-          // Positioned(
-          //   bottom: 0,
-          //   left: 0,
-          //   right: 0,
-          //   child: Container(
-          //     width: MediaQuery.of(context).size.width,
-          //     height: 60,
-          //     decoration: BoxDecoration(
-          //       color: Colors.grey,
-          //       borderRadius: BorderRadius.circular(15),
-          //     ),
-          //     child: Center(
-          //       child: Text(
-          //         'Ad',
-          //         style: TextStyle(color: Colors.grey.shade50, fontSize: 12),
-          //       ),
-          //     ),
-          //   ),
-          // ),
+
         ],
+      ),
+      bottomNavigationBar: Padding(
+        padding: const EdgeInsets.all(18.0),
+        child: MyElevatedButton(
+          onPressed: () {
+            // Handle button press
+          },
+          buttonText: 'Get Answers Now',
+          fontWeight: FontWeight.bold,
+
+
+        ),
       ),
     );
   }

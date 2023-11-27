@@ -6,13 +6,15 @@ class DateSelector extends StatefulWidget {
   final String? label;
   final String? hint;
   final Widget? suffixIcon; // New parameter for suffix icon
+  final Function(String?)? validator; // New parameter for validator
 
   const DateSelector({
     Key? key,
     required this.controller,
     this.label,
     this.hint,
-    this.suffixIcon, // Include suffixIcon parameter
+    this.suffixIcon,
+    this.validator, // Include validator parameter
   }) : super(key: key);
 
   @override
@@ -36,6 +38,9 @@ class _DateSelectorState extends State<DateSelector> {
 
     if (picked != null) {
       widget.controller.text = DateFormat('yyyy-MM-dd').format(picked);
+      if (widget.validator != null) {
+        widget.validator!(widget.controller.text);
+      }
     }
   }
 
@@ -68,7 +73,7 @@ class _DateSelectorState extends State<DateSelector> {
                       fontSize: 13,
                     ),
                     decoration: InputDecoration(
-                      hintStyle: TextStyle(color: Colors.white,fontWeight: FontWeight.normal,fontSize: 13,),
+                      hintStyle: TextStyle(color: Colors.white, fontWeight: FontWeight.normal, fontSize: 13),
                       hintText: widget.hint,
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(15),
