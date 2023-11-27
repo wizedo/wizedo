@@ -6,6 +6,7 @@ class YearSelector extends StatefulWidget {
   final String? label;
   final Widget? suffixIcon;
   final Widget? prefixIcon; // New parameter for prefix icon
+  final String? Function(String?)? validator; // New parameter for validator
 
   const YearSelector({
     Key? key,
@@ -13,6 +14,7 @@ class YearSelector extends StatefulWidget {
     this.label,
     this.suffixIcon,
     this.prefixIcon, // Include prefixIcon parameter
+    this.validator, // Include validator parameter
   }) : super(key: key);
 
   @override
@@ -65,7 +67,7 @@ class _YearSelectorState extends State<YearSelector> {
                     child: widget.prefixIcon,
                   ),
                 Expanded(
-                  child: TextField(
+                  child: TextFormField(
                     controller: widget.controller,
                     keyboardType: TextInputType.number,
                     style: TextStyle(
@@ -89,6 +91,7 @@ class _YearSelectorState extends State<YearSelector> {
                       ),
                       contentPadding: const EdgeInsets.symmetric(vertical: 14),
                     ),
+                    validator: widget.validator, // Set the validator
                   ),
                 ),
                 if (widget.suffixIcon != null) // Display suffix icon if provided

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-class MyTextField extends StatefulWidget {
+class MyTextMulitilineField extends StatefulWidget {
   final TextEditingController controller;
   final String? label;
   final bool obscureText;
@@ -14,8 +14,10 @@ class MyTextField extends StatefulWidget {
   final TextInputType keyboardType;
   final String? Function(String?)? validator;
   final Color? textColor; // Added parameter for text color
+  final double? height; // Added parameter for height
+  final double? width; // Added parameter for width
 
-  const MyTextField({
+  const MyTextMulitilineField({
     Key? key,
     required this.controller,
     this.label,
@@ -29,13 +31,15 @@ class MyTextField extends StatefulWidget {
     this.keyboardType = TextInputType.text,
     this.validator,
     this.textColor,
+    this.height,
+    this.width,
   }) : super(key: key);
 
   @override
-  _MyTextFieldState createState() => _MyTextFieldState();
+  _MyTextMulitilineFieldState createState() => _MyTextMulitilineFieldState();
 }
 
-class _MyTextFieldState extends State<MyTextField> {
+class _MyTextMulitilineFieldState extends State<MyTextMulitilineField> {
   String? errorMessage;
 
   @override
@@ -60,8 +64,8 @@ class _MyTextFieldState extends State<MyTextField> {
       mainAxisSize: MainAxisSize.min,
       children: [
         Container(
-          width: 308,
-          height: 51,
+          width: widget.width ?? 308,
+          height: widget.height ?? 51,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(15),
             color: backgroundColor,
@@ -70,6 +74,7 @@ class _MyTextFieldState extends State<MyTextField> {
             controller: widget.controller,
             obscureText: widget.obscureText,
             keyboardType: widget.keyboardType,
+            maxLines: null, // Set maxLines to null for multiline input
             style: GoogleFonts.mPlusRounded1c(
               textStyle: TextStyle(
                 color: widget.textColor ?? Colors.white, // Use optional text color
@@ -94,7 +99,7 @@ class _MyTextFieldState extends State<MyTextField> {
                 fontSize: 12,
               ),
               contentPadding:
-              const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              const EdgeInsets.symmetric(horizontal: 16, vertical: 14), // Adjust padding for multiline
               prefixIcon: widget.prefixIcon != null
                   ? Padding(
                 padding: EdgeInsets.all(8.0),
