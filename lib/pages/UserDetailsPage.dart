@@ -477,24 +477,32 @@ class _UserDetailsState extends State<UserDetails> {
                               bool isValid = _validateInputs();
 
                               if (isValid) {
-                                final fireStore = FirebaseFirestore.instance.collection('usersDetails');
-                                User? user = FirebaseAuth.instance.currentUser;
+                                try {
+                                  final user = FirebaseAuth.instance.currentUser;
+                                  if (user != null) {
+                                    final firestore = FirebaseFirestore.instance;
+                                    final email = user.email!;
+                                    final docRef = firestore.collection('usersDetails').doc(email);
 
-                                if (user != null) {
-                                  String email = user.email!;
-                                  String phoneNumberString = phonenoController.text;
-                                  int phoneNumber = int.tryParse(phoneNumberString) ?? 0;
+                                    await firestore.runTransaction((transaction) async {
+                                      final docSnapshot = await transaction.get(docRef);
 
-                                  try {
-                                    await fireStore.doc(email).set({
-                                      'id': email,
-                                      'name': unameController.text.toString(),
-                                      'phoneNumber': phoneNumber,
-                                      'country': _selectedState,
-                                      'college': _selectedCollege,
-                                      'course': _selectedCourse,
-                                      'courseStartYear': userYearController.text,
-                                      'userDetailsfilled': true,
+                                      if (!docSnapshot.exists) {
+                                        // Handle the case where the document does not exist
+                                      }
+
+                                      // Update the document
+                                      transaction.set(docRef, {
+                                        'id': email,
+                                        'name': unameController.text.toString(),
+                                        'phoneNumber': int.tryParse(phonenoController.text) ?? 0,
+                                        'country': _selectedState,
+                                        'college': _selectedCollege,
+                                        'course': _selectedCourse,
+                                        'courseStartYear': userYearController.text,
+                                        'userDetailsfilled': true,
+                                        'lastUpdated': FieldValue.serverTimestamp(),
+                                      });
                                     });
 
                                     await setUserDetailsFilledLocally(true);
@@ -514,14 +522,15 @@ class _UserDetailsState extends State<UserDetails> {
                                     setState(() {
                                       isFinished = false;
                                     });
-                                  } catch (error) {
-                                    print('Error updating user details: $error');
-                                    Get.snackbar('Error', 'Failed to update user details');
                                   }
+                                } catch (error) {
+                                  print('Error updating user details: $error');
+                                  Get.snackbar('Error', 'Failed to update user details');
                                 }
                               }
                             }
                           },
+
 
                           style: ElevatedButton.styleFrom(
                             primary: Color(0xFF955AF2),
