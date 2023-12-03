@@ -350,24 +350,28 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     style: mPlusRoundedText.copyWith(fontSize: 12),
                   ),
                   SizedBox(height: 10),
-                    MyUploadButton(
+                  MyUploadButton(
                     onPressed: () async {
-                      final path = await FlutterDocumentPicker.openDocument(); // Open all files on the device
+                      final path = await FlutterDocumentPicker.openDocument();
                       if (path != null && path.isNotEmpty) {
                         print(path);
                         // Do not upload the file here; just update the _pdf controller
                         setState(() {
                           _pdf.text = path;
-                          String fileName = path.split('/').last; // Extract file name from path
-                          buttonText = fileName; // Change the button text to selected file name with extension
+                          String fileName = path.split('/').last;
+                          if (fileName.length > 30) {
+                            fileName = fileName.substring(0, 30) + '...pdf'; // Truncate the file name
+                          }
+                          buttonText = fileName;
                         });
                       } else {
                         Get.snackbar('Error', 'No file selected');
                       }
                     },
                     suffixIcon: Icon(Icons.upload, color: Color(0xFF955AF2)),
-                    buttonText: buttonText ?? 'Upload a pdf', // Display 'Upload a pdf' if buttonText is null
+                    buttonText: buttonText ?? 'Upload a pdf',
                   ),
+
                   SizedBox(height: 10),
                   Text(
                     'Your offer:',

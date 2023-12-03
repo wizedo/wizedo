@@ -52,7 +52,7 @@ class MyUploadButton extends StatelessWidget {
                       buttonText,
                       style: GoogleFonts.mPlusRounded1c(
                         textStyle: TextStyle(
-                          fontSize: 7,
+                          fontSize: 12,
                           fontWeight: fontWeight ?? FontWeight.normal,
                         ),
                       ),
