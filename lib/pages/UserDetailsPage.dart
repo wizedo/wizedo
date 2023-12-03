@@ -77,6 +77,18 @@ class _UserDetailsState extends State<UserDetails> {
   }
 
   @override
+  void dispose() {
+    // Dispose of your controllers to free up resources
+    _searchController.dispose();
+    _universityNameController.dispose();
+    unameController.dispose();
+    phonenoController.dispose();
+    userYearController.dispose();
+
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     Color backgroundColor = ColorUtil.hexToColor(hexColor);
     String email = widget.userEmail;

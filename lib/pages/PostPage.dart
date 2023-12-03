@@ -116,6 +116,19 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
   @override
+  void dispose() {
+    print("controllers diposed");
+    // Clean up controllers when the state is removed
+    _projectName.dispose();
+    _numberOfPages.dispose();
+    _descriptionText.dispose();
+    _pdf.dispose();
+    _datePicker.dispose();
+    _paymentDetails.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: backgroundColor,
@@ -352,25 +365,33 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   SizedBox(height: 10),
                   MyUploadButton(
                     onPressed: () async {
-                      final path = await FlutterDocumentPicker.openDocument();
-                      if (path != null && path.isNotEmpty) {
-                        print(path);
-                        // Do not upload the file here; just update the _pdf controller
-                        setState(() {
-                          _pdf.text = path;
-                          String fileName = path.split('/').last;
-                          if (fileName.length > 30) {
-                            fileName = fileName.substring(0, 30) + '...pdf'; // Truncate the file name
-                          }
-                          buttonText = fileName;
-                        });
-                      } else {
-                        Get.snackbar('Error', 'No file selected');
-                      }
+                    final path = await FlutterDocumentPicker.openDocument();
+                    if (path != null && path.isNotEmpty) {
+                    print(path);
+
+                    // Check if the selected file has a .pdf extension
+                    if (!path.toLowerCase().endsWith('.pdf')) {
+                    Get.snackbar('Error', 'Please select a PDF file only');
+                    return;
+                    }
+
+                    // Do not upload the file here; just update the _pdf controller
+                    setState(() {
+                    _pdf.text = path;
+                    String fileName = path.split('/').last;
+                    if (fileName.length > 30) {
+                    fileName = fileName.substring(0, 30) + '...pdf'; // Truncate the file name
+                    }
+                    buttonText = fileName;
+                    });
+                    } else {
+                    Get.snackbar('Error', 'No file selected');
+                    }
                     },
                     suffixIcon: Icon(Icons.upload, color: Color(0xFF955AF2)),
-                    buttonText: buttonText ?? 'Upload a pdf',
+                    buttonText: buttonText ?? 'Upload a PDF',
                   ),
+
 
                   SizedBox(height: 10),
                   Text(
