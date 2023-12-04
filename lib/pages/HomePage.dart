@@ -1,8 +1,10 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
+import 'package:get_time_ago/get_time_ago.dart';
 import 'package:wizedo/components/CustomRichText.dart';
 import 'package:wizedo/components/searchable_dropdown.dart';
 import 'package:wizedo/components/white_text.dart';
@@ -26,31 +28,6 @@ class _HomePageState extends State<HomePage> {
   TextEditingController emailController=TextEditingController();
 
   String _selectedCategory = 'College Project';
-  List<String> _technologyNews = ['Tech News 1', 'Tech News 2', 'Tech News 3'];
-  List<String> _politicsNews = [
-    'Politics News 1',
-    'Politics News 2',
-    'Politics News 3',
-    'Politics News 4',
-    'Politics News 5',
-    'Politics News 6',
-    'Politics News 7',
-    'Politics News 8',
-    'Politics News 9',
-    'Politics News 10',
-    'Politics News 11',
-    'Politics News 12',
-    'Politics News 13',
-    'Politics News 14',
-    'Politics News 15',
-    'Politics News 16',
-    'Politics News 17',
-    'Politics News 18',
-    'Politics News 19',
-    'Politics News 20',
-  ];
-
-  List<String> _scienceNews = ['Science News 1', 'Science News 2', 'Science News 3'];
 
   Future<void> _signOut(BuildContext context) async {
     try {
@@ -61,18 +38,23 @@ class _HomePageState extends State<HomePage> {
       Get.snackbar('Error', 'Error signing out: $error');
     }
   }
+  // Function to clean up the username
+  String cleanUpUserName(String email) {
+    // Extract the username part from the email (remove @gmail.com)
+    String userName = email.split('@')[0];
+
+    // Remove any special characters
+    userName = userName.replaceAll(RegExp(r'[^\w\s]'), '');
+
+    // Remove any numbers
+    userName = userName.replaceAll(RegExp(r'\d'), '');
+
+    return userName;
+  }
 
 
   @override
   Widget build(BuildContext context) {
-    List<String> selectedCategoryNews;
-    if (_selectedCategory == 'College Project') {
-      selectedCategoryNews = _technologyNews;
-    } else if (_selectedCategory == 'Personal Development') {
-      selectedCategoryNews = _politicsNews;
-    } else {
-      selectedCategoryNews = _scienceNews;
-    }
 
     return Scaffold(
       backgroundColor: Color(0xFF211B2E),
@@ -214,7 +196,7 @@ class _HomePageState extends State<HomePage> {
                             setState(() {
                               _selectedCategory = 'College Project';
                             });
-                            print('Technology Chip tapped!');
+                            print('College Chip tapped!');
                           },
                           width: 140,
                           height: 30,
@@ -226,23 +208,19 @@ class _HomePageState extends State<HomePage> {
                             setState(() {
                               _selectedCategory = 'Personal Development';
                             });
-                            Get.to(() => EmailVerificationScreen(
-                              userEmail: _auth.currentUser?.email ?? '',
-                            ));
-                            print('Politics Chip tapped!');
+                            print('Personal Chip tapped!');
                           },
                           width: 160,
                           height: 30,
                         ),
                         FilterChipWidget(
-                          label: 'Coding Club',
+                          label: 'Assignment',
                           selectedCategory: _selectedCategory,
                           onTap: () {
-                            _signOut(context);//remove this later
                             setState(() {
-                              _selectedCategory = 'Coding Club';
+                              _selectedCategory = 'Assignment';
                             });
-                            print('Politics Chip tapped!');
+                            print('Assignment Chip tapped!');
                           },
                           width: 120,
                           height: 30,
@@ -269,66 +247,48 @@ class _HomePageState extends State<HomePage> {
             ),
             Container(
               child: Expanded(
-                child: SingleChildScrollView(
-                  scrollDirection: Axis.vertical,
-                  child: Column(
-                    children: [
-                      JobCard(
-                        subject: 'Android Development',
-                        postedTime: '2 hours ago',
-                        description: 'Looking for an experienced Android developer for a mobile app project.',
-                        priceRange: 'Rs. 100 - 200',
-                        userName: 'naresh',
-                      ),
-                      JobCard(
-                        subject: 'iOS Development',
-                        postedTime: '3 hours ago',
-                        description: 'iOS developer needed for a new app development project  mobile app project ...',
-                        priceRange: 'Rs. 150 - 250',
-                        userName: 'Vishnu',
-                      ),
-                      JobCard(
-                        subject: 'iOS Development',
-                        postedTime: '3 hours ago',
-                        description: 'iOS developer needed for a new app development project.',
-                        priceRange: 'Rs. 150 - 250',
-                        userName: 'Avinash',
-                      ),
-                      JobCard(
-                        subject: 'iOS Development',
-                        postedTime: '3 hours ago',
-                        description: 'iOS developer needed for a new app development project.',
-                        priceRange: 'Rs. 150 - 250',
-                        userName: 'Vishnu',
-                      ),
-                      JobCard(
-                        subject: 'iOS Development',
-                        postedTime: '3 hours ago',
-                        description: 'iOS developer needed for a new app development project.',
-                        priceRange: 'Rs. 150 - 250',
-                        userName: 'Avinash',
-                      ),
-                      JobCard(
-                        subject: 'iOS Development',
-                        postedTime: '3 hours ago',
-                        description: 'iOS developer needed for a new app development project.',
-                        priceRange: 'Rs. 150 - 250',
-                        userName: 'Vishnu',
-                      ),
-                      JobCard(
-                        subject: 'iOS Development',
-                        postedTime: '3 hours ago',
-                        description: 'iOS developer needed for a new app development project.',
-                        priceRange: 'Rs. 150 - 250',
-                        userName: 'Avinash',
-                      ),
+                child: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+                  stream: FirebaseFirestore.instance.collection('posts')
+                      .where('category', isEqualTo: _selectedCategory)
+                      .snapshots(),
+                  builder: (context, AsyncSnapshot<QuerySnapshot<Map<String, dynamic>>> snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return Center(child: CircularProgressIndicator());
+                    } else if (snapshot.connectionState == ConnectionState.active) {
+                      if (snapshot.data!.docs.isNotEmpty) {
+                        return ListView.builder(
+                          itemCount: snapshot.data!.docs.length,
+                          itemBuilder: (BuildContext context, int index) {
+                            var data = snapshot.data!.docs[index].data() as Map<String, dynamic>;
+                            Timestamp date=snapshot.data!.docs[index]['createdAt'];
+                            var finalDate=DateTime.parse(date.toDate().toString());
 
-                    ],
-                  ),
+                            return JobCard(
+                              category: _selectedCategory,
+                              subject: data['subCategory'],
+                              date: data['createdAt'],//change here
+                              description: data['description'],
+                              priceRange: data['totalPayment'],
+                              userName: cleanUpUserName(data['emailid']),
+                              finalDate: finalDate, // Update this field accordingly
 
+
+                            );
+                          },
+                        );
+                      } else {
+                        return const Center(
+                          child: Text('No posts'),
+                        );
+                      }
+                    }
+                    return Center(
+                      child: Text('Something went wrong'),
+                    );
+                  },
                 ),
               ),
-            ),
+            )
 
             // Bottom banner ad
             // With this corrected code
@@ -349,6 +309,7 @@ class _HomePageState extends State<HomePage> {
             //     ),
             //   ),
             // ),
+
 
             // this the code to filter through chip
             // Expanded(

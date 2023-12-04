@@ -98,3 +98,24 @@
         //   loading.value = false;
         // }
       }
+
+
+                // Positioned(
+                //   bottom: 0,
+                //   left: 0,
+                //   right: 0,
+                //   child: Container(
+                //     width: MediaQuery.of(context).size.width,
+                //     height: 60,
+                //     decoration: BoxDecoration(
+                //       color: Colors.grey,
+                //       borderRadius: BorderRadius.circular(15),
+                //     ),
+                //     child: Center(
+                //       child: Text(
+                //         'Ad',
+                //         style: TextStyle(color: Colors.grey.shade50, fontSize: 12),
+                //       ),
+                //     ),
+                //   ),
+                // ),

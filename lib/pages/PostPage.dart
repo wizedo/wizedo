@@ -1,8 +1,14 @@
+import 'dart:io';
+import 'dart:math';
+
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_document_picker/flutter_document_picker.dart';
+import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'package:flutter/material.dart';
+import 'package:flutter_document_picker/flutter_document_picker.dart';
 import 'package:get/get.dart';
-import 'package:gradient_slide_to_act/gradient_slide_to_act.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:swipeable_button_view/swipeable_button_view.dart';
 import 'package:wizedo/Widgets/colors.dart';
@@ -11,10 +17,10 @@ import 'package:wizedo/components/YearPickerTextField.dart';
 import 'package:wizedo/components/datePickerTextField.dart';
 import 'package:wizedo/components/mPlusRoundedText.dart';
 import 'package:wizedo/components/my_text_field.dart';
-import 'package:wizedo/components/searchable_dropdown.dart';
-import 'package:wizedo/components/white_text.dart';
 
-import '../components/boxDecoration.dart';
+import '../components/MyUploadButton.dart';
+import '../components/my_elevatedbutton.dart';
+import '../components/my_post_text_field.dart';
 import '../components/my_textmultiline_field.dart';
 import 'BottomNavigation.dart';
 
@@ -29,7 +35,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
   bool isFinished = false;
   bool _sliderValue = false;
   final TextEditingController _projectName = TextEditingController();
+  final TextEditingController _numberOfPages = TextEditingController();
   final TextEditingController _descriptionText = TextEditingController();
+  final TextEditingController _pdf = TextEditingController();
   final TextEditingController _datePicker = TextEditingController();
   final TextEditingController _paymentDetails = TextEditingController();
   String? _selectedCategory; // Change the type to String?
@@ -37,6 +45,45 @@ class _RegisterScreenState extends State<RegisterScreen> {
   DateTime _selectedDate = DateTime.now();
   final _formKey = GlobalKey<FormState>();
   List<String> errors = [];
+  String? buttonText;
+
+  Future<firebase_storage.UploadTask?> uploadFile(File file, User? user) async {
+    if (file == null) {
+      Get.snackbar('Error', 'Unable to Upload');
+      print('No file was picked');
+      return null;
+    }
+
+    try {
+      firebase_storage.UploadTask uploadTask;
+
+      // Generate a unique filename using timestamp, random identifier, and user UID
+      String timestamp = DateTime.now().millisecondsSinceEpoch.toString();
+      String randomIdentifier = Random().nextInt(10000).toString();
+      String fileName = 'file_${user?.uid ?? 'unknown'}_$timestamp$randomIdentifier.pdf';
+
+      // Create a Reference to the file with the generated filename
+      firebase_storage.Reference ref = firebase_storage.FirebaseStorage.instance
+          .ref()
+          .child('Reference Files')
+          .child(fileName);
+
+      final metadata = firebase_storage.SettableMetadata(
+        contentType: 'file/pdf',
+        customMetadata: {'picked-file-path': file.path},
+      );
+
+      print("Uploading..!");
+      uploadTask = ref.putData(await file.readAsBytes(), metadata);
+      print("done..!");
+
+      return Future.value(uploadTask);
+    } catch (error) {
+      print('Error uploading file: $error');
+      Get.snackbar('Error', 'Failed to upload file');
+      return null;
+    }
+  }
 
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
@@ -66,6 +113,19 @@ class _RegisterScreenState extends State<RegisterScreen> {
         errors.remove(error);
       });
     }
+  }
+
+  @override
+  void dispose() {
+    print("controllers diposed");
+    // Clean up controllers when the state is removed
+    _projectName.dispose();
+    _numberOfPages.dispose();
+    _descriptionText.dispose();
+    _pdf.dispose();
+    _datePicker.dispose();
+    _paymentDetails.dispose();
+    super.dispose();
   }
 
   @override
@@ -101,7 +161,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   ),
                   SizedBox(height: 10),
                   Container(
-                    width: 310,
                     height: 51,
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(15),
@@ -141,9 +200,17 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         setState(() {
                           _selectedCategory = value;
                           _isNumberOfPagesVisible =
-                              _selectedCategory == 'Assignment' || _selectedCategory == 'College Project';
+                              _selectedCategory == 'Assignment';
                         });
                         print('Selected item: $value');
+                      },
+                      validator: (value) {
+                        if (value == null) {
+                          addError(error: 'Please select your category');
+                        } else {
+                          removeError(error: 'Please select your category');
+                        }
+                        return null;
                       },
                     ),
                   ),
@@ -156,7 +223,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   SizedBox(height: 10),
                   Container(
                     width: double.infinity,
-                    child: MyTextField(
+                    child: MyPostTextField(
                       controller: _projectName,
                       obscureText: false,
                       hint: 'Name',
@@ -204,7 +271,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       obscureText: false,
                       hint: 'Description (max 150 words)',
                       keyboardType: TextInputType.name,
-                      height: 120,
+                      height: 185,
                       width: 400,
                       fontSize: 12,
                       validator: (value) {
@@ -214,6 +281,31 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         } else {
                           removeError(error: 'Description is required');
                         }
+
+                        // Check for leading spaces
+                        if (value != null && value.startsWith(' ')) {
+                          addError(error: 'Leading spaces at the beginning are not allowed');
+                          return 'Leading spaces at the beginning are not allowed';
+                        } else {
+                          removeError(error: 'Leading spaces at the beginning are not allowed');
+                        }
+
+                        // Check for trailing spaces
+                        if (value != null && value.endsWith(' ')) {
+                          addError(error: 'Spaces at the end are not allowed');
+                          return 'Spaces at the end are not allowed';
+                        } else {
+                          removeError(error: 'Spaces at the end are not allowed');
+                        }
+
+                        // Check for consecutive spaces
+                        if (value != null && value.contains(RegExp(r'\s{2,}'))) {
+                          addError(error: 'Consecutive spaces are not allowed');
+                          return 'Consecutive spaces within the text are not allowed';
+                        } else {
+                          removeError(error: 'Consecutive spaces are not allowed');
+                        }
+
                         if (value != null && value.length < 100) {
                           addError(error: 'Description should be of at least 100 characters');
                           return 'Description should be of at least 100 characters';
@@ -226,30 +318,48 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         } else {
                           removeError(error: 'Maximum characters allowed is 250');
                         }
+
+                        // Rest of your validation logic...
+
                         return null;
                       },
-                    ),
+                    )
+
+
                   ),
+                  SizedBox(height: 10),
+
                   if (_isNumberOfPagesVisible)
                     Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        SizedBox(height: 10),
                         Text(
-                          'Total/Approx pages requiring assistance',
+                          'Total/Approx pages requiring assistance:',
                           style: mPlusRoundedText.copyWith(fontSize: 12),
                         ),
                         SizedBox(height: 10),
                         Container(
                           width: 400,
-                          child: MyTextField(
-                            controller: _descriptionText,
+                          child: MyPostTextField(
+                            controller: _numberOfPages,
                             obscureText: false,
                             hint: 'Number of pages',
-                            keyboardType: TextInputType.name,
+                            keyboardType: TextInputType.number,
+                            fontSize: 12,
                             suffixIcon: IconButton(
-                              icon: Icon(Icons.info, color: Colors.blue),
-                              onPressed: () {},
+                              icon: Icon(Icons.info,color: Colors.deepPurple,),
+                              onPressed: () {
+
+                              },
                             ),
+                            validator: (value){
+                              if (value == null || value.isEmpty) {
+                                addError(error: 'Number of pages is required');
+                                return 'Number of pages is required';
+                              } else {
+                                removeError(error: 'Number of pages is required');
+                              }
+                            },
                           ),
                         ),
                       ],
@@ -271,112 +381,176 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           hint: 'Select Date (yyyy-mm-dd)',
                           suffixIcon: Icon(
                             Icons.calendar_month,
-                            color: Colors.deepPurple,
+                            color: Color(0xFF955AF2),
                           ),
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                addError(error: 'Due date is required');
+                                return 'Due date is required';
+                              } else {
+                                removeError(error: 'Due date is required');
+                              }
+                              return null;
+                            },
                         )
                       ],
                     ),
                   ),
+                  //lib/images/pdf.png
                   SizedBox(height: 10),
                   Text(
                     'Upload a reference file: ',
                     style: mPlusRoundedText.copyWith(fontSize: 12),
                   ),
                   SizedBox(height: 10),
-                  Container(
-                    decoration: boxDecoration,
-                    padding: EdgeInsets.all(15),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Image.asset('lib/images/pdf.png', width: 30),
-                        SizedBox(width: 10),
-                        WhiteText('Upload a file',
-                            fontSize: 13, fontWeight: FontWeight.bold),
-                      ],
-                    ),
+                  MyUploadButton(
+                    onPressed: () async {
+                    final path = await FlutterDocumentPicker.openDocument();
+                    if (path != null && path.isNotEmpty) {
+                    print(path);
+
+                    // Check if the selected file has a .pdf extension
+                    if (!path.toLowerCase().endsWith('.pdf')) {
+                    Get.snackbar('Error', 'Please select a PDF file only');
+                    return;
+                    }
+
+                    // Do not upload the file here; just update the _pdf controller
+                    setState(() {
+                    _pdf.text = path;
+                    String fileName = path.split('/').last;
+                    if (fileName.length > 30) {
+                    fileName = fileName.substring(0, 30) + '...pdf'; // Truncate the file name
+                    }
+                    buttonText = fileName;
+                    });
+                    } else {
+                    Get.snackbar('Error', 'No file selected');
+                    }
+                    },
+                    suffixIcon: Icon(Icons.upload, color: Color(0xFF955AF2)),
+                    buttonText: buttonText ?? 'Upload a PDF',
                   ),
+
+
                   SizedBox(height: 10),
                   Text(
-                    'Total Pay:',
+                    'Your offer:',
                     style: mPlusRoundedText.copyWith(fontSize: 12),
                   ),
                   SizedBox(height: 10),
                   Container(
                     width: double.infinity,
-                    child: MyTextField(
+                    child: MyPostTextField(
+                      prefixIcon: Icon(Icons.currency_rupee_rounded, color: Colors.yellow),
                       fontSize: 12,
                       controller: _paymentDetails,
                       obscureText: false,
-                      hint: 'Enter Expected pay',
+                      hint: 'Amount you are ready to pay',
                       keyboardType: TextInputType.number,
-                      suffixIcon: Icon(Icons.attach_money, color: Colors.yellow),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          addError(error: 'Expected pay is required');
+                          return 'Expected pay is required';
+                        } else {
+                          removeError(error: 'Expected pay is required');
+                        }
+                        return null;
+                      },
                     ),
                   ),
-                  SizedBox(height: 20),
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 30),
-                    child: Container(
-                      width: double.infinity,
-                      height: 51,
-                      child: SwipeableButtonView(
-                        onFinish: () async {
-                          if(_formKey.currentState!.validate() && _validateInputs()){
-                            _formKey.currentState!.save();
-                            print("updated post detials");
-
-                          }
-                          await Navigator.push(
-                              context,
-                              PageTransition(
-                                  type: PageTransitionType.fade,
-                                  child: BottomNavigation()));
-
-                          setState(() {
-                            isFinished = false;
-                          });
-                        },
-                        isFinished: isFinished,
-                        onWaitingProcess: () {
-                          Future.delayed(Duration(seconds: 0), () {
-                            setState(() {
-                              isFinished = true;
-                            });
-                          });
-                        },
-                        activeColor: Color(0xFF955AF2),
-                        buttonWidget: Icon(Icons.arrow_forward_rounded, color: Colors.white),
-                        buttonText: 'Swipe to Join',
-                        borderRadius: 15,
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: 30),
+                  SizedBox(height: 10),
                 ],
 
               ),
             ),
           ),
-          // Positioned(
-          //   bottom: 0,
-          //   left: 0,
-          //   right: 0,
-          //   child: Container(
-          //     width: MediaQuery.of(context).size.width,
-          //     height: 60,
-          //     decoration: BoxDecoration(
-          //       color: Colors.grey,
-          //       borderRadius: BorderRadius.circular(15),
-          //     ),
-          //     child: Center(
-          //       child: Text(
-          //         'Ad',
-          //         style: TextStyle(color: Colors.grey.shade50, fontSize: 12),
-          //       ),
-          //     ),
-          //   ),
-          // ),
+
         ],
+      ),
+      bottomNavigationBar: Padding(
+        padding: const EdgeInsets.all(18.0),
+        child: MyElevatedButton(
+          onPressed: () async {
+            if (_formKey.currentState!.validate()) {
+              _formKey.currentState!.save();
+
+              bool isValid = _validateInputs();
+
+              if (isValid) {
+                try {
+                  final user = FirebaseAuth.instance.currentUser;
+                  if (user != null) {
+                    final firestore = FirebaseFirestore.instance;
+                    final email = user.email!;
+
+                    // Generate a unique postId
+                    String postId = firestore.collection('posts').doc().id;
+
+                    // Upload the file only if a file is selected
+                    firebase_storage.UploadTask? uploadTask;
+                    if (_pdf.text.isNotEmpty) {
+                      File file = File(_pdf.text);
+                      uploadTask = await uploadFile(file, user);
+                    }
+
+                    // Use a transaction for the Firestore write operations
+                    await firestore.runTransaction((transaction) async {
+                      // Retrieve the post reference
+                      final postRef = firestore.collection('posts').doc(postId);
+
+                      // Read the post to ensure its existence
+                      final postSnapshot = await transaction.get(postRef);
+                      if (postSnapshot.exists) {
+                        throw Exception('Post already exists'); // Or handle it appropriately
+                      }
+
+                      // Write the post data
+                      transaction.set(postRef, {
+                        'userId': user.uid,
+                        'emailid': email,
+                        'category': _selectedCategory,
+                        'subCategory': _projectName.text.isNotEmpty
+                            ? _projectName.text[0].toUpperCase() + _projectName.text.substring(1)
+                            : _projectName.text,
+                        'description': _descriptionText.text.isNotEmpty
+                            ? _descriptionText.text[0].toUpperCase() + _descriptionText.text.substring(1)
+                            : _descriptionText.text,
+                        'pages': _numberOfPages.text,
+                        'dueDate': DateFormat('yyyy-MM-dd').format(_selectedDate),
+                        // 'referencePDF': 'URL_TO_PDF', // Replace with the actual URL or path
+                        'totalPayment': int.tryParse(_paymentDetails.text) ?? 0,
+                        'status': 'Pending',
+                        'createdAt': FieldValue.serverTimestamp(),
+                      });
+                    });
+
+                    Get.snackbar('Success', 'Post created successfully');
+
+                    // Redirect to the desired screen, e.g., BottomNavigation
+                    await Navigator.push(
+                      context,
+                      PageTransition(
+                        type: PageTransitionType.fade,
+                        child: BottomNavigation(),
+                      ),
+                    );
+
+                    setState(() {
+                      isFinished = false;
+                    });
+                  }
+                } catch (error) {
+                  print('Error creating post: $error');
+                  Get.snackbar('Error', 'Failed to create post');
+                }
+              }
+            }
+          },
+          buttonText: 'Get Answers Now',
+          fontWeight: FontWeight.bold,
+        ),
+
       ),
     );
   }

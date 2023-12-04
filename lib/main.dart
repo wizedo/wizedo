@@ -9,10 +9,12 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wizedo/pages/BottomNavigation.dart';
 import 'package:wizedo/pages/LoginPage.dart';
 import 'package:wizedo/pages/UserDetailsPage.dart';
+import 'package:firebase_app_check/firebase_app_check.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
+  // await FirebaseAppCheck.instance.activate();
   runApp(const MyApp());
 }
 
