@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:get_time_ago/get_time_ago.dart';
+import 'package:liquid_pull_to_refresh/liquid_pull_to_refresh.dart';
 import 'package:wizedo/components/CustomRichText.dart';
 import 'package:wizedo/components/searchable_dropdown.dart';
 import 'package:wizedo/components/white_text.dart';
@@ -50,6 +51,10 @@ class _HomePageState extends State<HomePage> {
     userName = userName.replaceAll(RegExp(r'\d'), '');
 
     return userName;
+  }
+
+  Future<void> _handleRefresh() async{
+    return await Future.delayed(Duration(seconds: 1));
   }
 
 
@@ -186,7 +191,7 @@ class _HomePageState extends State<HomePage> {
                 SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
                   child: Padding(
-                    padding: const EdgeInsets.only(top: 5,left: 50),
+                    padding: const EdgeInsets.only(top: 5,left: 50, bottom: 8),
                     child: Row(
                       children: [
                         FilterChipWidget(
@@ -245,47 +250,61 @@ class _HomePageState extends State<HomePage> {
 
               ],
             ),
-            Container(
-              child: Expanded(
-                child: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-                  stream: FirebaseFirestore.instance.collection('posts')
-                      .where('category', isEqualTo: _selectedCategory)
-                      .snapshots(),
-                  builder: (context, AsyncSnapshot<QuerySnapshot<Map<String, dynamic>>> snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return Center(child: CircularProgressIndicator());
-                    } else if (snapshot.connectionState == ConnectionState.active) {
-                      if (snapshot.data!.docs.isNotEmpty) {
-                        return ListView.builder(
-                          itemCount: snapshot.data!.docs.length,
-                          itemBuilder: (BuildContext context, int index) {
-                            var data = snapshot.data!.docs[index].data() as Map<String, dynamic>;
-                            Timestamp date=snapshot.data!.docs[index]['createdAt'];
-                            var finalDate=DateTime.parse(date.toDate().toString());
+            // onRefresh: _handleRefresh,
+            // color: Colors.deepPurple,
+            // height: 300,
+            // backgroundColor: Colors.deepPurple[200],
+            // animSpeedFactor: 2,
+            // showChildOpacityTransition: true,
+            LiquidPullToRefresh(
+              onRefresh: _handleRefresh,
+              color: Color(0xFF955AF2),
+              height: 70,
+              backgroundColor:  Colors.white,
+              animSpeedFactor: 2,
+              showChildOpacityTransition: true,
+              child: Container(
+                child: Expanded(
+                  child: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+                    stream: FirebaseFirestore.instance.collection('posts')
+                        .where('category', isEqualTo: _selectedCategory)
+                        .snapshots(),
+                    builder: (context, AsyncSnapshot<QuerySnapshot<Map<String, dynamic>>> snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return Center(child: CircularProgressIndicator());
+                      } else if (snapshot.connectionState == ConnectionState.active) {
+                        if (snapshot.data!.docs.isNotEmpty) {
+                          return ListView.builder(
+                            itemCount: snapshot.data!.docs.length,
+                            itemBuilder: (BuildContext context, int index) {
+                              var data = snapshot.data!.docs[index].data() as Map<String, dynamic>;
+                              Timestamp date=snapshot.data!.docs[index]['createdAt'];
+                              var finalDate=DateTime.parse(date.toDate().toString());
 
-                            return JobCard(
-                              category: _selectedCategory,
-                              subject: data['subCategory'],
-                              date: data['createdAt'],//change here
-                              description: data['description'],
-                              priceRange: data['totalPayment'],
-                              userName: cleanUpUserName(data['emailid']),
-                              finalDate: finalDate, // Update this field accordingly
+                              return JobCard(
+                                category: _selectedCategory,
+                                subject: data['subCategory'],
+                                date: data['createdAt'],//change here
+                                description: data['description'],
+                                priceRange: data['totalPayment'],
+                                userName: cleanUpUserName(data['emailid']),
+                                finalDate: finalDate, // Update this field accordingly
 
 
-                            );
-                          },
-                        );
-                      } else {
-                        return const Center(
-                          child: Text('No posts'),
-                        );
+                              );
+                            },
+                          );
+                        } else {
+                          return const Center(
+                            child: Text('No posts'),
+                          );
+                        }
                       }
-                    }
-                    return Center(
-                      child: Text('Something went wrong'),
-                    );
-                  },
+                      return Center(
+                        child: Text('Something went wrong'),
+                      );
+                    },
+                  ),
                 ),
               ),
             )

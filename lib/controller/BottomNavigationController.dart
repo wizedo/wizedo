@@ -15,8 +15,8 @@ class BottomNavigationController extends GetxController {
 
   var pages=[
     HomePage(),
-    RegisterScreen(),
     DetailsScreen(),
+    ChatHomePage(),
     settingScreen(),
   ];
 }
