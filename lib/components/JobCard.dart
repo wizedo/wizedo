@@ -1,18 +1,25 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:get_time_ago/get_time_ago.dart';
+import 'package:intl/intl.dart';
 
 class JobCard extends StatefulWidget {
+  final String category;
   final String subject;
-  final String postedTime;
+  final Timestamp  date;
   final String description;
-  final String priceRange;
+  final int priceRange; // Change to int
   final String userName;
+  final DateTime finalDate; // Add this line
 
   JobCard({
+    required this.category,
     required this.subject,
-    required this.postedTime,
+    required this.date,
     required this.description,
     required this.priceRange,
     required this.userName,
+    required this.finalDate, // Add this line
   });
 
   @override
@@ -22,8 +29,13 @@ class JobCard extends StatefulWidget {
 class _JobCardState extends State<JobCard> {
   bool isBookmarked = false;
 
+  String getTimeAgo(DateTime dateTime) {
+    return GetTimeAgo.parse(dateTime); // Assuming GetTimeAgo can parse DateTime objects
+  }
+
   @override
   Widget build(BuildContext context) {
+
     return Container(
       width: 370,
       height: 150,
@@ -43,7 +55,7 @@ class _JobCardState extends State<JobCard> {
                   begin: Alignment.centerLeft,
                   end: Alignment.centerRight,
                   colors: [Colors.transparent, Color(0xFF14141E)],
-                  stops: [0.1,1],
+                  stops: [0.1, 1],
                 ),
               ),
               child: Padding(
@@ -52,16 +64,20 @@ class _JobCardState extends State<JobCard> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      widget.subject,
+                      '${widget.subject}',
                       style: TextStyle(fontSize: 12.0, fontWeight: FontWeight.bold, color: Colors.white),
                     ),
+                    //date
                     Text(
-                      'Posted ${widget.postedTime}',
+                      '${getTimeAgo(widget.finalDate)}',
                       style: TextStyle(color: Colors.grey, fontSize: 8.0),
                     ),
+
                     SizedBox(height: 8.0),
                     Text(
-                      widget.description,
+                      widget.description.length > 100
+                          ? '${widget.description.substring(0, 100)}...' // Display only first 70 characters
+                          : widget.description,
                       style: TextStyle(fontSize: 10.0, color: Colors.white),
                     ),
                     SizedBox(height: 12.0),
@@ -69,7 +85,7 @@ class _JobCardState extends State<JobCard> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          'Price: ${widget.priceRange}',
+                          'Price: ${widget.priceRange}', // Assuming price is in dollars
                           style: TextStyle(fontSize: 10.0, fontWeight: FontWeight.bold, color: Colors.white),
                         ),
                         Text(
@@ -84,8 +100,8 @@ class _JobCardState extends State<JobCard> {
             ),
           ),
           Positioned(
-            right: -10, // Adjust the position to overlap half inside and half outside the card
-            top: -10, // Adjust the position to overlap half inside and half outside the card
+            right: -10,
+            top: -10,
             child: Padding(
               padding: const EdgeInsets.only(right: 25),
               child: IconButton(
@@ -105,4 +121,8 @@ class _JobCardState extends State<JobCard> {
       ),
     );
   }
+
+
+
+
 }

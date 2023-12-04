@@ -360,6 +360,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.6.6"
+  get_time_ago:
+    dependency: "direct main"
+    description:
+      name: get_time_ago
+      sha256: "114b4ac06c2a2b8dc9ba091f6c46d76587e0be6a29a5ba2e343f243403ee9b15"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.2.5"
   glob:
     dependency: transitive
     description:

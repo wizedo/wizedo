@@ -281,6 +281,31 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         } else {
                           removeError(error: 'Description is required');
                         }
+
+                        // Check for leading spaces
+                        if (value != null && value.startsWith(' ')) {
+                          addError(error: 'Leading spaces at the beginning are not allowed');
+                          return 'Leading spaces at the beginning are not allowed';
+                        } else {
+                          removeError(error: 'Leading spaces at the beginning are not allowed');
+                        }
+
+                        // Check for trailing spaces
+                        if (value != null && value.endsWith(' ')) {
+                          addError(error: 'Spaces at the end are not allowed');
+                          return 'Spaces at the end are not allowed';
+                        } else {
+                          removeError(error: 'Spaces at the end are not allowed');
+                        }
+
+                        // Check for consecutive spaces
+                        if (value != null && value.contains(RegExp(r'\s{2,}'))) {
+                          addError(error: 'Consecutive spaces are not allowed');
+                          return 'Consecutive spaces within the text are not allowed';
+                        } else {
+                          removeError(error: 'Consecutive spaces are not allowed');
+                        }
+
                         if (value != null && value.length < 100) {
                           addError(error: 'Description should be of at least 100 characters');
                           return 'Description should be of at least 100 characters';
@@ -293,9 +318,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         } else {
                           removeError(error: 'Maximum characters allowed is 250');
                         }
+
+                        // Rest of your validation logic...
+
                         return null;
                       },
-                    ),
+                    )
+
+
                   ),
                   SizedBox(height: 10),
 
@@ -318,8 +348,18 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             fontSize: 12,
                             suffixIcon: IconButton(
                               icon: Icon(Icons.info,color: Colors.deepPurple,),
-                              onPressed: () {},
+                              onPressed: () {
+
+                              },
                             ),
+                            validator: (value){
+                              if (value == null || value.isEmpty) {
+                                addError(error: 'Number of pages is required');
+                                return 'Number of pages is required';
+                              } else {
+                                removeError(error: 'Number of pages is required');
+                              }
+                            },
                           ),
                         ),
                       ],
@@ -470,13 +510,18 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         'userId': user.uid,
                         'emailid': email,
                         'category': _selectedCategory,
-                        'subCategory': _projectName.text,
-                        'description': _descriptionText.text,
+                        'subCategory': _projectName.text.isNotEmpty
+                            ? _projectName.text[0].toUpperCase() + _projectName.text.substring(1)
+                            : _projectName.text,
+                        'description': _descriptionText.text.isNotEmpty
+                            ? _descriptionText.text[0].toUpperCase() + _descriptionText.text.substring(1)
+                            : _descriptionText.text,
                         'pages': _numberOfPages.text,
                         'dueDate': DateFormat('yyyy-MM-dd').format(_selectedDate),
                         // 'referencePDF': 'URL_TO_PDF', // Replace with the actual URL or path
                         'totalPayment': int.tryParse(_paymentDetails.text) ?? 0,
                         'status': 'Pending',
+                        'createdAt': FieldValue.serverTimestamp(),
                       });
                     });
 
