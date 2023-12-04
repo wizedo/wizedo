@@ -58,6 +58,7 @@ dependencies:
   flutter_document_picker: ^5.2.3
   firebase_app_check: ^0.2.1+6
   get_time_ago: ^1.2.5
+  dotted_border: ^2.1.0
 
 
 dev_dependencies:
