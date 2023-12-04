@@ -6,7 +6,9 @@ import 'package:get/get_core/src/get_main.dart';
 import 'package:wizedo/components/boxDecoration.dart';
 import 'package:wizedo/components/cardContainerSettings.dart';
 import 'package:wizedo/components/mPlusRoundedText.dart';
+import 'package:wizedo/pages/privacyPolicy.dart';
 import 'package:wizedo/pages/profilepage.dart';
+import 'package:wizedo/pages/terms&cond.dart';
 
 import '../Widgets/colors.dart';
 import '../components/gradientBoxDecoration.dart';
@@ -215,7 +217,14 @@ class settingScreen extends StatelessWidget {
                     Container(
                       padding: EdgeInsets.all(10),
                       child: TextButton.icon(
-                        onPressed: () {},
+                        onPressed: () {
+                          // Navigate to the Terms and Conditions page
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (context) => PrivacyPolicyPage(),
+                            ),
+                          );
+                        },
                         icon: Icon(Icons.privacy_tip_sharp, color: Colors.white),
                         label: Text('Privacy Policy', style: TextStyle(color: Colors.white)),
                         style: ButtonStyle(
@@ -228,7 +237,14 @@ class settingScreen extends StatelessWidget {
                     Container(
                       padding: EdgeInsets.all(10),
                       child: TextButton.icon(
-                        onPressed: () {},
+                        onPressed: () {
+                          // Navigate to the Terms and Conditions page
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (context) => TermsConditionsPage(),
+                            ),
+                          );
+                        },
                         icon: Icon(Icons.label_important, color: Colors.white),
                         label: Text('Terms and Conditions', style: TextStyle(color: Colors.white)),
                         style: ButtonStyle(
