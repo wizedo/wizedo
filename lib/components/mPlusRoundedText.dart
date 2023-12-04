@@ -6,3 +6,8 @@ TextStyle mPlusRoundedText = GoogleFonts.mPlusRounded1c(
   color: Colors.white,
   fontSize: 23,
 );
+
+TextStyle rubicMicrobe=GoogleFonts.rubikMicrobe(
+  color: Colors.white,
+  fontSize: 23,
+);

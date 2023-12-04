@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wizedo/components/colors/sixty.dart';
 import '../components/my_elevatedbutton.dart';
@@ -64,12 +65,44 @@ class _LoginPageState extends State<LoginPage> {
 
       // Handle the specific FirebaseAuthException
       if (error is FirebaseAuthException && error.code == 'account-exists-with-different-credential') {
-        // Display a Snackbar with a brief description
         Get.snackbar('Error', 'Account exists with a different credential.');
       }
     }
   }
+  Future<void> signInWithGoogle(BuildContext context) async {
+    try {
+      GoogleSignInAccount? googleSignInAccount = await _authService.signInWithGoogle();
+      print('gmail signin');
+      if (googleSignInAccount != null) {
+        print('user is signed through gmail ');
+        String userEmail = googleSignInAccount.email ?? '';
 
+        print('User signed in with Google. Email: $userEmail');
+
+        DocumentSnapshot userDocSnapshot = await _firestore.collection('usersDetails').doc(userEmail).get();
+
+        if (!userDocSnapshot.exists) {
+          await _firestore.collection('usersDetails').doc(userEmail).set({
+            'id': userEmail,
+            'userDetailsfilled': false,
+          });
+          print('User document created for $userEmail');
+        }
+
+        bool userDetailsfilled = await getUserDetailsFilled(userEmail);
+
+        if (userDetailsfilled == true) {
+          Get.offAll(() => BottomNavigation());
+        } else {
+          Get.to(() => UserDetails(userEmail: userEmail));
+        }
+      } else {
+        Get.snackbar('Error', 'Failed to sign in with Google.');
+      }
+    } catch (error) {
+      Get.snackbar('Error', 'Error signing in with Google: $error');
+    }
+  }
 
   String _handleFirebaseError(dynamic error) {
     if (error is FirebaseAuthException) {
@@ -275,18 +308,17 @@ class _LoginPageState extends State<LoginPage> {
                       ],
                     ),
                     SizedBox(height: 25),
-                    GestureDetector(
-                      onTap: () {
-                        // Uncomment the following line when the Google sign-in functionality is implemented.
-                        // signInWithGoogle(context);
-                        Get.snackbar('Message', 'Under Maintenance');
-                      },
-                      child: Image.asset(
-                        'lib/images/google.png',
-                        width: 45,
-                        height: 45,
-                      ),
+                  GestureDetector(
+                    onTap: () {
+                      signInWithGoogle(context);
+                    },
+                    child: Image.asset(
+                      'lib/images/google.png',
+                      width: 45,
+                      height: 45,
                     ),
+                  ),
+
                     SizedBox(height: 15),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
