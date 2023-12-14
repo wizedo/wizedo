@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
 import 'package:wizedo/components/boxDecoration.dart';
 import 'package:wizedo/components/cardContainerSettings.dart';
 import 'package:wizedo/components/mPlusRoundedText.dart';
@@ -10,8 +12,10 @@ import 'package:wizedo/pages/terms&cond.dart';
 
 import '../Widgets/colors.dart';
 import '../components/gradientBoxDecoration.dart';
+import 'LoginPage.dart';
 
 class settingScreen extends StatelessWidget {
+  final FirebaseAuth _auth = FirebaseAuth.instance;
   final CollectionReference fireStore;
 
   settingScreen({Key? key})
@@ -21,6 +25,16 @@ class settingScreen extends StatelessWidget {
   call(){
     print(fireStore.id);
     print(user?.email);
+  }
+
+  Future<void> _signOut(BuildContext context) async {
+    try {
+      await _auth.signOut();
+      Get.snackbar('Success', 'Sign out successful');
+      Get.to(LoginPage());
+    } catch (error) {
+      Get.snackbar('Error', 'Error signing out: $error');
+    }
   }
 
   Future<void> getData(BuildContext context) async {
@@ -244,7 +258,7 @@ class settingScreen extends StatelessWidget {
                       padding: EdgeInsets.all(10),
                       child: TextButton.icon(
                         onPressed: () {
-                          FirebaseAuth.instance.signOut();
+                          _signOut(context);
                         },
                         icon: Icon(Icons.logout, color: Colors.white),
                         label: Text('Log-Out', style: TextStyle(color: Colors.white)),

@@ -5,6 +5,7 @@ import 'package:get/get_core/src/get_main.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import '../../Widgets/colors.dart';
 import '../../components/my_text_field.dart';
 import 'chatcontroller.dart';
 import 'chatservice.dart';
@@ -81,59 +82,51 @@ class _ChatPageState extends State<ChatPage> {
   Widget build(BuildContext context) {
     // Set the system overlay style
     // Set the system overlay style for status and navigation bars
-    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
-      statusBarColor: Color(0xFF21215E).withOpacity(0.5), // Set the status bar color
-      statusBarIconBrightness: Brightness.light, // Set the status bar icons color
-      systemNavigationBarColor: Color(0xFF21215E).withOpacity(0.7), // Set the navigation bar color
-      systemNavigationBarDividerColor: Colors.transparent, // Set the navigation bar divider color
-    ));
     String receiverDisplayName = widget.receiveruserEmail.split('@').first;
-    return SafeArea(
-      child: Scaffold(
-        appBar: AppBar(
-          title: Center(
-            child: Text(receiverDisplayName,style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold,fontSize: 16),
-            ),
+    return Scaffold(
+      appBar: AppBar(
+        title: Center(
+          child: Text(receiverDisplayName,style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold,fontSize: 16),
           ),
-          backgroundColor: Color(0xFF21215E).withOpacity(0.7),
-          automaticallyImplyLeading: false,
-          actions: [
-            IconButton(
-              icon: Icon(Icons.delete_rounded,size: 16,),
-              onPressed: () {
-                Get.snackbar(
-                  '', // Empty title for a transparent style
-                  'Are you sure you want to delete this chat??',
-                  snackPosition: SnackPosition.TOP,
-                  duration: Duration(seconds: 6),
-                  margin: EdgeInsets.only(top: 50,left: 10,right: 10),
-                  backgroundColor: Colors.transparent,
-                  borderRadius: 20,
-                  mainButton: TextButton(
-                    onPressed: () {
-                      _chatController.deleteChat(widget.receiverUserID); // Pass the chatId
-                      Get.back(); // Close the snackbar
-                    },
-                    child: Text(
-                      'Yes',
-                      style: TextStyle(color: Color(0xFF21215E)), // Change button text color
-                    ),
-                  ),
-                );
-              },
-            ),
-          ],
         ),
-        body: Container(
-          child: Column(
-            children: [
-              Expanded(child: _buildMessageList()),
-
-              //User Input
-              _buildMessageInput(),
-              const SizedBox(height: 25,)
-            ],
+        backgroundColor: backgroundColor,
+        automaticallyImplyLeading: false,
+        actions: [
+          IconButton(
+            icon: Icon(Icons.delete_rounded,size: 16,),
+            onPressed: () {
+              Get.snackbar(
+                '', // Empty title for a transparent style
+                'Are you sure you want to delete this chat??',
+                snackPosition: SnackPosition.TOP,
+                duration: Duration(seconds: 6),
+                margin: EdgeInsets.only(top: 50,left: 10,right: 10),
+                backgroundColor: Colors.transparent,
+                borderRadius: 20,
+                mainButton: TextButton(
+                  onPressed: () {
+                    _chatController.deleteChat(widget.receiverUserID); // Pass the chatId
+                    Get.back(); // Close the snackbar
+                  },
+                  child: Text(
+                    'Yes',
+                    style: TextStyle(color: Color(0xFF21215E)), // Change button text color
+                  ),
+                ),
+              );
+            },
           ),
+        ],
+      ),
+      body: Container(
+        child: Column(
+          children: [
+            Expanded(child: _buildMessageList()),
+
+            //User Input
+            _buildMessageInput(),
+            const SizedBox(height: 25,)
+          ],
         ),
       ),
     );

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import '../Widgets/colors.dart';
 import '../services/chatservices/chatpage.dart';
 import '../services/chatservices/chatservice.dart';
 import 'LoginPage.dart';
@@ -31,43 +32,39 @@ class _ChatHomePageState extends State<ChatHomePage> {
 
     @override
     Widget build(BuildContext context) {
-        SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
-                statusBarColor: Color(0xFF21215E).withOpacity(0.5), // Set the status bar color
-                statusBarIconBrightness: Brightness.light, // Set the status bar icons color
-                systemNavigationBarColor: Color(0xFF21215E).withOpacity(0.7), // Set the navigation bar color
-                systemNavigationBarDividerColor: Colors.transparent, // Set the navigation bar divider color
-    ));
+    //     SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+    //             statusBarColor: Color(0xFF21215E).withOpacity(0.5), // Set the status bar color
+    //             statusBarIconBrightness: Brightness.light, // Set the status bar icons color
+    //             systemNavigationBarColor: Color(0xFF21215E).withOpacity(0.7), // Set the navigation bar color
+    //             systemNavigationBarDividerColor: Colors.transparent, // Set the navigation bar divider color
+    // ));
         return WillPopScope(
                 onWillPop: () async {
             // Override the back button behavior to prevent going back to LoginPage.
             Get.offAll(ChatHomePage());
             return false; // Return false to prevent default back navigation.
         },
-        child: SafeArea(
-                child: Scaffold(
-                backgroundColor: Colors.grey[20],
-                appBar: AppBar(
-                title: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Center(
-                child: Text(
-                'Message',
-                style: TextStyle(
-                color: Colors.white, fontWeight: FontWeight.bold, fontSize: 17),
-                ),
-              ),
-            ),
-        backgroundColor: Color(0xFF21215E).withOpacity(0.7),
-                actions: [
-        IconButton(
-                icon: Icon(Icons.logout),
-                onPressed: _signOut,
-              ),
-            ],
+        child: Scaffold(
+        backgroundColor: Colors.grey[20],
+        appBar: AppBar(
+                  title: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Center(
+                  child: Text(
+                  'Message',
+                  style: TextStyle(
+                  color: Colors.white, fontWeight: FontWeight.bold, fontSize: 17),
+                  ),),),
+                  backgroundColor: backgroundColor,
+                  actions: [
+                  // IconButton(
+                  // icon: Icon(Icons.logout),
+                  // onPressed: _signOut,
+                  //       ),
+                      ],
           ),
         body: _buildUserList(),
         ),
-      ),
     );
     }
 
@@ -108,7 +105,7 @@ class _ChatHomePageState extends State<ChatHomePage> {
                     ),
             child: ListTile(
                     dense: true,
-                    title: Text(displayName,style: TextStyle(fontSize: 15,color: Color(0xFF21215E).withOpacity(0.7)),),
+                    title: Text(displayName,style: TextStyle(fontSize: 15,color: backgroundColor),),
             subtitle: Text(latestMessages[userData['uid']] ?? ''),
                     ),
                   ),
