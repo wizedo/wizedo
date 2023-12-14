@@ -5,6 +5,7 @@ import 'package:wizedo/pages/LoginPage.dart';
 import 'package:wizedo/pages/PostPage.dart';
 import 'package:wizedo/pages/RegisterPage.dart';
 import 'package:wizedo/pages/UserDetailsPage.dart';
+import 'package:wizedo/pages/acceptedJobs.dart';
 import 'package:wizedo/pages/settings.dart';
 
 import '../pages/ChatHomePage.dart';
@@ -15,7 +16,7 @@ class BottomNavigationController extends GetxController {
 
   var pages=[
     HomePage(),
-    // DetailsScreen(category: '', subject: '', description: '', priceRange: 01, userName: '', finalDate: ''),
+    acceptedJobs(),
     ChatHomePage(),
     settingScreen(),
   ];
