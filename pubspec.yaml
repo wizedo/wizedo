@@ -59,6 +59,7 @@ dependencies:
   firebase_app_check: ^0.2.1+6
   get_time_ago: ^1.2.5
   dotted_border: ^2.1.0
+  liquid_pull_to_refresh: ^3.0.1
 
 
 dev_dependencies:

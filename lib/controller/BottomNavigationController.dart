@@ -15,7 +15,7 @@ class BottomNavigationController extends GetxController {
 
   var pages=[
     HomePage(),
-    DetailsScreen(),
+    // DetailsScreen(category: '', subject: '', description: '', priceRange: 01, userName: '', finalDate: ''),
     ChatHomePage(),
     settingScreen(),
   ];
