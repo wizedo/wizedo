@@ -14,6 +14,7 @@ import '../components/JobCard.dart';
 import '../controller/BottomNavigationController.dart';
 import '../services/email_verification_page.dart';
 import 'LoginPage.dart';
+import 'detailsPage.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key});
@@ -263,16 +264,34 @@ class _HomePageState extends State<HomePage> {
                             Timestamp date=snapshot.data!.docs[index]['createdAt'];
                             var finalDate=DateTime.parse(date.toDate().toString());
 
-                            return JobCard(
-                              category: _selectedCategory,
-                              subject: data['subCategory'],
-                              date: data['createdAt'],//change here
-                              description: data['description'],
-                              priceRange: data['totalPayment'],
-                              userName: cleanUpUserName(data['emailid']),
-                              finalDate: finalDate, // Update this field accordingly
+                            return GestureDetector(
+                              onTap: () {
+                                print(data);
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => DetailsScreen(
+                                      category: data['category'],
+                                      subject: data['subCategory'],
+                                      date: data['createdAt'],
+                                      description: data['description'],
+                                      priceRange: data['totalPayment'],
+                                      userName: cleanUpUserName(data['emailid']),
+                                      finalDate: data['dueDate'],
+                                    ),
+                                  ),
+                                );
+                              },
 
-
+                              child: JobCard(
+                                category: _selectedCategory,
+                                subject: data['subCategory'],
+                                date: data['createdAt'],
+                                description: data['description'],
+                                priceRange: data['totalPayment'],
+                                userName: cleanUpUserName(data['emailid']),
+                                finalDate: finalDate,
+                              ),
                             );
                           },
                         );

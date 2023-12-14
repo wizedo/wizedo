@@ -1,18 +1,31 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:wizedo/Widgets/colors.dart';
-import 'package:intl/intl.dart';
-import 'package:wizedo/components/YearPickerTextField.dart';
-import 'package:wizedo/components/white_text.dart';
 import 'package:wizedo/pages/PostPage.dart';
 import '../components/boxDecoration.dart';
-import '../components/datePickerTextField.dart';
 import '../components/mPlusRoundedText.dart';
-import '../components/my_text_field.dart';
-import '../components/searchable_dropdown.dart';
 
 class DetailsScreen extends StatefulWidget {
-  const DetailsScreen({Key? key}) : super(key: key);
+  final String category;
+  final String subject;
+  final Timestamp date;
+  final String description;
+  final int priceRange;
+  final String userName;
+  final String finalDate;
+
+  const DetailsScreen({
+    Key? key,
+    required this.category,
+    required this.subject,
+    required this.date,
+    required this.description,
+    required this.priceRange,
+    required this.userName,
+    required this.finalDate,
+  }) : super(key: key);
+
 
   @override
   State<DetailsScreen> createState() => _DetailsScreenState();
@@ -77,7 +90,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
                       Align(
                         alignment: Alignment.center,
                         child: Text(
-                          'Graphic Designing',
+                          widget.category,
                           style: mPlusRoundedText,
                         ),
                       ),
@@ -90,7 +103,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
                       Align(
                         alignment: Alignment.center,
                         child: Text(
-                          'Due Date : Jun 20 2023',
+                          'Due Date : ${widget.finalDate}',
                           style: mPlusRoundedText.copyWith(fontSize: 15),
                         ),
                       ),
@@ -132,7 +145,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
                       size: 35,
                     ),
                     Text(
-                      '400',
+                      widget.priceRange.toString(),
                       style: mPlusRoundedText.copyWith(fontSize: 25),
                     ),
                   ],
@@ -152,7 +165,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
             Align(
               alignment: Alignment.centerLeft,
               child: Text(
-                'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. por commodo. Massa vitae tortor condimentum lacinia quis. Diam phasellus vestibulum lorem sed risus ultricies tristique nulla aliquet. Elementum facilisis leo vel fringilla. Neque volutpat ac tincidunt vitae semper quis lectus nulla. Tincidunt praesent semper feugiat nibh sed pulvinar. Proin sed libero enim sed faucibus turpis in. Convallis posuere morbi leo urna molestie at elementum eu facilisis.',
+                widget.description,
                 style: mPlusRoundedText.copyWith(fontSize: 13),
                 textAlign: TextAlign.justify,
               ),
