@@ -90,6 +90,7 @@ class _LoginPageState extends State<LoginPage> {
         }
 
         bool userDetailsfilled = await getUserDetailsFilled(userEmail);
+        print(userDetailsfilled);
 
         if (userDetailsfilled == true) {
           Get.offAll(() => BottomNavigation());

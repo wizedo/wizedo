@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:get_time_ago/get_time_ago.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wizedo/components/CustomRichText.dart';
 import 'package:wizedo/components/searchable_dropdown.dart';
 import 'package:wizedo/components/white_text.dart';
@@ -29,6 +30,7 @@ class _HomePageState extends State<HomePage> {
   TextEditingController emailController=TextEditingController();
 
   String _selectedCategory = 'College Project';
+  String userCollegee = 'null';
 
   Future<void> _signOut(BuildContext context) async {
     try {
@@ -37,6 +39,16 @@ class _HomePageState extends State<HomePage> {
       Get.offAll(() => LoginPage());
     } catch (error) {
       Get.snackbar('Error', 'Error signing out: $error');
+    }
+  }
+
+  Future<String?> getSelectedCollegeLocally() async {
+    try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      return prefs.getString('selectedCollege');
+    } catch (error) {
+      print('Error getting selected college locally: $error');
+      return null;
     }
   }
   // Function to clean up the username
@@ -53,6 +65,20 @@ class _HomePageState extends State<HomePage> {
     return userName;
   }
 
+  Future<void> getUserCollege() async {
+    String? userCollege = await getSelectedCollegeLocally();
+    setState(() {
+      userCollegee = userCollege ?? 'null set manually2';
+      print('User College: $userCollegee'); // Print the user's college name
+    });
+  }
+
+
+  @override
+  void initState() {
+    super.initState();
+    getUserCollege();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -249,8 +275,12 @@ class _HomePageState extends State<HomePage> {
             Container(
               child: Expanded(
                 child: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-                  stream: FirebaseFirestore.instance.collection('posts')
+                  stream: FirebaseFirestore.instance
+                      .collection('colleges')
+                      .doc(userCollegee) // Replace with the actual document ID or field name
+                      .collection('collegePosts')
                       .where('category', isEqualTo: _selectedCategory)
+                      .where('college')
                       .snapshots(),
                   builder: (context, AsyncSnapshot<QuerySnapshot<Map<String, dynamic>>> snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
@@ -261,8 +291,8 @@ class _HomePageState extends State<HomePage> {
                           itemCount: snapshot.data!.docs.length,
                           itemBuilder: (BuildContext context, int index) {
                             var data = snapshot.data!.docs[index].data() as Map<String, dynamic>;
-                            Timestamp date=snapshot.data!.docs[index]['createdAt'];
-                            var finalDate=DateTime.parse(date.toDate().toString());
+                            Timestamp date = snapshot.data!.docs[index]['createdAt'];
+                            var finalDate = DateTime.parse(date.toDate().toString());
 
                             return GestureDetector(
                               onTap: () {
@@ -283,7 +313,6 @@ class _HomePageState extends State<HomePage> {
                                   ),
                                 );
                               },
-
                               child: JobCard(
                                 category: _selectedCategory,
                                 subject: data['subCategory'],
@@ -309,6 +338,7 @@ class _HomePageState extends State<HomePage> {
                 ),
               ),
             )
+
 
             // Bottom banner ad
             // With this corrected code

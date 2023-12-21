@@ -535,8 +535,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     // Generate a unique postId using date, time, and user email
                     String postId = '${DateTime.now().millisecondsSinceEpoch}_${user.email.hashCode}';
 
-                    // Upload the file only if a file is selected
+                    if (userCollege == null) {
+                      final userDoc = await firestore.collection('usersDetails').doc(email).get();
+                      if (userDoc.exists) {
+                        userCollegee = userDoc['college'] ?? 'Unknown College';
+                        print('User college from Firestore: $userCollegee');
+                      }
+                    }
+
                     firebase_storage.UploadTask? uploadTask;
+
                     if (_pdf.text.isNotEmpty) {
                       File file = File(_pdf.text);
                       uploadTask = await uploadFile(file, user);
@@ -548,17 +556,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
                     // Use a transaction for the Firestore write operations
                     await firestore.runTransaction((transaction) async {
-                      // Retrieve the post reference
-                      final postRef = firestore.collection('posts').doc(postId);
-
-                      // Read the post to ensure its existence
-                      final postSnapshot = await transaction.get(postRef);
-                      if (postSnapshot.exists) {
-                        throw Exception('Post already exists'); // Or handle it appropriately
-                      }
-
-                      // Write the post data
-                      transaction.set(postRef, {
+                      // Optionally, add the post to a subcollection under the college document
+                      final collegePostRef = firestore
+                          .collection('colleges')
+                          .doc(userCollegee)
+                          .collection('collegePosts')
+                          .doc(postId);
+                      transaction.set(collegePostRef, {
+                        'postId': postId,
                         'postId':postId,
                         'userId': user.uid,
                         'emailid': email,
@@ -572,10 +577,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             : _descriptionText.text,
                         'pages': _numberOfPages.text,
                         'dueDate': DateFormat('yyyy-MM-dd').format(_selectedDate),
-                        // 'referencePDF': 'URL_TO_PDF', // Replace with the actual URL or path
                         'totalPayment': int.tryParse(_paymentDetails.text) ?? 0,
                         'status': 'Pending',
                         'createdAt': FieldValue.serverTimestamp(),
+                        'college':userCollegee
                       });
                     });
 
@@ -602,6 +607,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
               }
             }
           },
+
           buttonText: 'Get Answers Now',
           fontWeight: FontWeight.bold,
         ),

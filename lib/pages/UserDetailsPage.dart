@@ -88,6 +88,15 @@ class _UserDetailsState extends State<UserDetails> {
     super.dispose();
   }
 
+  Future<void> setSelectedCollegeLocally(String value) async {
+    try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      await prefs.setString('selectedCollege', value);
+    } catch (error) {
+      print('Error setting selected college locally: $error');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     Color backgroundColor = ColorUtil.hexToColor(hexColor);
@@ -515,6 +524,8 @@ class _UserDetailsState extends State<UserDetails> {
                                         'userDetailsfilled': true,
                                         'lastUpdated': FieldValue.serverTimestamp(),
                                       });
+                                      // Store the selected college locally
+                                      setSelectedCollegeLocally(_selectedCollege!);
                                     });
 
                                     await setUserDetailsFilledLocally(true);

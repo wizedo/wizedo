@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:wizedo/Widgets/colors.dart';
+import 'package:wizedo/components/my_elevatedbutton.dart';
 import 'package:wizedo/pages/PostPage.dart';
 import '../components/boxDecoration.dart';
 import '../components/mPlusRoundedText.dart';
@@ -214,7 +215,9 @@ class _DetailsScreenState extends State<DetailsScreen> {
       ),
       bottomNavigationBar: Container(
         padding: const EdgeInsets.symmetric(horizontal: 25),
-        child: ElevatedButton.icon(
+        child: MyElevatedButton(
+          buttonText: 'Apply',
+          fontWeight: FontWeight.bold,
           onPressed: () {
             addToAcceptedCollection(
               category: widget.category,
@@ -224,19 +227,9 @@ class _DetailsScreenState extends State<DetailsScreen> {
               priceRange: widget.priceRange,
               postid: widget.postid,
             );
-          },
-          icon: Icon(Icons.done, size: 20, color: Colors.white),
-          label: Text(
-            'Apply',
-            style: TextStyle(color: Colors.white),
-          ),
-          style: ButtonStyle(
-            backgroundColor: MaterialStateProperty.all(Colors.purpleAccent),
-            padding: MaterialStateProperty.all(
-              EdgeInsets.symmetric(horizontal: 15), // Add the desired padding
-            ),
-          ),
-        ),
+        },
+
+        )
       ),
 
     );

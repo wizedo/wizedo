@@ -36,7 +36,7 @@ class MyElevatedButton extends StatelessWidget {
           style: ElevatedButton.styleFrom(
             primary: Colors.transparent, // Make the button background transparent
             onPrimary: Colors.white, // Customize the text color
-            elevation: 0, // No shadow for the button
+            elevation: 20, // No shadow for the button
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(15),
             ),
