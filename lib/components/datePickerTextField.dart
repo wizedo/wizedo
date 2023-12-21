@@ -7,6 +7,7 @@ class DateSelector extends StatefulWidget {
   final String? hint;
   final Widget? suffixIcon; // New parameter for suffix icon
   final Function(String?)? validator; // New parameter for validator
+  final double? width; // New parameter for width
 
   const DateSelector({
     Key? key,
@@ -15,6 +16,7 @@ class DateSelector extends StatefulWidget {
     this.hint,
     this.suffixIcon,
     this.validator, // Include validator parameter
+    this.width, // Include width parameter
   }) : super(key: key);
 
   @override
@@ -54,7 +56,7 @@ class _DateSelectorState extends State<DateSelector> {
       },
       child: AbsorbPointer(
         child: Container(
-          width: 308,
+          width: widget.width ?? 308, // Use the provided width or default to 308
           height: 51,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(15),
@@ -76,11 +78,11 @@ class _DateSelectorState extends State<DateSelector> {
                       hintStyle: TextStyle(color: Colors.white, fontWeight: FontWeight.normal, fontSize: 13),
                       hintText: widget.hint,
                       enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(15),
+                        borderRadius: BorderRadius.circular(12),
                         borderSide: BorderSide(color: backgroundColor),
                       ),
                       focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(15),
+                        borderRadius: BorderRadius.circular(12),
                         borderSide: BorderSide(color: backgroundColor),
                       ),
                       labelText: widget.label,
@@ -96,7 +98,15 @@ class _DateSelectorState extends State<DateSelector> {
                 if (widget.suffixIcon != null) // Display suffix icon if provided
                   Padding(
                     padding: const EdgeInsets.only(left: 8),
-                    child: widget.suffixIcon,
+                    child: Container(
+                      width: 40, // Adjust the size of the white circle
+                      height: 40, // Adjust the size of the white circle
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Colors.white,
+                      ),
+                      child: Center(child: widget.suffixIcon),
+                    ),
                   ),
               ],
             ),

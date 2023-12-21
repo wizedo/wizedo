@@ -10,6 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_document_picker/flutter_document_picker.dart';
 import 'package:get/get.dart';
 import 'package:page_transition/page_transition.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:swipeable_button_view/swipeable_button_view.dart';
 import 'package:wizedo/Widgets/colors.dart';
 import 'package:intl/intl.dart';
@@ -115,6 +116,21 @@ class _RegisterScreenState extends State<RegisterScreen> {
     }
   }
 
+
+  Future<String?> getSelectedCollegeLocally() async {
+    try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      return prefs.getString('selectedCollege');
+    } catch (error) {
+      print('Error getting selected college locally: $error');
+      return null;
+    }
+  }
+
+
+
+
+
   @override
   void dispose() {
     print("controllers diposed");
@@ -189,8 +205,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           child: Text(
                             item,
                             style: TextStyle(
-                              color: _selectedCategory == item ? Color(0xFFdacfe6) : Colors.black,
-                              fontSize: 12
+                                color: _selectedCategory == item ? Color(0xFFdacfe6) : Colors.black,
+                                fontSize: 12
                             ),
                           ),
                         );
@@ -265,65 +281,65 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   ),
                   SizedBox(height: 10),
                   Container(
-                    width: double.infinity,
-                    child: MyTextMulitilineField(
-                      controller: _descriptionText,
-                      obscureText: false,
-                      hint: 'Description (max 150 words)',
-                      keyboardType: TextInputType.name,
-                      height: 185,
-                      width: 400,
-                      fontSize: 12,
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          addError(error: 'Description is required');
-                          return 'Description is required';
-                        } else {
-                          removeError(error: 'Description is required');
-                        }
+                      width: double.infinity,
+                      child: MyTextMulitilineField(
+                        controller: _descriptionText,
+                        obscureText: false,
+                        hint: 'Description (max 150 words)',
+                        keyboardType: TextInputType.name,
+                        height: 185,
+                        width: 400,
+                        fontSize: 12,
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            addError(error: 'Description is required');
+                            return 'Description is required';
+                          } else {
+                            removeError(error: 'Description is required');
+                          }
 
-                        // Check for leading spaces
-                        if (value != null && value.startsWith(' ')) {
-                          addError(error: 'Leading spaces at the beginning are not allowed');
-                          return 'Leading spaces at the beginning are not allowed';
-                        } else {
-                          removeError(error: 'Leading spaces at the beginning are not allowed');
-                        }
+                          // Check for leading spaces
+                          if (value != null && value.startsWith(' ')) {
+                            addError(error: 'Leading spaces at the beginning are not allowed');
+                            return 'Leading spaces at the beginning are not allowed';
+                          } else {
+                            removeError(error: 'Leading spaces at the beginning are not allowed');
+                          }
 
-                        // Check for trailing spaces
-                        if (value != null && value.endsWith(' ')) {
-                          addError(error: 'Spaces at the end are not allowed');
-                          return 'Spaces at the end are not allowed';
-                        } else {
-                          removeError(error: 'Spaces at the end are not allowed');
-                        }
+                          // Check for trailing spaces
+                          if (value != null && value.endsWith(' ')) {
+                            addError(error: 'Spaces at the end are not allowed');
+                            return 'Spaces at the end are not allowed';
+                          } else {
+                            removeError(error: 'Spaces at the end are not allowed');
+                          }
 
-                        // Check for consecutive spaces
-                        if (value != null && value.contains(RegExp(r'\s{2,}'))) {
-                          addError(error: 'Consecutive spaces are not allowed');
-                          return 'Consecutive spaces within the text are not allowed';
-                        } else {
-                          removeError(error: 'Consecutive spaces are not allowed');
-                        }
+                          // Check for consecutive spaces
+                          if (value != null && value.contains(RegExp(r'\s{2,}'))) {
+                            addError(error: 'Consecutive spaces are not allowed');
+                            return 'Consecutive spaces within the text are not allowed';
+                          } else {
+                            removeError(error: 'Consecutive spaces are not allowed');
+                          }
 
-                        if (value != null && value.length < 100) {
-                          addError(error: 'Description should be of at least 100 characters');
-                          return 'Description should be of at least 100 characters';
-                        } else {
-                          removeError(error: 'Description should be of at least 100 characters');
-                        }
-                        if (value != null && value.length > 250 ) {
-                          addError(error: 'Maximum characters allowed is 250');
-                          return 'Maximum characters allowed is 250';
-                        } else {
-                          removeError(error: 'Maximum characters allowed is 250');
-                        }
+                          if (value != null && value.length < 100) {
+                            addError(error: 'Description should be of at least 100 characters');
+                            return 'Description should be of at least 100 characters';
+                          } else {
+                            removeError(error: 'Description should be of at least 100 characters');
+                          }
+                          if (value != null && value.length > 250 ) {
+                            addError(error: 'Maximum characters allowed is 250');
+                            return 'Maximum characters allowed is 250';
+                          } else {
+                            removeError(error: 'Maximum characters allowed is 250');
+                          }
 
-                        // Rest of your validation logic...
+                          // Rest of your validation logic...
 
-                        return null;
-                      },
-                    )
+                          return null;
+                        },
+                      )
 
 
                   ),
@@ -377,21 +393,23 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     child: Row(
                       children: [
                         DateSelector(
+                          width: 340,
                           controller: _datePicker,
                           hint: 'Select Date (yyyy-mm-dd)',
                           suffixIcon: Icon(
                             Icons.calendar_month,
                             color: Color(0xFF955AF2),
+                            size: 20,
                           ),
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                addError(error: 'Due date is required');
-                                return 'Due date is required';
-                              } else {
-                                removeError(error: 'Due date is required');
-                              }
-                              return null;
-                            },
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              addError(error: 'Due date is required');
+                              return 'Due date is required';
+                            } else {
+                              removeError(error: 'Due date is required');
+                            }
+                            return null;
+                          },
                         )
                       ],
                     ),
@@ -405,32 +423,47 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   SizedBox(height: 10),
                   MyUploadButton(
                     onPressed: () async {
-                    final path = await FlutterDocumentPicker.openDocument();
-                    if (path != null && path.isNotEmpty) {
-                    print(path);
 
-                    // Check if the selected file has a .pdf extension
-                    if (!path.toLowerCase().endsWith('.pdf')) {
-                    Get.snackbar('Error', 'Please select a PDF file only');
-                    return;
-                    }
-
-                    // Do not upload the file here; just update the _pdf controller
-                    setState(() {
-                    _pdf.text = path;
-                    String fileName = path.split('/').last;
-                    if (fileName.length > 30) {
-                    fileName = fileName.substring(0, 30) + '...pdf'; // Truncate the file name
-                    }
-                    buttonText = fileName;
-                    });
-                    } else {
-                    Get.snackbar('Error', 'No file selected');
-                    }
+                      // Your onPressed logic here
                     },
-                    suffixIcon: Icon(Icons.upload, color: Color(0xFF955AF2)),
+                    suffixIcon: Container(
+                      width: 40, // Set the width to control the size of the white circle
+                      height: 40, // Set the height to control the size of the white circle
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(12),
+                        color: Colors.white, // White circle color
+                      ),
+                      child: InkWell(
+                        child: Icon(Icons.upload, color: Color(0xFF955AF2), size: 25),
+                        onTap: () async {
+                          final path = await FlutterDocumentPicker.openDocument();
+                          if (path != null && path.isNotEmpty) {
+                            print(path);
+
+                            // Check if the selected file has a .pdf extension
+                            if (!path.toLowerCase().endsWith('.pdf')) {
+                              Get.snackbar('Error', 'Please select a PDF file only');
+                              return;
+                            }
+
+                            // Do not upload the file here; just update the _pdf controller
+                            setState(() {
+                              _pdf.text = path;
+                              String fileName = path.split('/').last;
+                              if (fileName.length > 25) {
+                                fileName = fileName.substring(0, 25) + '...pdf'; // Truncate the file name
+                              }
+                              buttonText = fileName;
+                            });
+                          } else {
+                            Get.snackbar('Error', 'No file selected');
+                          }
+                        },
+                      ),
+                    ),
                     buttonText: buttonText ?? 'Upload a PDF',
                   ),
+
 
 
                   SizedBox(height: 10),
@@ -483,9 +516,24 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   if (user != null) {
                     final firestore = FirebaseFirestore.instance;
                     final email = user.email!;
+                    print('User email: $email');
 
-                    // Generate a unique postId
-                    String postId = firestore.collection('posts').doc().id;
+                    String? userCollege = await getSelectedCollegeLocally();
+                    String userCollegee = userCollege ?? 'null set manually2';
+                    print(userCollegee);
+
+
+                    // If college name is not available locally, fetch it from Firestore
+                    if (userCollege == null) {
+                      final userDoc = await firestore.collection('usersDetails').doc(email).get();
+                      if (userDoc.exists) {
+                        userCollegee = userDoc['college'] ?? 'Unknown College';
+                        print('User college from Firestore: $userCollegee');
+                      }
+                    }
+
+                    // Generate a unique postId using date, time, and user email
+                    String postId = '${DateTime.now().millisecondsSinceEpoch}_${user.email.hashCode}';
 
                     // Upload the file only if a file is selected
                     firebase_storage.UploadTask? uploadTask;
@@ -493,6 +541,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       File file = File(_pdf.text);
                       uploadTask = await uploadFile(file, user);
                     }
+
+
+
+
 
                     // Use a transaction for the Firestore write operations
                     await firestore.runTransaction((transaction) async {
@@ -507,8 +559,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
                       // Write the post data
                       transaction.set(postRef, {
+                        'postId':postId,
                         'userId': user.uid,
                         'emailid': email,
+                        'collegeName': userCollegee, // Add the college name to the post
                         'category': _selectedCategory,
                         'subCategory': _projectName.text.isNotEmpty
                             ? _projectName.text[0].toUpperCase() + _projectName.text.substring(1)
@@ -544,6 +598,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   print('Error creating post: $error');
                   Get.snackbar('Error', 'Failed to create post');
                 }
+
               }
             }
           },

@@ -278,6 +278,7 @@ class _HomePageState extends State<HomePage> {
                                       priceRange: data['totalPayment'],
                                       userName: cleanUpUserName(data['emailid']),
                                       finalDate: data['dueDate'],
+                                      postid: data['postId'],
                                     ),
                                   ),
                                 );

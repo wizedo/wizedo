@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:wizedo/Widgets/colors.dart';
@@ -13,6 +14,7 @@ class DetailsScreen extends StatefulWidget {
   final String description;
   final int priceRange;
   final String userName;
+  final String postid;
   final String finalDate;
 
   const DetailsScreen({
@@ -24,6 +26,7 @@ class DetailsScreen extends StatefulWidget {
     required this.priceRange,
     required this.userName,
     required this.finalDate,
+    required this.postid,
   }) : super(key: key);
 
 
@@ -213,7 +216,14 @@ class _DetailsScreenState extends State<DetailsScreen> {
         padding: const EdgeInsets.symmetric(horizontal: 25),
         child: ElevatedButton.icon(
           onPressed: () {
-            Get.to(RegisterScreen());
+            addToAcceptedCollection(
+              category: widget.category,
+              subject: widget.subject,
+              finalDate: widget.finalDate,
+              description: widget.description,
+              priceRange: widget.priceRange,
+              postid: widget.postid,
+            );
           },
           icon: Icon(Icons.done, size: 20, color: Colors.white),
           label: Text(
@@ -232,3 +242,48 @@ class _DetailsScreenState extends State<DetailsScreen> {
     );
   }
 }
+
+Future<void> addToAcceptedCollection({
+  required String category,
+  required String subject,
+  required String finalDate,
+  required String description,
+  required int priceRange,
+  required String postid,
+}) async {
+  try {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      final firestore = FirebaseFirestore.instance;
+      final email = user.email!;
+
+      // Check if the document with the given postid already exists
+      final docSnapshot = await firestore.collection('accepted').doc(postid).get();
+
+      if (docSnapshot.exists) {
+        // Document with the given postid already exists
+        Get.snackbar('Already Applied', 'You have already applied for this job.');
+      } else {
+        // Document with the given postid doesn't exist, add the details
+        await firestore.collection('accepted').doc(postid).set({
+          'userId': user.uid,
+          'emailid': email,
+          'category': category,
+          'subject': subject,
+          'finalDate': finalDate,
+          'description': description,
+          'priceRange': priceRange,
+          'status': 'Accepted',
+          'postid': postid,
+          'createdAt': FieldValue.serverTimestamp(),
+        });
+
+        Get.snackbar('Success', 'Details added to the accepted collection');
+      }
+    }
+  } catch (error) {
+    print('Error adding to accepted collection: $error');
+    Get.snackbar('Error', 'Failed to add details to accepted collection');
+  }
+}
+
