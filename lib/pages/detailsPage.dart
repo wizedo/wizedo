@@ -249,18 +249,17 @@ Future<void> addToAcceptedCollection({
     if (user != null) {
       final firestore = FirebaseFirestore.instance;
       final email = user.email!;
+      final userDocRef = firestore.collection('accepted').doc(email);
 
       // Check if the document with the given postid already exists
-      final docSnapshot = await firestore.collection('accepted').doc(postid).get();
+      final docSnapshot = await userDocRef.collection('acceptedPosts').doc(postid).get();
 
       if (docSnapshot.exists) {
         // Document with the given postid already exists
         Get.snackbar('Already Applied', 'You have already applied for this job.');
       } else {
         // Document with the given postid doesn't exist, add the details
-        await firestore.collection('accepted').doc(postid).set({
-          'userId': user.uid,
-          'emailid': email,
+        await userDocRef.collection('acceptedPosts').doc(postid).set({
           'category': category,
           'subject': subject,
           'finalDate': finalDate,
@@ -279,4 +278,3 @@ Future<void> addToAcceptedCollection({
     Get.snackbar('Error', 'Failed to add details to accepted collection');
   }
 }
-

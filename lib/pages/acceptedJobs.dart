@@ -3,18 +3,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:get/get_core/src/get_main.dart';
-import 'package:get_time_ago/get_time_ago.dart';
-import 'package:wizedo/components/CustomRichText.dart';
-import 'package:wizedo/components/mPlusRoundedText.dart';
+import 'package:wizedo/components/FliterChip.dart';
+import 'package:wizedo/components/JobCard.dart';
 import 'package:wizedo/components/searchable_dropdown.dart';
-import 'package:wizedo/components/white_text.dart';
-import 'package:shimmer/shimmer.dart';
-import '../components/FliterChip.dart';
-import '../components/JobCard.dart';
-import '../controller/BottomNavigationController.dart';
-import '../services/email_verification_page.dart';
-import 'LoginPage.dart';
+import 'package:wizedo/components/mPlusRoundedText.dart';
 import 'detailsPage.dart';
 
 class acceptedPage extends StatefulWidget {
@@ -26,8 +18,8 @@ class acceptedPage extends StatefulWidget {
 
 class _acceptedPageState extends State<acceptedPage> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  TextEditingController emailController=TextEditingController();
   String _selectedCategory = 'College Project';
+
   // Function to clean up the username
   String cleanUpUserName(String email) {
     // Extract the username part from the email (remove @gmail.com)
@@ -38,6 +30,7 @@ class _acceptedPageState extends State<acceptedPage> {
     userName = userName.replaceAll(RegExp(r'\d'), '');
     return userName;
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -49,8 +42,10 @@ class _acceptedPageState extends State<acceptedPage> {
             Get.back();
           },
         ),
-        title: Text('Pending Jobs',
-          style: mPlusRoundedText.copyWith(fontSize: 18),),
+        title: Text(
+          'Pending Jobs',
+          style: mPlusRoundedText.copyWith(fontSize: 18),
+        ),
         centerTitle: true,
       ),
       backgroundColor: Color(0xFF211B2E),
@@ -58,7 +53,7 @@ class _acceptedPageState extends State<acceptedPage> {
         child: Column(
           children: [
             Padding(
-              padding: const EdgeInsets.only(top: 25,right: 20,left: 20,bottom: 10),
+              padding: const EdgeInsets.only(top: 25, right: 20, left: 20, bottom: 10),
               child: SearchableDropdownTextField(
                 items: [
                   'Bachelor of Arts (BA)',
@@ -74,12 +69,13 @@ class _acceptedPageState extends State<acceptedPage> {
                   'Bachelor of Law (LLB)',
                   'Master of Arts (MA)',
                 ],
-                labelText:'Search',
-                onSelected:(selectedItem){
+                labelText: 'Search',
+                onSelected: (selectedItem) {
                   // Handle the selected item here
                   print('Selected item: $selectedItem');
                 },
-                suffix: Icon(Icons.search_rounded,
+                suffix: Icon(
+                  Icons.search_rounded,
                   color: Colors.white,
                   size: 20,
                 ),
@@ -92,14 +88,14 @@ class _acceptedPageState extends State<acceptedPage> {
                 SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
                   child: Padding(
-                    padding: const EdgeInsets.only(top: 5,left: 50),
+                    padding: const EdgeInsets.only(top: 5, left: 50),
                     child: Row(
                       children: [
                         FilterChipWidget(
                           label: 'College Project',
                           selectedCategory: _selectedCategory,
-                          onTap: (){
-                            setState((){
+                          onTap: () {
+                            setState(() {
                               _selectedCategory = 'College Project';
                             });
                             print('College Chip tapped!');
@@ -139,7 +135,7 @@ class _acceptedPageState extends State<acceptedPage> {
                   height: 40,
                   color: Color(0xFF211B2E),
                   child: Padding(
-                    padding: const EdgeInsets.only(left: 25,top: 5,right: 10),
+                    padding: const EdgeInsets.only(left: 25, top: 5, right: 10),
                     child: Icon(
                       CupertinoIcons.tags_solid,
                       color: Colors.white,
@@ -151,20 +147,20 @@ class _acceptedPageState extends State<acceptedPage> {
             ),
             Container(
               child: Expanded(
-                child: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-                  stream: FirebaseFirestore.instance.collection('accepted')
-                      .where('category', isEqualTo: _selectedCategory)
-                      .snapshots(),
+                child: FutureBuilder<QuerySnapshot<Map<String, dynamic>>>(
+                  future: getUserAcceptedPosts(),
                   builder: (context, AsyncSnapshot<QuerySnapshot<Map<String, dynamic>>> snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
                       return Center(child: CircularProgressIndicator());
-                    } else if (snapshot.connectionState == ConnectionState.active) {
-                      if (snapshot.data!.docs.isNotEmpty) {
+                    } else if (snapshot.connectionState == ConnectionState.done) {
+                      final userAcceptedPosts = snapshot.data!.docs;
+
+                      if (userAcceptedPosts.isNotEmpty) {
                         return ListView.builder(
-                          itemCount: snapshot.data!.docs.length,
+                          itemCount: userAcceptedPosts.length,
                           itemBuilder: (BuildContext context, int index) {
-                            var data = snapshot.data!.docs[index].data() as Map<String, dynamic>;
-                            Timestamp date = snapshot.data!.docs[index]['createdAt'];
+                            var data = userAcceptedPosts[index].data()!;
+                            Timestamp date = data['createdAt'];
                             var finalDate = DateTime.parse(date.toDate().toString());
 
                             return GestureDetector(
@@ -210,45 +206,21 @@ class _acceptedPageState extends State<acceptedPage> {
                   },
                 ),
               ),
-            )
-            // Bottom banner ad
-            // With this corrected code
-            // Positioned(
-            //   bottom: 0,
-            //   child: Container(
-            //     width: MediaQuery.of(context).size.width,
-            //     height: 60, // Adjust the height of the ad container as needed
-            //     decoration: BoxDecoration(
-            //       color: Colors.grey, // Change the background color of the ad container
-            //       borderRadius: BorderRadius.circular(15),
-            //     ),
-            //     child: Center(
-            //       child: Text(
-            //         'Ad',
-            //         style: TextStyle(color: Colors.grey.shade50, fontSize: 12),
-            //       ),
-            //     ),
-            //   ),
-            // ),
-            // this the code to filter through chip
-            // Expanded(
-            //   flex: 1,
-            //   child: ListView.builder(
-            //     itemCount: selectedCategoryNews.length,
-            //     itemBuilder: (context, index) {
-            //       return Padding(
-            //         padding: const EdgeInsets.only(top: 25,left: 25,right: 25),
-            //         child: ListTile(
-            //           title: Text(selectedCategoryNews[index],style: TextStyle(color: Colors.white),),
-            //         ),
-            //       );
-            //     },
-            //   ),
-            // ),
-            // to select category
+            ),
           ],
         ),
       ),
     );
+  }
+
+  Future<QuerySnapshot<Map<String, dynamic>>> getUserAcceptedPosts() async {
+    final user = _auth.currentUser;
+    if (user != null) {
+      final firestore = FirebaseFirestore.instance;
+      final email = user.email!;
+      return await firestore.collection('accepted').doc(email).collection('acceptedPosts').get();
+    } else {
+      throw Exception('User not logged in');
+    }
   }
 }
