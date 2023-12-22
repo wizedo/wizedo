@@ -14,7 +14,6 @@ class DetailsScreen extends StatefulWidget {
   final Timestamp date;
   final String description;
   final int priceRange;
-  final String userName;
   final String postid;
   final String finalDate;
 
@@ -25,7 +24,6 @@ class DetailsScreen extends StatefulWidget {
     required this.date,
     required this.description,
     required this.priceRange,
-    required this.userName,
     required this.finalDate,
     required this.postid,
   }) : super(key: key);
@@ -46,6 +44,17 @@ class _DetailsScreenState extends State<DetailsScreen> {
 
   DateTime _selectedDate = DateTime.now();
 
+  void initState() {
+    super.initState();
+    // Print out values in the initState method
+    print('Category: ${widget.category}');
+    print('Subject: ${widget.subject}');
+    print('Date: ${widget.date}');
+    print('Description: ${widget.description}');
+    print('Price Range: ${widget.priceRange}');
+    print('Post ID: ${widget.postid}');
+    print('Final Date: ${widget.finalDate}');
+  }
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
       context: context,
@@ -59,7 +68,6 @@ class _DetailsScreenState extends State<DetailsScreen> {
       });
     }
   }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -267,6 +275,7 @@ Future<void> addToAcceptedCollection({
           'priceRange': priceRange,
           'status': 'Accepted',
           'postid': postid,
+          'emailid':email,
           'createdAt': FieldValue.serverTimestamp(),
         });
 

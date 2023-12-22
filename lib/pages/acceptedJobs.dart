@@ -28,6 +28,7 @@ class _acceptedPageState extends State<acceptedPage> {
     userName = userName.replaceAll(RegExp(r'[^\w\s]'), '');
     // Remove any numbers
     userName = userName.replaceAll(RegExp(r'\d'), '');
+    print(userName);
     return userName;
   }
 
@@ -154,46 +155,53 @@ class _acceptedPageState extends State<acceptedPage> {
                       return Center(child: CircularProgressIndicator());
                     } else if (snapshot.connectionState == ConnectionState.done) {
                       final userAcceptedPosts = snapshot.data!.docs;
-
+                      print(userAcceptedPosts);
                       if (userAcceptedPosts.isNotEmpty) {
                         return ListView.builder(
                           itemCount: userAcceptedPosts.length,
                           itemBuilder: (BuildContext context, int index) {
-                            var data = userAcceptedPosts[index].data()!;
-                            Timestamp date = data['createdAt'];
-                            var finalDate = DateTime.parse(date.toDate().toString());
+                            var data = userAcceptedPosts[index].data() as Map<String, dynamic>?; // Change this line
+                            if (data != null) { // Add a null check
+                              Timestamp date = data['createdAt'];
+                              var finalDate = DateTime.parse(date.toDate().toString());
 
-                            return GestureDetector(
-                              onTap: () {
-                                print(data);
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => DetailsScreen(
-                                      category: data['category'],
-                                      subject: data['subject'],
-                                      date: data['createdAt'],
-                                      description: data['description'],
-                                      priceRange: data['priceRange'],
-                                      userName: cleanUpUserName(data['emailid']),
-                                      finalDate: data['finalDate'],
-                                      postid: data['postId'],
+                              return GestureDetector(
+                                onTap: () {
+                                  print(data);
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => DetailsScreen(
+                                        category: data['category'],
+                                        subject: data['subject'],
+                                        date: data['createdAt'],
+                                        description: data['description'],
+                                        priceRange: data['priceRange'],
+                                        finalDate: data['finalDate'],
+                                        postid: data['postId'],
+                                      ),
                                     ),
-                                  ),
-                                );
-                              },
-                              child: JobCard(
-                                category: _selectedCategory,
-                                subject: data['subject'],
-                                date: data['createdAt'],
-                                description: data['description'],
-                                priceRange: data['priceRange'],
-                                userName: cleanUpUserName(data['emailid']),
-                                finalDate: finalDate,
-                              ),
-                            );
+                                  );
+                                },
+                                child: JobCard(
+                                  category: _selectedCategory,
+                                  subject: data['subject'],
+                                  date: data['createdAt'],
+                                  description: data['description'],
+                                  priceRange: data['priceRange'],
+                                  userName: cleanUpUserName(data['emailid']),
+                                  finalDate: finalDate,
+                                ),
+                              );
+                            } else {
+                              // Handle the case where data is null
+                              return const Center(
+                                child: Text('No posts'),
+                              );
+                            }
                           },
                         );
+
                       } else {
                         return const Center(
                           child: Text('No accepted posts'),
@@ -218,9 +226,16 @@ class _acceptedPageState extends State<acceptedPage> {
     if (user != null) {
       final firestore = FirebaseFirestore.instance;
       final email = user.email!;
-      return await firestore.collection('accepted').doc(email).collection('acceptedPosts').get();
+      QuerySnapshot<Map<String, dynamic>> querySnapshot =
+      await firestore.collection('accepted').doc(email).collection('acceptedPosts')
+          .where('category', isEqualTo: _selectedCategory)
+          .get();
+      return querySnapshot;
+
     } else {
       throw Exception('User not logged in');
     }
   }
+
+
 }
