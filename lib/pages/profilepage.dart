@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:dotted_border/dotted_border.dart';
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../Widgets/colors.dart';
@@ -36,11 +38,11 @@ class ProfilePage extends StatelessWidget {
         centerTitle: true,
         leading: IconButton(
           icon: Icon(
-            Icons.arrow_back,
+            Icons.arrow_back_ios_rounded,
             color: Colors.white,
           ),
-          onPressed: () {
-            Navigator.of(context).pop();
+          onPressed: (){
+            Get.back();
           },
         ),
       ),

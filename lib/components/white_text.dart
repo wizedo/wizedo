@@ -3,24 +3,37 @@ import 'package:google_fonts/google_fonts.dart';
 
 class WhiteText extends StatelessWidget {
   final String text;
-  final double? fontSize; // Make the font size optional
+  final double? fontSize;
   final FontWeight? fontWeight;
   final TextAlign? textAlignment;
+  final Color? textColor;
+  final TextOverflow? overflow; // Add overflow parameter
+  final int? maxLines; // Add maxLines parameter
 
-  const WhiteText(this.text, {this.fontSize, this.fontWeight,this.textAlignment}); // Make the font size and weight optional
+  const WhiteText(
+      this.text, {
+        this.fontSize,
+        this.fontWeight,
+        this.textAlignment,
+        this.textColor,
+        this.overflow, // Include overflow parameter
+        this.maxLines, // Include maxLines parameter
+      });
 
   @override
   Widget build(BuildContext context) {
     return Text(
       text,
-      style: GoogleFonts.mPlusRounded1c( // Note the correct font family name here
+      style: GoogleFonts.mPlusRounded1c(
         textStyle: TextStyle(
-          color: Color(0xFFFFFFFF),
-          fontSize: fontSize, // Set the font size if provided, otherwise use the default size
+          color: textColor ?? Color(0xFFFFFFFF),
+          fontSize: fontSize,
           fontWeight: fontWeight ?? FontWeight.normal,
         ),
       ),
       textAlign: textAlignment,
+      overflow: overflow,
+      maxLines: maxLines,
     );
   }
 }

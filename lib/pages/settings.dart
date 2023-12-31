@@ -2,16 +2,17 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:get/get_core/src/get_main.dart';
-import 'package:wizedo/components/boxDecoration.dart';
 import 'package:wizedo/components/cardContainerSettings.dart';
-import 'package:wizedo/components/mPlusRoundedText.dart';
+import 'package:wizedo/components/white_text.dart';
 import 'package:wizedo/pages/privacyPolicy.dart';
 import 'package:wizedo/pages/profilepage.dart';
+import 'package:wizedo/pages/statusPage.dart';
 import 'package:wizedo/pages/terms&cond.dart';
 
 import '../Widgets/colors.dart';
 import '../components/gradientBoxDecoration.dart';
+import '../components/mPlusRoundedText.dart';
+import '../components/myCustomAppliedCard.dart';
 import 'LoginPage.dart';
 
 class settingScreen extends StatelessWidget {
@@ -21,8 +22,10 @@ class settingScreen extends StatelessWidget {
   settingScreen({Key? key})
       : fireStore = FirebaseFirestore.instance.collection('usersDetails'),
         super(key: key);
+
   User? user = FirebaseAuth.instance.currentUser;
-  call(){
+
+  call() {
     print(fireStore.id);
     print(user?.email);
   }
@@ -38,20 +41,18 @@ class settingScreen extends StatelessWidget {
   }
 
   Future<void> getData(BuildContext context) async {
-
-
-    // Assuming you want to fetch data for a specific user, replace 'wizedoit@gmail.com' with the desired user's email.
-    QuerySnapshot querySnapshot = await fireStore.where('id', isEqualTo:user?.email).get();
+    QuerySnapshot querySnapshot =
+    await fireStore.where('id', isEqualTo: user?.email).get();
 
     if (querySnapshot.docs.isNotEmpty) {
-      final userData = querySnapshot.docs.first.data() as Map<String, dynamic>;
+      final userData =
+      querySnapshot.docs.first.data() as Map<String, dynamic>;
 
-      // Access the specific fields you need
       final String id = userData['id'];
       final String college = userData['college'];
       final String name = userData['name'];
       final String course = userData['course'];
-      final int phoneNumber=userData['phoneNumber'];
+      final int phoneNumber = userData['phoneNumber'];
 
       print('ID: $id, College: $college, Name: $name, Course: $course, Phone: $phoneNumber');
       print(userData);
@@ -64,19 +65,15 @@ class settingScreen extends StatelessWidget {
               name: name,
               course: course,
               college: college,
-              phone:phoneNumber,
+              phone: phoneNumber,
             ),
           ),
         ),
       );
-      
     } else {
       print('User not found');
     }
   }
-
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -85,9 +82,9 @@ class settingScreen extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.white),
+          icon: Icon(Icons.arrow_back_ios_rounded, color: Colors.white),
           onPressed: () {
-            Navigator.of(context).pop();
+            Get.back();
           },
         ),
         title: Text(
@@ -102,8 +99,9 @@ class settingScreen extends StatelessWidget {
           child: Column(
             children: [
               Container(
-                decoration: gradientBoxDecoration,
+                width: 400,
                 padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 8),
+                decoration: cardContainerdecoration,
                 child: Center(
                   child: Stack(
                     alignment: Alignment.center,
@@ -117,46 +115,35 @@ class settingScreen extends StatelessWidget {
                               color: Color(0xFF955AF2),
                             ),
                             child: Center(
-                              child: Text(
+                              child: WhiteText(
                                 'N',
-                                style: TextStyle(
-                                  fontSize: 50,
-                                  color: Colors.white,
-                                ),
+                                fontSize: 40,
                               ),
                             ),
                           ),
                           SizedBox(width: 20),
                           Column(
-                            mainAxisAlignment: MainAxisAlignment.start,
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
+                              WhiteText(
                                 'Naresh',
-                                style: mPlusRoundedText,
-                                overflow: TextOverflow.ellipsis,
+                                fontSize: 20,
                               ),
+                              SizedBox(height: 5),
                               Container(
                                 width: 220,
-                                child: Text(
-                                  'Computer Science and Engineering',
-                                  style: mPlusRoundedText.copyWith(fontSize: 12),
-                                  overflow: TextOverflow.ellipsis,
+                                child: WhiteText(
+                                  'tnaresh564@gmail.com',
+                                  fontSize: 12,
                                 ),
                               ),
                               SizedBox(height: 5),
                               Container(
                                 width: 220,
-                                child: Text(
-                                  'Presidency University, Bangalore',
-                                  style: mPlusRoundedText.copyWith(fontSize: 9),
-                                  overflow: TextOverflow.ellipsis,
+                                child: WhiteText(
+                                    'Presidency University, Bangalore',
+                                  fontSize: 12,
                                 ),
-                              ),
-                              Text(
-                                'Earner',
-                                style: mPlusRoundedText.copyWith(fontSize: 15),
-                                overflow: TextOverflow.ellipsis,
                               ),
                             ],
                           ),
@@ -173,25 +160,30 @@ class settingScreen extends StatelessWidget {
                   children: [
                     cardSettingContainer(text: 'Earnings', iconData: Icons.currency_rupee_rounded),
                     cardSettingContainer(text: 'Payment', iconData: Icons.payment),
-                    cardSettingContainer(text: 'Help', iconData: Icons.help),
+                    InkWell(
+                      onTap: () {
+                        Get.to(statusPage());
+                      },
+                      child: cardSettingContainer(text: 'Help', iconData: Icons.help),
+                    ),
                   ],
                 ),
               ),
-              SizedBox(height: 20),
+              SizedBox(height: 10),
               Container(
-                padding: EdgeInsets.all(1),
-                margin: EdgeInsets.all(12),
+                decoration: cardContainerdecoration,
+                margin: EdgeInsets.all(5),
+                padding: EdgeInsets.only(top: 10,bottom: 10),
                 width: double.infinity,
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.start,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Container(
-                      padding: EdgeInsets.all(10),
                       child: TextButton.icon(
-                          onPressed: (){
-                            getData(context);
-                          },
+                        onPressed: () {
+                          getData(context);
+                        },
                         icon: Icon(Icons.account_circle, color: Colors.white),
                         label: Text('Profile', style: TextStyle(color: Colors.white)),
                         style: ButtonStyle(
@@ -200,9 +192,8 @@ class settingScreen extends StatelessWidget {
                         ),
                       ),
                     ),
-                    Divider(height: 0.2, color: Colors.grey),
+                    // Divider(height: 0, color: Colors.grey),
                     Container(
-                      padding: EdgeInsets.all(10),
                       child: TextButton.icon(
                         onPressed: () {},
                         icon: Icon(Icons.notification_important, color: Colors.white),
@@ -213,12 +204,10 @@ class settingScreen extends StatelessWidget {
                         ),
                       ),
                     ),
-                    Divider(height: 0.2, color: Colors.grey),
+                    // Divider(height: 0.2, color: Colors.grey),
                     Container(
-                      padding: EdgeInsets.all(10),
                       child: TextButton.icon(
                         onPressed: () {
-                          // Navigate to the Terms and Conditions page
                           Navigator.of(context).push(
                             MaterialPageRoute(
                               builder: (context) => PrivacyPolicyPage(),
@@ -233,12 +222,10 @@ class settingScreen extends StatelessWidget {
                         ),
                       ),
                     ),
-                    Divider(height: 0.2, color: Colors.grey),
+                    // Divider(height: 0.2, color: Colors.grey),
                     Container(
-                      padding: EdgeInsets.all(10),
                       child: TextButton.icon(
                         onPressed: () {
-                          // Navigate to the Terms and Conditions page
                           Navigator.of(context).push(
                             MaterialPageRoute(
                               builder: (context) => TermsConditionsPage(),
@@ -253,9 +240,8 @@ class settingScreen extends StatelessWidget {
                         ),
                       ),
                     ),
-                    Divider(height: 0.2, color: Colors.grey),
+                    // Divider(height: 0.2, color: Colors.grey),
                     Container(
-                      padding: EdgeInsets.all(10),
                       child: TextButton.icon(
                         onPressed: () {
                           _signOut(context);

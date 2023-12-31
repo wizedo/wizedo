@@ -40,25 +40,26 @@ class _UserDetailsState extends State<UserDetails> {
 
   String hexColor = '#211b2e';
 
-  Future<void> setUserDetailsFilledLocally(bool value) async {
+  Future<void> setUserDetailsFilledLocally(String email, bool value) async {
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
-      await prefs.setBool('userDetailsFilled', value);
+      await prefs.setBool('userDetailsFilled_$email', value);
     } catch (error) {
       print('Error setting user details locally: $error');
     }
   }
 
-  Future<bool> getUserDetailsFilledLocally() async {
+  Future<bool> getUserDetailsFilledLocally(String email) async {
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
-      bool userDetailsFilledLocally = prefs.getBool('userDetailsFilled') ?? false;
+      bool userDetailsFilledLocally = prefs.getBool('userDetailsFilled_$email') ?? false;
       return userDetailsFilledLocally;
     } catch (error) {
       print('Error getting user details locally: $error');
       return false;
     }
   }
+
 
   void addError({required String error}) {
     if (!errors.contains(error)) {
@@ -88,12 +89,12 @@ class _UserDetailsState extends State<UserDetails> {
     super.dispose();
   }
 
-  Future<void> setSelectedCollegeLocally(String value) async {
+  Future<void> saveCollegeLocally(String collegeName, String userEmail) async {
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
-      await prefs.setString('selectedCollege', value);
+      prefs.setString('selectedCollege_$userEmail', collegeName);
     } catch (error) {
-      print('Error setting selected college locally: $error');
+      print('Error saving college locally: $error');
     }
   }
 
@@ -525,11 +526,11 @@ class _UserDetailsState extends State<UserDetails> {
                                         'lastUpdated': FieldValue.serverTimestamp(),
                                       });
                                       // Store the selected college locally
-                                      setSelectedCollegeLocally(_selectedCollege!);
+                                      saveCollegeLocally(_selectedCollege!,email);
                                     });
 
-                                    await setUserDetailsFilledLocally(true);
-                                    bool userDetailsFilledLocally = await getUserDetailsFilledLocally();
+                                    await setUserDetailsFilledLocally(email,true);
+                                    bool userDetailsFilledLocally = await getUserDetailsFilledLocally(email);
                                     print('userDetailsFilledLocally: $userDetailsFilledLocally');
 
                                     Get.snackbar('Success', 'Updated successfully');

@@ -57,24 +57,14 @@ class MyApp extends StatelessWidget {
 
   Widget checkUserDetailsFilledLocally(BuildContext context, String? userEmail) {
     try {
-      // Fetch userDetailsFilled locally
-      getUserDetailsFilledLocally().then((userDetailsFilledLocally) async {
+      getUserDetailsFilledLocally(userEmail ?? '').then((userDetailsFilledLocally) async {
         print(userDetailsFilledLocally);
         if (userDetailsFilledLocally == true) {
+          print('User details for $userEmail is true');
           // If userDetailsFilled locally is true, redirect to BottomNavigation
           Get.offAll(() => BottomNavigation());
         } else {
-          // If userDetailsFilled locally is false, check email verification
-          User? user = FirebaseAuth.instance.currentUser;
-          await user?.reload();
-          if (user?.emailVerified == true) {
-            // If email is verified, redirect to UserDetails
-            Get.to(() => UserDetails(userEmail: userEmail ?? ''));
-          } else {
-            // If email is not verified, stay on the login page or show a message
-            // You may want to show a message or handle this case differently
-            print('Email is not verified yet.');
-          }
+            Get.to(() => LoginPage());
         }
       });
       return Container(); // You may need to return a placeholder widget here.
@@ -84,16 +74,17 @@ class MyApp extends StatelessWidget {
       return Scaffold(body: Center(child: Text('Error')));
     }
   }
+}
 
-  Future<bool> getUserDetailsFilledLocally() async {
+  Future<bool> getUserDetailsFilledLocally(String email) async {
     try {
-      // Use shared preferences to get userDetailsFilled locally
       SharedPreferences prefs = await SharedPreferences.getInstance();
-      return prefs.getBool('userDetailsFilled') ?? false;
+      bool userDetailsFilledLocally = prefs.getBool('userDetailsFilled_$email') ?? false;
+      return userDetailsFilledLocally;
     } catch (error) {
       print('Error getting user details locally: $error');
       return false;
     }
   }
-}
+
 

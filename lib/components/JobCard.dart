@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get_time_ago/get_time_ago.dart';
 import 'package:intl/intl.dart';
+import 'package:wizedo/components/white_text.dart';
 
 class JobCard extends StatefulWidget {
   final String category;
@@ -35,7 +36,6 @@ class _JobCardState extends State<JobCard> {
 
   @override
   Widget build(BuildContext context) {
-
     return Container(
       width: 370,
       height: 150,
@@ -63,34 +63,37 @@ class _JobCardState extends State<JobCard> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
+                    WhiteText(
                       '${widget.subject}',
-                      style: TextStyle(fontSize: 12.0, fontWeight: FontWeight.bold, color: Colors.white),
+                      fontSize: 12.0,
+                      fontWeight: FontWeight.bold,
                     ),
                     //date
-                    Text(
+                    WhiteText(
                       '${getTimeAgo(widget.finalDate)}',
-                      style: TextStyle(color: Colors.grey, fontSize: 8.0),
+                      fontSize: 8.0,
+                      textColor: Colors.grey.shade500,
                     ),
 
                     SizedBox(height: 8.0),
-                    Text(
+                    WhiteText(
                       widget.description.length > 100
                           ? '${widget.description.substring(0, 100)}...' // Display only first 70 characters
                           : widget.description,
-                      style: TextStyle(fontSize: 10.0, color: Colors.white),
+                      fontSize: 10.0,
                     ),
                     SizedBox(height: 12.0),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(
+                        WhiteText(
                           'Price: ${widget.priceRange}', // Assuming price is in dollars
-                          style: TextStyle(fontSize: 10.0, fontWeight: FontWeight.bold, color: Colors.white),
+                          fontSize: 10.0,
+                          fontWeight: FontWeight.bold,
                         ),
-                        Text(
+                        WhiteText(
                           '~${widget.userName}',
-                          style: TextStyle(fontSize: 8.0, color: Colors.grey),
+                          fontSize: 8.0,
                         ),
                       ],
                     ),
@@ -121,8 +124,4 @@ class _JobCardState extends State<JobCard> {
       ),
     );
   }
-
-
-
-
 }

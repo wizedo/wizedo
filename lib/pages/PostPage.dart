@@ -151,7 +151,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.white),
+          icon: Icon(Icons.arrow_back_ios_rounded, color: Colors.white),
           onPressed: () {
             Get.back();
           },
@@ -503,113 +503,116 @@ class _RegisterScreenState extends State<RegisterScreen> {
       ),
       bottomNavigationBar: Padding(
         padding: const EdgeInsets.all(18.0),
-        child: MyElevatedButton(
-          onPressed: () async {
-            if (_formKey.currentState!.validate()) {
-              _formKey.currentState!.save();
+        child: Padding(
+          padding: const EdgeInsets.only(left: 10 , right: 10 , bottom: 5),
+          child: MyElevatedButton(
+            onPressed: () async {
+              if (_formKey.currentState!.validate()) {
+                _formKey.currentState!.save();
 
-              bool isValid = _validateInputs();
+                bool isValid = _validateInputs();
 
-              if (isValid) {
-                try {
-                  final user = FirebaseAuth.instance.currentUser;
-                  if (user != null) {
-                    final firestore = FirebaseFirestore.instance;
-                    final email = user.email!;
-                    print('User email: $email');
+                if (isValid) {
+                  try {
+                    final user = FirebaseAuth.instance.currentUser;
+                    if (user != null) {
+                      final firestore = FirebaseFirestore.instance;
+                      final email = user.email!;
+                      print('User email: $email');
 
-                    String? userCollege = await getSelectedCollegeLocally();
-                    String userCollegee = userCollege ?? 'null set manually2';
-                    print(userCollegee);
+                      String? userCollege = await getSelectedCollegeLocally();
+                      String userCollegee = userCollege ?? 'null set manually2';
+                      print(userCollegee);
 
 
-                    // If college name is not available locally, fetch it from Firestore
-                    if (userCollege == null) {
-                      final userDoc = await firestore.collection('usersDetails').doc(email).get();
-                      if (userDoc.exists) {
-                        userCollegee = userDoc['college'] ?? 'Unknown College';
-                        print('User college from Firestore: $userCollegee');
+                      // If college name is not available locally, fetch it from Firestore
+                      if (userCollege == null) {
+                        final userDoc = await firestore.collection('usersDetails').doc(email).get();
+                        if (userDoc.exists) {
+                          userCollegee = userDoc['college'] ?? 'Unknown College';
+                          print('User college from Firestore: $userCollegee');
+                        }
                       }
-                    }
 
-                    // Generate a unique postId using date, time, and user email
-                    String postId = '${DateTime.now().millisecondsSinceEpoch}_${user.email.hashCode}';
+                      // Generate a unique postId using date, time, and user email
+                      String postId = '${DateTime.now().millisecondsSinceEpoch}_${user.email.hashCode}';
 
-                    if (userCollege == null) {
-                      final userDoc = await firestore.collection('usersDetails').doc(email).get();
-                      if (userDoc.exists) {
-                        userCollegee = userDoc['college'] ?? 'Unknown College';
-                        print('User college from Firestore: $userCollegee');
+                      if (userCollege == null) {
+                        final userDoc = await firestore.collection('usersDetails').doc(email).get();
+                        if (userDoc.exists) {
+                          userCollegee = userDoc['college'] ?? 'Unknown College';
+                          print('User college from Firestore: $userCollegee');
+                        }
                       }
-                    }
 
-                    firebase_storage.UploadTask? uploadTask;
+                      firebase_storage.UploadTask? uploadTask;
 
-                    if (_pdf.text.isNotEmpty) {
-                      File file = File(_pdf.text);
-                      uploadTask = await uploadFile(file, user);
-                    }
-
+                      if (_pdf.text.isNotEmpty) {
+                        File file = File(_pdf.text);
+                        uploadTask = await uploadFile(file, user);
+                      }
 
 
 
 
-                    // Use a transaction for the Firestore write operations
-                    await firestore.runTransaction((transaction) async {
-                      // Optionally, add the post to a subcollection under the college document
-                      final collegePostRef = firestore
-                          .collection('colleges')
-                          .doc(userCollegee)
-                          .collection('collegePosts')
-                          .doc(postId);
-                      transaction.set(collegePostRef, {
-                        'postId': postId,
-                        'postId':postId,
-                        'userId': user.uid,
-                        'emailid': email,
-                        'collegeName': userCollegee, // Add the college name to the post
-                        'category': _selectedCategory,
-                        'subCategory': _projectName.text.isNotEmpty
-                            ? _projectName.text[0].toUpperCase() + _projectName.text.substring(1)
-                            : _projectName.text,
-                        'description': _descriptionText.text.isNotEmpty
-                            ? _descriptionText.text[0].toUpperCase() + _descriptionText.text.substring(1)
-                            : _descriptionText.text,
-                        'pages': _numberOfPages.text,
-                        'dueDate': DateFormat('yyyy-MM-dd').format(_selectedDate),
-                        'totalPayment': int.tryParse(_paymentDetails.text) ?? 0,
-                        'status': 'Pending',
-                        'createdAt': FieldValue.serverTimestamp(),
-                        'college':userCollegee
+
+                      // Use a transaction for the Firestore write operations
+                      await firestore.runTransaction((transaction) async {
+                        // Optionally, add the post to a subcollection under the college document
+                        final collegePostRef = firestore
+                            .collection('colleges')
+                            .doc(userCollegee)
+                            .collection('collegePosts')
+                            .doc(postId);
+                        transaction.set(collegePostRef, {
+                          'postId': postId,
+                          'postId':postId,
+                          'userId': user.uid,
+                          'emailid': email,
+                          'collegeName': userCollegee, // Add the college name to the post
+                          'category': _selectedCategory,
+                          'subCategory': _projectName.text.isNotEmpty
+                              ? _projectName.text[0].toUpperCase() + _projectName.text.substring(1)
+                              : _projectName.text,
+                          'description': _descriptionText.text.isNotEmpty
+                              ? _descriptionText.text[0].toUpperCase() + _descriptionText.text.substring(1)
+                              : _descriptionText.text,
+                          'pages': _numberOfPages.text,
+                          'dueDate': DateFormat('yyyy-MM-dd').format(_selectedDate),
+                          'totalPayment': int.tryParse(_paymentDetails.text) ?? 0,
+                          'status': 'active', // active or rejected or applied
+                          'createdAt': FieldValue.serverTimestamp(),
+                          'college':userCollegee
+                        });
                       });
-                    });
 
-                    Get.snackbar('Success', 'Post created successfully');
+                      Get.snackbar('Success', 'Post created successfully');
 
-                    // Redirect to the desired screen, e.g., BottomNavigation
-                    await Navigator.push(
-                      context,
-                      PageTransition(
-                        type: PageTransitionType.fade,
-                        child: BottomNavigation(),
-                      ),
-                    );
+                      // Redirect to the desired screen, e.g., BottomNavigation
+                      await Navigator.push(
+                        context,
+                        PageTransition(
+                          type: PageTransitionType.fade,
+                          child: BottomNavigation(),
+                        ),
+                      );
 
-                    setState(() {
-                      isFinished = false;
-                    });
+                      setState(() {
+                        isFinished = false;
+                      });
+                    }
+                  } catch (error) {
+                    print('Error creating post: $error');
+                    Get.snackbar('Error', 'Failed to create post');
                   }
-                } catch (error) {
-                  print('Error creating post: $error');
-                  Get.snackbar('Error', 'Failed to create post');
+
                 }
-
               }
-            }
-          },
+            },
 
-          buttonText: 'Get Answers Now',
-          fontWeight: FontWeight.bold,
+            buttonText: 'Get Answers Now',
+            fontWeight: FontWeight.bold,
+          ),
         ),
 
       ),

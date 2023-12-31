@@ -42,15 +42,33 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  Future<String?> getSelectedCollegeLocally() async {
+  Future<String?> getSelectedCollegeLocally(String userEmail) async {
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
-      return prefs.getString('selectedCollege');
+      return prefs.getString('selectedCollege_$userEmail');
     } catch (error) {
       print('Error getting selected college locally: $error');
       return null;
     }
   }
+
+  Future<void> getUserCollege() async {
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        final email = user.email!;
+        String? userCollege = await getSelectedCollegeLocally(email);
+        setState(() {
+          userCollegee = userCollege ?? 'null set manually2';
+          print('User College in homepage: $userCollegee'); // Print the user's college name
+        });
+      }
+    } catch (error) {
+      print('Error getting user college: $error');
+    }
+  }
+
+
   // Function to clean up the username
   String cleanUpUserName(String email) {
     // Extract the username part from the email (remove @gmail.com)
@@ -65,13 +83,7 @@ class _HomePageState extends State<HomePage> {
     return userName;
   }
 
-  Future<void> getUserCollege() async {
-    String? userCollege = await getSelectedCollegeLocally();
-    setState(() {
-      userCollegee = userCollege ?? 'null set manually2';
-      print('User College: $userCollegee'); // Print the user's college name
-    });
-  }
+
 
 
   @override
@@ -82,7 +94,7 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-
+    // Color(0xFF211B2E),
     return Scaffold(
       backgroundColor: Color(0xFF211B2E),
       body: SafeArea(
@@ -280,7 +292,7 @@ class _HomePageState extends State<HomePage> {
                       .doc(userCollegee) // Replace with the actual document ID or field name
                       .collection('collegePosts')
                       .where('category', isEqualTo: _selectedCategory)
-                      .where('college')
+                      .where('status', isEqualTo: 'active')  // Filter for 'active' posts
                       .snapshots(),
                   builder: (context, AsyncSnapshot<QuerySnapshot<Map<String, dynamic>>> snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
@@ -326,7 +338,7 @@ class _HomePageState extends State<HomePage> {
                         );
                       } else {
                         return const Center(
-                          child: Text('No posts'),
+                          child: Text('No active posts'),
                         );
                       }
                     }
@@ -337,6 +349,7 @@ class _HomePageState extends State<HomePage> {
                 ),
               ),
             )
+
 
 
             // Bottom banner ad

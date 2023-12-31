@@ -32,6 +32,48 @@ class _LoginPageState extends State<LoginPage> {
   final passController = TextEditingController();
   final AuthService _authService = AuthService();
 
+  Future<void> storeUserCollegeLocally() async {
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        final firestore = FirebaseFirestore.instance;
+        final email = user.email!;
+        final docSnapshot = await firestore.collection('usersDetails').doc(email).get();
+
+        if (docSnapshot.exists) {
+          final userData = docSnapshot.data() as Map<String, dynamic>;
+          final userCollege = userData['college'];
+          print('User College stored locally: $userCollege');
+
+          // Store the user's college name locally
+          await saveCollegeLocally(userCollege, email);
+        } else {
+          print('User details document does not exist');
+        }
+      }
+    } catch (error) {
+      print('Error fetching user details: $error');
+    }
+  }
+
+  Future<void> saveCollegeLocally(String collegeName, String userEmail) async {
+    try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      prefs.setString('selectedCollege_$userEmail', collegeName);
+    } catch (error) {
+      print('Error saving college locally: $error');
+    }
+  }
+
+  Future<void> setUserDetailsFilledLocally(String email, bool value) async {
+    try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('userDetailsFilled_$email', value);
+    } catch (error) {
+      print('Error setting user details locally: $error');
+    }
+  }
+
   Future<void> login(BuildContext context) async {
     try {
       UserCredential userCredential = await _auth.signInWithEmailAndPassword(
@@ -53,10 +95,13 @@ class _LoginPageState extends State<LoginPage> {
       await saveUserEmailLocally(emailController.text);
 
       bool userDetailsfilled = await getUserDetailsFilled(emailController.text);
+      await setUserDetailsFilledLocally(emailController.text,userDetailsfilled);
 
       if (userDetailsfilled == true) {
+        await storeUserCollegeLocally();
         Get.offAll(() => BottomNavigation());
       } else {
+        print('going to userdetails page from login page');
         Get.to(() => UserDetails(userEmail: emailController.text));
       }
     } catch (error) {
@@ -93,8 +138,10 @@ class _LoginPageState extends State<LoginPage> {
         print(userDetailsfilled);
 
         if (userDetailsfilled == true) {
+          await storeUserCollegeLocally();
           Get.offAll(() => BottomNavigation());
         } else {
+          await storeUserCollegeLocally(); // Added this line to store college locally
           Get.to(() => UserDetails(userEmail: userEmail));
         }
       } else {
@@ -104,6 +151,7 @@ class _LoginPageState extends State<LoginPage> {
       Get.snackbar('Error', 'Error signing in with Google: $error');
     }
   }
+
 
   String _handleFirebaseError(dynamic error) {
     if (error is FirebaseAuthException) {
@@ -125,7 +173,6 @@ class _LoginPageState extends State<LoginPage> {
           return 'Network error. Please check your internet connection and try again.';
         case 'DEVICE_NOT_SUPPORTED':
           return 'Your device is not supported. Please try again on a different device.';
-
       // Add more cases for specific PlatformException errors
 
         default:
@@ -135,12 +182,6 @@ class _LoginPageState extends State<LoginPage> {
       return 'An unexpected error occurred. Please try again later.';
     }
   }
-
-
-
-
-
-
 
   Future<void> saveUserEmailLocally(String userEmail) async {
     try {
@@ -156,8 +197,10 @@ class _LoginPageState extends State<LoginPage> {
       DocumentReference userDocRef = _firestore.collection('usersDetails').doc(userEmail);
       DocumentSnapshot userDocSnapshot = await userDocRef.get();
 
+
       if (userDocSnapshot.exists) {
         bool userDetailsfilled = userDocSnapshot['userDetailsfilled'];
+        print('User details value printed');
         print('userDetailsfilled value for $userEmail: $userDetailsfilled');
         return userDetailsfilled ?? false;
       } else {

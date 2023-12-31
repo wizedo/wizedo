@@ -19,9 +19,9 @@ class cardSettingContainer extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: Container(
-        margin: EdgeInsets.all(5),
-        width: 110,
-        height: 110,
+        margin: EdgeInsets.all(10),
+        width: 100,
+        height: 100,
         decoration: cardContainerdecoration,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -29,7 +29,7 @@ class cardSettingContainer extends StatelessWidget {
             Icon(
               iconData,
               color: Colors.white,
-              size: 30,
+              size: 25,
             ),
             SizedBox(height: 5),
             Text(
