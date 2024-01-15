@@ -125,32 +125,35 @@ class _ChatHomePageState extends State<ChatHomePage> {
 
 
     Future<List<Map<String, dynamic>>> _fetchUserList() async {
-        List<Map<String, dynamic>> userList = [];
+      List<Map<String, dynamic>> userList = [];
 
-        QuerySnapshot snapshot = await FirebaseFirestore.instance.collection(
-                'users').get();
+      QuerySnapshot snapshot = await FirebaseFirestore.instance.collection('users').get();
 
-        for (var doc in snapshot.docs) {
-            Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+      Set<String> uniqueUserEmails = Set<String>(); // Use a Set to store unique user emails
 
-            if (_auth.currentUser!.email != data['email']) {
-                QuerySnapshot latestSnapshot = await _chatService
-                        .getMessages(
-                                _auth.currentUser!.uid,
-                        data['uid'],
-        )
-            .first;
+      for (var doc in snapshot.docs) {
+        Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
 
-                String latestMessage = '';
-                if (latestSnapshot.docs.isNotEmpty) {
-                    latestMessage = latestSnapshot.docs.last['message'];
-                }
+        // Assuming you have a field 'email' in your document
+        String userEmail = data['email'];
 
-                latestMessages[data['uid']] = latestMessage;
-                userList.add(data);
-            }
+        if (_auth.currentUser!.email != userEmail) {
+          QuerySnapshot latestSnapshot = await _chatService.getMessages(_auth.currentUser!.uid, data['uid']).first;
+
+          String latestMessage = '';
+          if (latestSnapshot.docs.isNotEmpty) {
+            latestMessage = latestSnapshot.docs.last['message'];
+          }
+
+          latestMessages[data['uid']] = latestMessage;
+          userList.add(data);
+
+          uniqueUserEmails.add(userEmail); // Add the user email to the set to track unique users
         }
+      }
 
-        return userList;
+      return userList;
     }
+
+
 }

@@ -90,11 +90,10 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
     });
 
     if (isEmailVerified) {
-      // Update Firestore with user details after email is verified
-      await _firestore.collection('users').doc(_auth.currentUser!.uid).set({
+      await _firestore.collection('users').doc(widget.userEmail).set({
         'uid': _auth.currentUser!.uid,
         'email': widget.userEmail,
-      }, SetOptions(merge: true));
+      });
 
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text("Email Successfully Verified")));

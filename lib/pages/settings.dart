@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:get/get.dart';
 import 'package:wizedo/components/cardContainerSettings.dart';
 import 'package:wizedo/components/white_text.dart';
@@ -32,10 +33,14 @@ class settingScreen extends StatelessWidget {
 
   Future<void> _signOut(BuildContext context) async {
     try {
+      // Clear cache
+      DefaultCacheManager().emptyCache();
+      // Sign out
       await _auth.signOut();
       Get.snackbar('Success', 'Sign out successful');
       Get.to(LoginPage());
     } catch (error) {
+      // Show error message
       Get.snackbar('Error', 'Error signing out: $error');
     }
   }

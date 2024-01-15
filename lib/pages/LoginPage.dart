@@ -114,41 +114,43 @@ class _LoginPageState extends State<LoginPage> {
       }
     }
   }
-  Future<void> signInWithGoogle(BuildContext context) async {
+
+
+  Future<dynamic> signInWithGoogle() async {
     try {
-      GoogleSignInAccount? googleSignInAccount = await _authService.signInWithGoogle();
-      print('gmail signin');
-      if (googleSignInAccount != null) {
-        print('user is signed through gmail ');
-        String userEmail = googleSignInAccount.email ?? '';
+      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
 
-        print('User signed in with Google. Email: $userEmail');
+      final GoogleSignInAuthentication? googleAuth =
+      await googleUser?.authentication;
 
-        DocumentSnapshot userDocSnapshot = await _firestore.collection('usersDetails').doc(userEmail).get();
+      final credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth?.accessToken,
+        idToken: googleAuth?.idToken,
+      );
+      Get.snackbar('Error', 'user logged in');
 
-        if (!userDocSnapshot.exists) {
-          await _firestore.collection('usersDetails').doc(userEmail).set({
-            'id': userEmail,
-            'userDetailsfilled': false,
-          });
-          print('User document created for $userEmail');
-        }
+      String userEmail = FirebaseAuth.instance.currentUser?.email ?? '';
 
-        bool userDetailsfilled = await getUserDetailsFilled(userEmail);
-        print(userDetailsfilled);
+      // Save user Gmail ID locally using shared preferences
+      await saveUserEmailLocally(emailController.text);
 
-        if (userDetailsfilled == true) {
-          await storeUserCollegeLocally();
-          Get.offAll(() => BottomNavigation());
-        } else {
-          await storeUserCollegeLocally(); // Added this line to store college locally
-          Get.to(() => UserDetails(userEmail: userEmail));
-        }
+      // Now, check userDetailsfilled and redirect the user
+      bool userDetailsfilled = await getUserDetailsFilled(userEmail);
+      print(userDetailsfilled);
+      await setUserDetailsFilledLocally(userEmail, userDetailsfilled);
+      print('user emails through google storing is $userEmail');
+      if (userDetailsfilled == true) {
+        await storeUserCollegeLocally();
+        Get.offAll(() => BottomNavigation());
       } else {
-        Get.snackbar('Error', 'Failed to sign in with Google.');
+
+        await storeUserCollegeLocally(); // Added this line to store college locally
+        Get.to(() => UserDetails(userEmail: userEmail));
       }
-    } catch (error) {
-      Get.snackbar('Error', 'Error signing in with Google: $error');
+      return await FirebaseAuth.instance.signInWithCredential(credential);
+    } on Exception catch (e) {
+      // TODO
+      print('exception->$e');
     }
   }
 
@@ -356,7 +358,7 @@ class _LoginPageState extends State<LoginPage> {
                     SizedBox(height: 25),
                   GestureDetector(
                     onTap: () {
-                      signInWithGoogle(context);
+                      signInWithGoogle();
                     },
                     child: Image.asset(
                       'lib/images/google.png',

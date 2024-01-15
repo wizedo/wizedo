@@ -23,7 +23,7 @@ class UserDetails extends StatefulWidget {
   State<UserDetails> createState() => _UserDetailsState();
 }
 
-class _UserDetailsState extends State<UserDetails> {
+class _UserDetailsState extends State<UserDetails> with WidgetsBindingObserver {
   List<String> errors = [];
   List<String> collegeItems = [];
   String? _selectedState;
@@ -78,6 +78,12 @@ class _UserDetailsState extends State<UserDetails> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance?.addObserver(this);
+  }
+
+  @override
   void dispose() {
     // Dispose of your controllers to free up resources
     _searchController.dispose();
@@ -85,8 +91,19 @@ class _UserDetailsState extends State<UserDetails> {
     unameController.dispose();
     phonenoController.dispose();
     userYearController.dispose();
+    WidgetsBinding.instance?.removeObserver(this);
 
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) async {
+    if (state == AppLifecycleState.paused) {
+      // App is paused (backgrounded or closed)
+      // Set userDetailsFilled to false
+      await setUserDetailsFilledLocally(widget.userEmail, false);
+      print('UserDetailsFilled set to false because the app is paused.');
+    }
   }
 
   Future<void> saveCollegeLocally(String collegeName, String userEmail) async {
