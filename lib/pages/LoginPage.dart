@@ -32,29 +32,25 @@ class _LoginPageState extends State<LoginPage> {
   final passController = TextEditingController();
   final AuthService _authService = AuthService();
 
-  Future<void> storeUserCollegeLocally() async {
+  Future<void> storeUserCollegeLocally(String userEmail) async {
     try {
-      final user = FirebaseAuth.instance.currentUser;
-      if (user != null) {
-        final firestore = FirebaseFirestore.instance;
-        final email = user.email!;
-        final docSnapshot = await firestore.collection('usersDetails').doc(email).get();
-
+      print("in try block of storeusercollegelocally");
+        final docSnapshot = await _firestore.collection('usersDetails').doc(userEmail).get();
         if (docSnapshot.exists) {
           final userData = docSnapshot.data() as Map<String, dynamic>;
           final userCollege = userData['college'];
           print('User College stored locally: $userCollege');
 
           // Store the user's college name locally
-          await saveCollegeLocally(userCollege, email);
+          await saveCollegeLocally(userCollege, userEmail);
         } else {
           print('User details document does not exist');
         }
-      }
     } catch (error) {
       print('Error fetching user details: $error');
     }
   }
+
 
   Future<void> saveCollegeLocally(String collegeName, String userEmail) async {
     try {
@@ -98,7 +94,7 @@ class _LoginPageState extends State<LoginPage> {
       await setUserDetailsFilledLocally(emailController.text,userDetailsfilled);
 
       if (userDetailsfilled == true) {
-        await storeUserCollegeLocally();
+        await storeUserCollegeLocally(emailController.text);
         Get.offAll(() => BottomNavigation());
       } else {
         print('going to userdetails page from login page');
@@ -120,39 +116,48 @@ class _LoginPageState extends State<LoginPage> {
     try {
       final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
 
+      if (googleUser == null) {
+        // User canceled the sign-in process
+        print('user has clicked out of google sign in pop up');
+        return null;
+      }
+
       final GoogleSignInAuthentication? googleAuth =
-      await googleUser?.authentication;
+      await googleUser.authentication;
 
       final credential = GoogleAuthProvider.credential(
         accessToken: googleAuth?.accessToken,
         idToken: googleAuth?.idToken,
       );
+
       Get.snackbar('Error', 'user logged in');
 
-      String userEmail = FirebaseAuth.instance.currentUser?.email ?? '';
+      String userEmail = googleUser.email;
+      print("useremail through google sign is: $userEmail");
 
       // Save user Gmail ID locally using shared preferences
-      await saveUserEmailLocally(emailController.text);
+      await saveUserEmailLocally(userEmail);
 
       // Now, check userDetailsfilled and redirect the user
       bool userDetailsfilled = await getUserDetailsFilled(userEmail);
       print(userDetailsfilled);
       await setUserDetailsFilledLocally(userEmail, userDetailsfilled);
-      print('user emails through google storing is $userEmail');
+
       if (userDetailsfilled == true) {
-        await storeUserCollegeLocally();
+        await storeUserCollegeLocally(userEmail);
         Get.offAll(() => BottomNavigation());
       } else {
-
-        await storeUserCollegeLocally(); // Added this line to store college locally
         Get.to(() => UserDetails(userEmail: userEmail));
       }
+
       return await FirebaseAuth.instance.signInWithCredential(credential);
-    } on Exception catch (e) {
-      // TODO
+    } catch (e) {
+      // Handle exceptions appropriately
       print('exception->$e');
+      return null;
     }
   }
+
 
 
   String _handleFirebaseError(dynamic error) {
@@ -196,6 +201,12 @@ class _LoginPageState extends State<LoginPage> {
 
   Future<bool> getUserDetailsFilled(String userEmail) async {
     try {
+
+      if (userEmail.isEmpty) {
+        print('Error: Empty email passed to getUserDetailsFilled');
+        return false;
+      }
+
       DocumentReference userDocRef = _firestore.collection('usersDetails').doc(userEmail);
       DocumentSnapshot userDocSnapshot = await userDocRef.get();
 

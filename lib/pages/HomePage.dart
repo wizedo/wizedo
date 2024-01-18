@@ -42,9 +42,23 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  Future<String?> getUserEmailLocally() async {
+    try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String? userEmail = prefs.getString('userEmail');
+      return userEmail;
+    } catch (error) {
+      print('Error fetching user email locally: $error');
+      return null;
+    }
+  }
+
+
   Future<String?> getSelectedCollegeLocally(String userEmail) async {
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
+      print("after this statement select college locally should show");
+      print(prefs.getString('selectedCollege_$userEmail'));
       return prefs.getString('selectedCollege_$userEmail');
     } catch (error) {
       print('Error getting selected college locally: $error');
@@ -54,15 +68,13 @@ class _HomePageState extends State<HomePage> {
 
   Future<void> getUserCollege() async {
     try {
-      final user = FirebaseAuth.instance.currentUser;
-      if (user != null) {
-        final email = user.email!;
-        String? userCollege = await getSelectedCollegeLocally(email);
+        String? email=await getUserEmailLocally();
+        String? userCollege = await getSelectedCollegeLocally(email!);
         setState(() {
           userCollegee = userCollege ?? 'null set manually2';
           print('User College in homepage: $userCollegee'); // Print the user's college name
         });
-      }
+
     } catch (error) {
       print('Error getting user college: $error');
     }
@@ -82,9 +94,6 @@ class _HomePageState extends State<HomePage> {
 
     return userName;
   }
-
-
-
 
   @override
   void initState() {
@@ -320,6 +329,7 @@ class _HomePageState extends State<HomePage> {
                                       priceRange: data['totalPayment'],
                                       finalDate: data['dueDate'],
                                       postid: data['postId'],
+                                      emailid:data['emailid']
                                     ),
                                   ),
                                 );

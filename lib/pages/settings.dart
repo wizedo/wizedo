@@ -15,10 +15,15 @@ import '../components/gradientBoxDecoration.dart';
 import '../components/mPlusRoundedText.dart';
 import '../components/myCustomAppliedCard.dart';
 import 'LoginPage.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+
 
 class settingScreen extends StatelessWidget {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final CollectionReference fireStore;
+  final GoogleSignIn _googleSignIn = GoogleSignIn();
+
+
 
   settingScreen({Key? key})
       : fireStore = FirebaseFirestore.instance.collection('usersDetails'),
@@ -33,52 +38,77 @@ class settingScreen extends StatelessWidget {
 
   Future<void> _signOut(BuildContext context) async {
     try {
-      // Clear cache
-      DefaultCacheManager().emptyCache();
-      // Sign out
+      // Sign out from Firebase
       await _auth.signOut();
+
+      // Disconnect from Google Sign-In (if possible)
+      if (await _googleSignIn.isSignedIn()) {
+        try {
+          await _googleSignIn.disconnect();
+          print("signed out through google signin");
+        } catch (disconnectError) {
+          // Handle specific error related to disconnecting from Google Sign-In
+          print('Error disconnecting from Google Sign-In: $disconnectError');
+        }
+      }else{
+        print("signout normally");
+      }
+
+      // Clear cache after sign-out actions
+      DefaultCacheManager().emptyCache();
+
+      // Show success message and navigate to the login page
       Get.snackbar('Success', 'Sign out successful');
       Get.to(LoginPage());
     } catch (error) {
-      // Show error message
+      // Show error message if there's an issue with sign-out
       Get.snackbar('Error', 'Error signing out: $error');
     }
   }
 
+
   Future<void> getData(BuildContext context) async {
-    QuerySnapshot querySnapshot =
-    await fireStore.where('id', isEqualTo: user?.email).get();
+    User? user = FirebaseAuth.instance.currentUser;
 
-    if (querySnapshot.docs.isNotEmpty) {
-      final userData =
-      querySnapshot.docs.first.data() as Map<String, dynamic>;
+    if (user != null) {
+      QuerySnapshot querySnapshot =
+      await fireStore.where('id', isEqualTo: user?.email).get();
+      print('User Email: ${user?.email}');
 
-      final String id = userData['id'];
-      final String college = userData['college'];
-      final String name = userData['name'];
-      final String course = userData['course'];
-      final int phoneNumber = userData['phoneNumber'];
+      if (querySnapshot.docs.isNotEmpty) {
+        final userData =
+        querySnapshot.docs.first.data() as Map<String, dynamic>;
 
-      print('ID: $id, College: $college, Name: $name, Course: $course, Phone: $phoneNumber');
-      print(userData);
+        final String id = userData['id'];
+        final String college = userData['college'];
+        final String name = userData['name'];
+        final String course = userData['course'];
+        final int phoneNumber = userData['phoneNumber'];
 
-      Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (context) => ProfilePage(
-            userDetails: UserDetails(
-              id: id,
-              name: name,
-              course: course,
-              college: college,
-              phone: phoneNumber,
+        print('ID: $id, College: $college, Name: $name, Course: $course, Phone: $phoneNumber');
+        print(userData);
+
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => ProfilePage(
+              userDetails: UserDetails(
+                id: id,
+                name: name,
+                course: course,
+                college: college,
+                phone: phoneNumber,
+              ),
             ),
           ),
-        ),
-      );
+        );
+      } else {
+        print('User not found');
+      }
     } else {
-      print('User not found');
+      print('User is not authenticated');
     }
   }
+
 
   @override
   Widget build(BuildContext context) {

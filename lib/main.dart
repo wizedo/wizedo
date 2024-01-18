@@ -13,6 +13,7 @@ import 'package:wizedo/pages/UserDetailsPage.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
   await Firebase.initializeApp();
   // await FirebaseAppCheck.instance.activate();
   runApp(const MyApp());

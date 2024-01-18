@@ -17,6 +17,7 @@ class DetailsScreen extends StatefulWidget {
   final int? priceRange;
   final String? postid;
   final String? finalDate;
+  final String? emailid;
 
   const DetailsScreen({
     Key? key,
@@ -27,6 +28,7 @@ class DetailsScreen extends StatefulWidget {
      this.priceRange,
      this.finalDate,
      this.postid,
+     this.emailid
   }) : super(key: key);
 
 
@@ -241,17 +243,35 @@ class _DetailsScreenState extends State<DetailsScreen> {
             buttonText: 'Apply',
             fontWeight: FontWeight.bold,
             onPressed: () {
-              addToAcceptedCollection(
-                category: widget.category,
-                subject: widget.subject,
-                finalDate: widget.finalDate,
-                description: widget.description,
-                priceRange: widget.priceRange,
-                postid: widget.postid,
-              );
-          },
-
+              // Check if the current user's email matches the email associated with the post
+              final user = FirebaseAuth.instance.currentUser;
+              if (user != null) {
+                // Ensure that widget.emailid is not null
+                if (widget.emailid != null) {
+                  if (user.email == widget.emailid) {
+                    // User's email matches the email associated with the post, show a Snackbar
+                    Get.snackbar('Cannot Apply', 'You have posted this job, and you cannot apply for it.');
+                  } else {
+                    // User's email is different, proceed to apply
+                    addToAcceptedCollection(
+                      category: widget.category,
+                      subject: widget.subject,
+                      finalDate: widget.finalDate,
+                      description: widget.description,
+                      priceRange: widget.priceRange,
+                      postid: widget.postid,
+                      emailid: widget.emailid
+                    );
+                  }
+                } else {
+                  // Handle the case where widget.emailid is null
+                  print('Widget emailid is null.');
+                  // You might want to show an error message or handle it according to your logic.
+                }
+              }
+            },
           ),
+
         )
       ),
 
@@ -266,19 +286,20 @@ Future<void> addToAcceptedCollection({
   required String? description,
   required int? priceRange,
   required String? postid,
+  required String? emailid
 }) async {
   try {
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
       final firestore = FirebaseFirestore.instance;
-      final email = user.email!;
+      final workeremail = user.email!;
 
       // Fetch user collegee from Firestore
-      final userDoc = await firestore.collection('usersDetails').doc(email).get();
+      final userDoc = await firestore.collection('usersDetails').doc(workeremail).get();
       String userCollegee = userDoc['college'] ?? 'Unknown College';
       print(userCollegee);
 
-      final userDocRef = firestore.collection('accepted').doc(email);
+      final userDocRef = firestore.collection('accepted').doc(workeremail);
 
       // Check if the document with the given postid already exists
       final docSnapshot = await userDocRef.collection('acceptedPosts').doc(postid).get();
@@ -296,8 +317,9 @@ Future<void> addToAcceptedCollection({
           'priceRange': priceRange,
           'status': 'applied',
           'postid': postid,
-          'emailid': email,
+          'workeremail': workeremail,
           'createdAt': FieldValue.serverTimestamp(),
+          'recieveremail':emailid
         });
 
         Get.snackbar('Success', 'Details added to the accepted collection');
