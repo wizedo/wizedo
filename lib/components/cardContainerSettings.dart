@@ -3,6 +3,14 @@ import 'package:flutter/material.dart';
 Decoration cardContainerdecoration = BoxDecoration(
   color: Color(0xFF261D3C),
   borderRadius: BorderRadius.circular(15),
+  boxShadow: [
+    BoxShadow(
+      color: Colors.black.withOpacity(0.1),
+      spreadRadius: 1,
+      blurRadius: 3,
+      offset: Offset(0, 2),
+    ),
+  ],
 );
 
 class cardSettingContainer extends StatelessWidget {
@@ -34,7 +42,7 @@ class cardSettingContainer extends StatelessWidget {
             SizedBox(height: 5),
             Text(
               text,
-              style: TextStyle(color: Colors.white,fontSize: 12),
+              style: TextStyle(color: Colors.white, fontSize: 12),
             ),
           ],
         ),

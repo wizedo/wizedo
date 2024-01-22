@@ -286,7 +286,7 @@ Future<void> addToAcceptedCollection({
   required String? description,
   required int? priceRange,
   required String? postid,
-  required String? emailid
+  required String? emailid,
 }) async {
   try {
     final user = FirebaseAuth.instance.currentUser;
@@ -294,10 +294,10 @@ Future<void> addToAcceptedCollection({
       final firestore = FirebaseFirestore.instance;
       final workeremail = user.email!;
 
-      // Fetch user collegee from Firestore
+      // Fetch user college from Firestore
       final userDoc = await firestore.collection('usersDetails').doc(workeremail).get();
-      String userCollegee = userDoc['college'] ?? 'Unknown College';
-      print(userCollegee);
+      String userCollege = userDoc['college'] ?? 'Unknown College';
+      print(userCollege);
 
       final userDocRef = firestore.collection('accepted').doc(workeremail);
 
@@ -309,24 +309,28 @@ Future<void> addToAcceptedCollection({
         Get.snackbar('Already Applied', 'You have already applied for this job.');
       } else {
         // Document with the given postid doesn't exist, add the details
-        await userDocRef.collection('acceptedPosts').doc(postid).set({
-          'category': category,
-          'subject': subject,
-          'finalDate': finalDate,
-          'description': description,
-          'priceRange': priceRange,
-          'status': 'applied',
-          'postid': postid,
-          'workeremail': workeremail,
-          'createdAt': FieldValue.serverTimestamp(),
-          'recieveremail':emailid
-        });
+        await firestore.runTransaction((transaction) async {
+          // Optionally, add the post to a subcollection under the college document
+          final collegePostRef = firestore
+              .collection('colleges')
+              .doc(userCollege)
+              .collection('collegePosts')
+              .doc(postid);
 
-        Get.snackbar('Success', 'Details added to the accepted collection');
+          List<String> ids = [workeremail ?? '', emailid ?? '', postid ?? ''];
 
-        // Update the status of the post in the 'collegePosts' collection
-        await firestore.collection('colleges').doc(userCollegee).collection('collegePosts').doc(postid).update({
-          'status': 'applied',
+          String chatRoomId = ids.join("_"); // Combine workeremail, emailid, and postid
+
+          // Update the status of the post in the 'collegePosts' collection
+          transaction.update(collegePostRef, {
+            'status': 'Applied',
+            'workeremail': workeremail,
+            'recieveremail': emailid,
+            'amountpaid': 'yes',
+            'chatRoomId': chatRoomId, // Add chatRoomId to the data
+          });
+
+          Get.snackbar('Success', 'Details added to the accepted collection');
         });
       }
     }
@@ -335,5 +339,8 @@ Future<void> addToAcceptedCollection({
     Get.snackbar('Error', 'Failed to add details to accepted collection');
   }
 }
+
+
+
 
 

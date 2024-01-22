@@ -550,13 +550,13 @@ class _UserDetailsState extends State<UserDetails> with WidgetsBindingObserver {
                                     bool userDetailsFilledLocally = await getUserDetailsFilledLocally(email);
                                     print('userDetailsFilledLocally: $userDetailsFilledLocally');
 
-                                    Get.snackbar('Success', 'Updated successfully');
+                                    Get.snackbar('Success', 'Please login into your account');
 
                                     await Navigator.push(
                                       context,
                                       PageTransition(
                                         type: PageTransitionType.fade,
-                                        child: BottomNavigation(),
+                                        child: LoginPage(),
                                       ),
                                     );
 
@@ -611,6 +611,4 @@ class _UserDetailsState extends State<UserDetails> with WidgetsBindingObserver {
     }
     return isValid;
   }
-
-
 }

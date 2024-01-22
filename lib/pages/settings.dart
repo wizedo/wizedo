@@ -116,15 +116,12 @@ class settingScreen extends StatelessWidget {
       backgroundColor: backgroundColor,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios_rounded, color: Colors.white),
-          onPressed: () {
-            Get.back();
-          },
-        ),
-        title: Text(
-          'Settings',
-          style: mPlusRoundedText.copyWith(fontSize: 18),
+        title: Align(
+          alignment: Alignment.center,
+          child: Text(
+            'Settings',
+            style: mPlusRoundedText.copyWith(fontSize: 18),
+          ),
         ),
         centerTitle: true,
       ),

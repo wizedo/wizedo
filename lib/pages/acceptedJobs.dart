@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wizedo/components/JobCard.dart';
 import 'package:wizedo/components/mPlusRoundedText.dart';
 import 'package:wizedo/components/white_text.dart';
@@ -20,7 +21,10 @@ class acceptedPage extends StatefulWidget {
 
 class _acceptedPageState extends State<acceptedPage> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  String _selectedCategory = 'College Project';
+  String _selectedCategory = 'Applied';
+  String userCollegee = 'null';
+  String userEmail='null';
+
 
   // Function to clean up the username
   String cleanUpUserName(String email) {
@@ -33,18 +37,69 @@ class _acceptedPageState extends State<acceptedPage> {
     print(userName);
     return userName;
   }
+  Future<String> getUserEmailLocally() async {
+    try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String? userEmail = prefs.getString('userEmail');
+      print('my username in acceptedjobs page is: $userEmail');
+      return userEmail ?? ''; // Return an empty string if userEmail is null
+    } catch (error) {
+      print('Error fetching user email locally: $error');
+      return '';
+    }
+  }
+
+
+  Future<String?> getSelectedCollegeLocally(String userEmail) async {
+    try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      print("after this statement select college locally should show");
+      print(prefs.getString('selectedCollege_$userEmail'));
+      return prefs.getString('selectedCollege_$userEmail');
+    } catch (error) {
+      print('Error getting selected college locally: $error');
+      return null;
+    }
+  }
+
+  Future<void> getUserCollege() async {
+    try {
+      print('i am in acceptedjobs page');
+      String? email=await getUserEmailLocally();
+      String? userCollege = await getSelectedCollegeLocally(email!);
+      setState(() {
+        userCollegee = userCollege ?? 'null set manually2';
+        print('User College in acceptedpage: $userCollegee'); // Print the user's college name
+      });
+
+    } catch (error) {
+      print('Error getting user college: $error');
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    initializeData();
+  }
+
+  Future<void> initializeData() async {
+    userEmail = await getUserEmailLocally();
+    getUserCollege();
+  }
+
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.transparent,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white),
-          onPressed: () {
-            Get.back();
-          },
-        ),
+        // leading: IconButton(
+        //   icon: Icon(Icons.arrow_back_ios_rounded, color: Colors.white),
+        //   onPressed: () {
+        //     Get.back();
+        //   },
+        // ),
         title: WhiteText(
           'Pending Jobs',
           fontSize: 20,
@@ -145,61 +200,58 @@ class _acceptedPageState extends State<acceptedPage> {
                 child: Container(
                   width: 360,
                   height: 500,
-                  child: FutureBuilder<QuerySnapshot<Map<String, dynamic>>>(
-                    future: getUserAcceptedPosts(),
+                  child: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+                    stream: FirebaseFirestore.instance
+                        .collection('colleges')
+                        .doc(userCollegee)
+                        .collection('collegePosts')
+                        .where('status', isEqualTo: 'Applied')
+                        .where(_selectedCategory == 'Applied' ? 'workeremail' : 'recieveremail', isEqualTo: userEmail)
+                        .snapshots(),
                     builder: (context, AsyncSnapshot<QuerySnapshot<Map<String, dynamic>>> snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
                         return Center(child: CircularProgressIndicator());
-                      } else if (snapshot.connectionState == ConnectionState.done) {
-                        final userAcceptedPosts = snapshot.data!.docs;
-                        print(userAcceptedPosts);
-                        if (userAcceptedPosts.isNotEmpty) {
+                      } else if (snapshot.connectionState == ConnectionState.active) {
+                        if (snapshot.data!.docs.isNotEmpty) {
                           return ListView.builder(
-                            itemCount: userAcceptedPosts.length,
+                            itemCount: snapshot.data!.docs.length,
                             itemBuilder: (BuildContext context, int index) {
-                              var data = userAcceptedPosts[index].data() as Map<String, dynamic>?; // Change this line
-                              if (data != null) { // Add a null check
-                                Timestamp date = data['createdAt'];
-                                var finalDate = DateTime.parse(date.toDate().toString());
+                              var data = snapshot.data!.docs[index].data() as Map<String, dynamic>;
+                              Timestamp date = snapshot.data!.docs[index]['createdAt'];
+                              var finalDate = DateTime.parse(date.toDate().toString());
 
-                                return GestureDetector(
-                                  onTap: () {
-                                    print(data);
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) => DetailsScreen(
-                                          category: data['category'],
-                                          subject: data['subject'],
-                                          date: data['createdAt'],
-                                          description: data['description'],
-                                          // priceRange: data['priceRange'].toString(), // Convert int to String
-                                          finalDate: data['finalDate'],
-                                          postid: data['postId'],
-                                        ),
+                              return GestureDetector(
+                                onTap: () {
+                                  print(data);
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => DetailsScreen(
+                                        category: data['category'],
+                                        subject: data['subCategory'],
+                                        date: data['createdAt'],
+                                        description: data['description'],
+                                        priceRange: data['totalPayment'],
+                                        finalDate: data['dueDate'],
+                                        postid: data['postId'],
+                                        emailid: data['emailid'],
                                       ),
-                                    );
-                                  },
-                                  child: MyCustomCard(
-                                    subject: data['subject'],
-                                    date: '1st jan 2023',
-                                    priceRange: data['priceRange'].toString(), // Convert int to String
-                                    icon: Icons.star,
-                                    description: 'hello',
-                                  ),
-                                );
-
-                              } else {
-                                // Handle the case where data is null
-                                return const Center(
-                                  child: Text('No posts'),
-                                );
-                              }
+                                    ),
+                                  );
+                                },
+                                child: MyCustomCard(
+                                  subject: data['subCategory'],
+                                  date: '1st jan 2023',
+                                  priceRange: data['totalPayment'].toString(), // Check for null
+                                  icon: Icons.star,
+                                  description: 'hello',
+                                ),
+                              );
                             },
                           );
                         } else {
                           return const Center(
-                            child: Text('No accepted posts'),
+                            child: Text('No active posts'),
                           );
                         }
                       }
@@ -208,6 +260,9 @@ class _acceptedPageState extends State<acceptedPage> {
                       );
                     },
                   ),
+
+
+
                 ),
               ),
 // ...
@@ -217,20 +272,6 @@ class _acceptedPageState extends State<acceptedPage> {
         ),
       ),
     );
-  }
-
-  Future<QuerySnapshot<Map<String, dynamic>>> getUserAcceptedPosts() async {
-    final user = _auth.currentUser;
-    if (user != null) {
-      final firestore = FirebaseFirestore.instance;
-      final email = user.email!;
-      QuerySnapshot<Map<String, dynamic>> querySnapshot =
-      await firestore.collection('accepted').doc(email).collection('acceptedPosts').get();
-      return querySnapshot;
-
-    } else {
-      throw Exception('User not logged in');
-    }
   }
 
 

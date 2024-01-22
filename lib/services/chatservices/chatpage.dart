@@ -5,19 +5,29 @@ import 'package:get/get_core/src/get_main.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../Widgets/colors.dart';
 import '../../components/my_text_field.dart';
 import 'chatcontroller.dart';
 import 'chatservice.dart';
 
+
 class ChatPage extends StatefulWidget {
   final String receiveruserEmail;
   final String receiverUserID;
+  final String? workeremail; // Optional parameter
+  final String? recieveremail; // Optional parameter
+  final String? chatroomid;
+
   const ChatPage({
-    super.key,
     required this.receiveruserEmail,
-    required this.receiverUserID
-  });
+    required this.receiverUserID,
+    this.workeremail,
+    this.recieveremail,
+    required this.chatroomid,
+    Key? key,
+  }) : super(key: key);
+
   @override
   State<ChatPage> createState() => _ChatPageState();
 }
@@ -33,10 +43,64 @@ class _ChatPageState extends State<ChatPage> {
   //for automatic scrolling
   final ScrollController _scrollController = ScrollController();
 
+  String userEmail='null';
+  String otherEmail='null';
+  String boka='null';
+
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeData();
+    print('below is workeremail and recieveremail from chat page');
+    print(widget.workeremail);
+    print(widget.recieveremail);
+    print(widget.receiverUserID);
+    otherEmail = getOtherEmail(userEmail, widget.workeremail, widget.recieveremail);
+    print('below is otheremail');
+    print(otherEmail);
+    print('below printig boka');
+    print(boka);
+    _getLatestMessage(); // Fetch the latest message when the widget is initialized
+  }
+
+  Future<void> _initializeData() async {
+    await initializeData();
+    otherEmail = getOtherEmail(userEmail, widget.workeremail, widget.recieveremail);
+    _getLatestMessage();
+  }
+
+  Future<void> initializeData() async {
+    userEmail = await getUserEmailLocally() ?? '';
+  }
+
+  Future<String> getUserEmailLocally() async {
+    try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String? userEmail = prefs.getString('userEmail');
+      print('my username in chatpage particular page is: $userEmail');
+      return userEmail ?? ''; // Return an empty string if userEmail is null
+    } catch (error) {
+      print('Error fetching user email locally: $error');
+      return '';
+    }
+  }
+
+  String getOtherEmail(String userEmail, String? workeremail, String? recieveremail) {
+    print('below is useremail and workeremail');
+    print(userEmail);
+    print(workeremail);
+    if (userEmail != workeremail) {
+      return workeremail ?? 'DefaultRecieverEmail';
+    } else {
+      return recieveremail ?? 'DefaultRecieverEmail';
+    }
+  }
+
   void sendMessage()async{
     //only send message if there is something is send
     if(_messageController.text.isNotEmpty){
-      await _chatService.sendMessage(widget.receiverUserID, _messageController.text);
+      await _chatService.sendMessage(widget.receiverUserID, _messageController.text,widget.chatroomid!);
 
       //clear the text contorller after sending message
       _messageController.clear();
@@ -53,17 +117,13 @@ class _ChatPageState extends State<ChatPage> {
 
   String latestMessage = ''; // Store the latest received message here
 
-  @override
-  void initState() {
-    super.initState();
-    _getLatestMessage(); // Fetch the latest message when the widget is initialized
-  }
 
   // Function to get the latest message
   void _getLatestMessage() async {
     QuerySnapshot latestSnapshot = await _chatService.getMessages(
-      _firebaseAuth.currentUser!.uid,
-      widget.receiverUserID,
+        _firebaseAuth.currentUser!.uid,
+        widget.receiverUserID,
+        widget.chatroomid!
     ).first;
 
     if (latestSnapshot.docs.isNotEmpty) {
@@ -73,20 +133,28 @@ class _ChatPageState extends State<ChatPage> {
         latestMessage = latestData['message'];
       });
 
-      // Scroll to the end after updating the latest message
-      _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
+      // Check if the controller has clients before trying to jump
+      if (_scrollController.hasClients) {
+        // Scroll to the end after updating the latest message
+        _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
+      }
     }
   }
+
 
   @override
   Widget build(BuildContext context) {
     // Set the system overlay style
     // Set the system overlay style for status and navigation bars
-    String receiverDisplayName = widget.receiveruserEmail.split('@').first;
+    // String receiverDisplayName = widget.receiveruserEmail.split('@').first;
+
+
+
+
     return Scaffold(
       appBar: AppBar(
         title: Center(
-          child: Text(receiverDisplayName,style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold,fontSize: 16),
+          child: Text(otherEmail.split('@').first ?? 'Default Title',style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold,fontSize: 16),
           ),
         ),
         backgroundColor: backgroundColor,
@@ -136,13 +204,15 @@ class _ChatPageState extends State<ChatPage> {
   Widget _buildMessageList(){
     return StreamBuilder(//This widget helps handle real-time updates from a stream of data
         stream: _chatService.getMessages(//This function returns a stream of messages between the current user and the receiver user.
-            widget.receiverUserID, _firebaseAuth.currentUser!.uid),
+            widget.receiverUserID, _firebaseAuth.currentUser!.uid,widget.chatroomid!),
         builder: (context,snapshot){//This is where the UI is built based on the state of the stream's data.
           if(snapshot.hasError){
             return Text('Error${snapshot.error}');
           }
-          if(snapshot.connectionState==ConnectionState.waiting){
-            return const Text('Loading...');
+          if(snapshot.connectionState == ConnectionState.waiting){
+            return Center(
+              child: CircularProgressIndicator(),
+            );
           }
           WidgetsBinding.instance!.addPostFrameCallback((_) {
             // Scroll to the end after the ListView is built and updated
@@ -158,18 +228,6 @@ class _ChatPageState extends State<ChatPage> {
     //build message item
     Widget _buildMessageItem(DocumentSnapshot document){
       Map<String,dynamic> data=document.data() as Map<String,dynamic>;
-      //above code  is extracting the data of a specific message like
-      // When you call document.data() on the DocumentSnapshot object, it retrieves the data and assigns it to the data map:
-      //
-      // Map<String, dynamic> data = {
-      // "senderId": "user123",
-      // "senderEmail": "user123@gmail.com",
-      // "message": "Hello, how are you?",
-      // "timestamp": 1678987654321
-      // };
-      //After this assignment, you can access the data using the keys in the data map. For example:
-
-      // String senderId = data['senderId']; // "user123"
 
       //align msg to right if sender is user otherwise left
       var alignment =(data['senderId']==_firebaseAuth.currentUser!.uid)?
@@ -205,7 +263,24 @@ class _ChatPageState extends State<ChatPage> {
       );
 
       // Extract part of the email before '@gmail.com'
-      String senderDisplayName = data['senderEmail'].split('@')[0];
+      String senderDisplayName = (data['senderEmail'] ?? '').split('@')[0];
+
+// Determine the alignment and padding based on sender's ID
+      CrossAxisAlignment crossAlignment = (data['senderId'] == _firebaseAuth.currentUser!.uid)
+          ? CrossAxisAlignment.end
+          : CrossAxisAlignment.start;
+
+      double leftPadding = (data['senderId'] == _firebaseAuth.currentUser!.uid)
+          ? MediaQuery.of(context).size.width * 0.15 // 15% of screen width for sent messages
+          : 0; // No left padding for received messages
+
+      double rightPadding = (data['senderId'] == _firebaseAuth.currentUser!.uid)
+          ? 0 // No right padding for sent messages
+          : MediaQuery.of(context).size.width * 0.15; // 15% of screen width for received messages
+
+      EdgeInsets padding = (data['senderId'] == _firebaseAuth.currentUser!.uid)
+          ? EdgeInsets.fromLTRB(leftPadding, 10.0, rightPadding, 10.0)
+          : EdgeInsets.fromLTRB(leftPadding, 10.0, rightPadding, 10.0);
 
       if (data['timestamp'] == null) {
         return Container(); // Return an empty container if the timestamp is null
@@ -213,64 +288,77 @@ class _ChatPageState extends State<ChatPage> {
 
       return Container(
         alignment: alignment,
-
         child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Column(
-            //This determines the horizontal alignment of the column's children based on the condition.
-            crossAxisAlignment: (data['senderId']==_firebaseAuth.currentUser!.uid)?
-            CrossAxisAlignment.end : CrossAxisAlignment.start,
-            //If the senderId matches the current user's UID, the children will be aligned to the bottom, otherwise to the top.
-            mainAxisAlignment: (data['senderId']==_firebaseAuth.currentUser!.uid)?
-            MainAxisAlignment.end : MainAxisAlignment.start,
-            children: [
-              Text(senderDisplayName, style: TextStyle(fontSize: 9)),
-              const SizedBox(height: 5),
-              Container(
-                padding: EdgeInsets.all(9),
-                decoration: BoxDecoration(
-                  borderRadius: borderRadius,
-                  color: bubbleColor,
-                  // border: Border.all(color: borderColor, width: 0.7),
-                  boxShadow: [boxShadow]// Set the border color
+          padding: padding,
+          child: Padding(
+            padding: const EdgeInsets.only(top: 5,bottom: 5,left: 10,right: 10),
+            child: Column(
+              //This determines the horizontal alignment of the column's children based on the condition.
+              crossAxisAlignment: (data['senderId']==_firebaseAuth.currentUser!.uid)?
+              CrossAxisAlignment.end : CrossAxisAlignment.start,
+              //If the senderId matches the current user's UID, the children will be aligned to the bottom, otherwise to the top.
+              mainAxisAlignment: (data['senderId']==_firebaseAuth.currentUser!.uid)?
+              MainAxisAlignment.end : MainAxisAlignment.start,
+              children: [
+                Text(senderDisplayName, style: TextStyle(fontSize: 9)),
+                const SizedBox(height: 5),
+                Container(
+                  padding: EdgeInsets.all(9),
+                  decoration: BoxDecoration(
+                    borderRadius: borderRadius,
+                    color: bubbleColor,
+                    // border: Border.all(color: borderColor, width: 0.7),
+                    boxShadow: [boxShadow]// Set the border color
+                  ),
+                  child: Text(
+                    data['message'],
+                    style: TextStyle(fontSize: 13, color: textColor),
+                  ),
                 ),
-                child: Text(
-                  data['message'],
-                  style: TextStyle(fontSize: 13, color: textColor),
+                const SizedBox(height: 2),
+                Text(
+                  _formatTimestamp(data['timestamp']), // Format the timestamp here
+                  style: TextStyle(fontSize: 8, color: Colors.grey),
                 ),
-              ),
-              const SizedBox(height: 2),
-              Text(
-                _formatTimestamp(data['timestamp']), // Format the timestamp here
-                style: TextStyle(fontSize: 8, color: Colors.grey),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       );
     }
 
   //build message input
+  //build message input
   Widget _buildMessageInput(){
     return Container(
       color: Colors.transparent,
       child: Padding(
         padding: const EdgeInsets.only(top: 0,bottom: 2,right: 0,left: 20),
-        child: Row(
-          children: [
-            Expanded(child: MyTextField(
-              controller: _messageController,
-              label: 'Enter Message',
-              obscureText: false,
-            )),
-            //send button
-            Container(child: Padding(
-              padding: const EdgeInsets.all(10.0),
-              child: IconButton(onPressed: sendMessage, icon: Icon(Icons.send,color: Color(0xFF21215E).withOpacity(0.7) ,)),
-            ))
-          ],
+        child: SingleChildScrollView(
+          child: Row(
+            children: [
+              Expanded(
+                child: MyTextField(
+                  controller: _messageController,
+                  label: 'Enter Message',
+                  obscureText: false,
+                ),
+              ),
+              //send button
+              Container(
+                child: Padding(
+                  padding: const EdgeInsets.all(10.0),
+                  child: IconButton(
+                    onPressed: sendMessage,
+                    icon: Icon(Icons.send, color: Color(0xFF21215E).withOpacity(0.7)),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
+
 }

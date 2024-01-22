@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../Widgets/colors.dart';
 import '../services/chatservices/chatpage.dart';
 import '../services/chatservices/chatservice.dart';
@@ -11,102 +12,167 @@ import 'package:firebase_auth/firebase_auth.dart';
 class ChatHomePage extends StatefulWidget {
   const ChatHomePage({super.key});
 
-    @override
-    State<ChatHomePage> createState() => _ChatHomePageState();
+  @override
+  State<ChatHomePage> createState() => _ChatHomePageState();
 }
 
 class _ChatHomePageState extends State<ChatHomePage> {
-    final FirebaseAuth _auth = FirebaseAuth.instance;
-    final ChatService _chatService = ChatService(); // Add this line
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final ChatService _chatService = ChatService(); // Add this line
+  String userCollegee = 'null';
+  String userEmail='null';
 
-    //Create a Map to store the latest messages for each user
-    Map<String, String> latestMessages = {}; // Map to store latest messages
 
 
-    Future<void> _signOut() async {
-        await FirebaseAuth.instance.signOut();
-        Get.offAll(LoginPage());
+  //Create a Map to store the latest messages for each user
+  Map<String, String> latestMessages = {}; // Map to store latest messages
+
+
+  Future<void> _signOut() async {
+    await FirebaseAuth.instance.signOut();
+    Get.offAll(LoginPage());
+  }
+
+  Future<String> getUserEmailLocally() async {
+    try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String? userEmail = prefs.getString('userEmail');
+      print('my username in chat page is: $userEmail');
+      return userEmail ?? ''; // Return an empty string if userEmail is null
+    } catch (error) {
+      print('Error fetching user email locally: $error');
+      return '';
     }
+  }
+
+  Future<String?> getSelectedCollegeLocally(String userEmail) async {
+    try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      print("after this statement select college locally should show");
+      print(prefs.getString('selectedCollege_$userEmail'));
+      return prefs.getString('selectedCollege_$userEmail');
+    } catch (error) {
+      print('Error getting selected college locally: $error');
+      return null;
+    }
+  }
+
+  Future<void> getUserCollege() async {
+    try {
+      print('i am in chat page');
+      String? email=await getUserEmailLocally();
+      String? userCollege = await getSelectedCollegeLocally(email!);
+      setState(() {
+        userCollegee = userCollege ?? 'null set manually2';
+        print('User College in chat page: $userCollegee'); // Print the user's college name
+      });
+
+    } catch (error) {
+      print('Error getting user college: $error');
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    initializeData();
+  }
+
+  Future<void> initializeData() async {
+    userEmail = await getUserEmailLocally();
+    getUserCollege();
+  }
 
 
 
-    @override
-    Widget build(BuildContext context) {
+  @override
+  Widget build(BuildContext context) {
     //     SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
     //             statusBarColor: Color(0xFF21215E).withOpacity(0.5), // Set the status bar color
     //             statusBarIconBrightness: Brightness.light, // Set the status bar icons color
     //             systemNavigationBarColor: Color(0xFF21215E).withOpacity(0.7), // Set the navigation bar color
     //             systemNavigationBarDividerColor: Colors.transparent, // Set the navigation bar divider color
     // ));
-        return WillPopScope(
-                onWillPop: () async {
-            // Override the back button behavior to prevent going back to LoginPage.
-            Get.offAll(ChatHomePage());
-            return false; // Return false to prevent default back navigation.
-        },
-        child: Scaffold(
+    return WillPopScope(
+      onWillPop: () async {
+        // Override the back button behavior to prevent going back to LoginPage.
+        Get.offAll(ChatHomePage());
+        return false; // Return false to prevent default back navigation.
+      },
+      child: Scaffold(
         backgroundColor: Colors.grey[20],
         appBar: AppBar(
-                  title: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Center(
-                  child: Text(
-                  'Message',
-                  style: TextStyle(
-                  color: Colors.white, fontWeight: FontWeight.bold, fontSize: 17),
-                  ),),),
-                  backgroundColor: backgroundColor,
-                  actions: [
-                  // IconButton(
-                  // icon: Icon(Icons.logout),
-                  // onPressed: _signOut,
-                  //       ),
-                      ],
-          ),
-        body: _buildUserList(),
+          title: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Center(
+              child: Text(
+                'Message',
+                style: TextStyle(
+                    color: Colors.white, fontWeight: FontWeight.bold, fontSize: 17),
+              ),),),
+          backgroundColor: backgroundColor,
+          actions: [
+            // IconButton(
+            // icon: Icon(Icons.logout),
+            // onPressed: _signOut,
+            //       ),
+          ],
         ),
+        body: _buildUserList(),
+      ),
     );
-    }
+  }
 
-    Widget _buildUserList() {
-        return Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 5),
-        child: FutureBuilder(
-                future: _fetchUserList(),
-                builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-                return Center(child: CircularProgressIndicator());
+  Widget _buildUserList() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 5),
+      child: FutureBuilder(
+        future: _fetchUserList(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(child: CircularProgressIndicator());
+          }
+
+          if (snapshot.hasError) {
+            print('Error: ${snapshot.error}');
+            return Center(child: Text('Error: ${snapshot.error}'));
+          }
+
+
+          List<Widget> userItems = [];
+          snapshot.data!.forEach((userData) {
+            // String email = userData['emailid'] ?? '';
+            String displayName;
+
+            if (userData['workeremail'] == userEmail) {
+              displayName = userData['recieveremail'].split('@').first;
+            } else {
+              displayName = userData['workeremail'].split('@').first;
             }
-
-            if (snapshot.hasError) {
-                return Center(child: Text('Error'));
-            }
-
-            List<Widget> userItems = [];
-            snapshot.data!.forEach((userData) {
-                    String email = userData['email'] ?? '';
-            String displayName = email.split('@').first;
 
             userItems.add(
-                    GestureDetector(
-                            onTap: () {
-                //navigating to user's chat page and also giving reciveremail and uid
-                Get.to(ChatPage(
-                        receiveruserEmail: userData['email'],
-                        receiverUserID: userData['uid'],
+              GestureDetector(
+                onTap: () {
+                  //navigating to user's chat page and also giving reciveremail and uid
+                  Get.to(ChatPage(
+                    receiveruserEmail: userData['emailid'],
+                    receiverUserID: userData['userId'],
+                    workeremail: userData['workeremail'],
+                    recieveremail: userData['recieveremail'],
+                    chatroomid:userData['chatRoomId']
                   ));
-            },
-            child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 0),
-            child: Card(
+                },
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 0),
+                  child: Card(
                     elevation: 2, // Add elevation for 3D effect
                     shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10.0),
+                      borderRadius: BorderRadius.circular(10.0),
                     ),
-            child: ListTile(
-                    dense: true,
-                    title: Text(displayName,style: TextStyle(fontSize: 15,color: backgroundColor),),
-            subtitle: Text(latestMessages[userData['uid']] ?? ''),
+                    child: ListTile(
+                      dense: true,
+                      title: Text(displayName,style: TextStyle(fontSize: 15,color: backgroundColor),),
+                      subtitle: Text(latestMessages[userData['userId']] ?? ''),
                     ),
                   ),
                 ),
@@ -114,46 +180,67 @@ class _ChatHomePageState extends State<ChatHomePage> {
             );
           });
 
-            return ListView(
-                    children: userItems,
+          return ListView(
+            children: userItems,
           );
         },
       ),
     );
-    }
+  }
 
 
 
-    Future<List<Map<String, dynamic>>> _fetchUserList() async {
-      List<Map<String, dynamic>> userList = [];
+  Future<List<Map<String, dynamic>>> _fetchUserList() async {
+    List<Map<String, dynamic>> userList = [];
 
-      QuerySnapshot snapshot = await FirebaseFirestore.instance.collection('users').get();
+    QuerySnapshot snapshot1 = await FirebaseFirestore.instance
+        .collection('colleges')
+        .doc(userCollegee)
+        .collection('collegePosts')
+        .where('amountpaid', isEqualTo: 'yes')
+        .where('workeremail', isEqualTo: userEmail)
+        .get();
 
-      Set<String> uniqueUserEmails = Set<String>(); // Use a Set to store unique user emails
+    QuerySnapshot snapshot2 = await FirebaseFirestore.instance
+        .collection('colleges')
+        .doc(userCollegee)
+        .collection('collegePosts')
+        .where('amountpaid', isEqualTo: 'yes')
+        .where('recieveremail', isEqualTo: userEmail)
+        .get();
 
-      for (var doc in snapshot.docs) {
-        Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+    // Combine the results of both queries
+    List<QueryDocumentSnapshot> combinedResults = [...snapshot1.docs, ...snapshot2.docs];
 
-        // Assuming you have a field 'email' in your document
-        String userEmail = data['email'];
+    for (var doc in combinedResults) {
+      Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
 
-        if (_auth.currentUser!.email != userEmail) {
-          QuerySnapshot latestSnapshot = await _chatService.getMessages(_auth.currentUser!.uid, data['uid']).first;
+      String otherUseId;
 
-          String latestMessage = '';
-          if (latestSnapshot.docs.isNotEmpty) {
-            latestMessage = latestSnapshot.docs.last['message'];
-          }
-
-          latestMessages[data['uid']] = latestMessage;
-          userList.add(data);
-
-          uniqueUserEmails.add(userEmail); // Add the user email to the set to track unique users
-        }
+      if (data['workeremail'] == userEmail) {
+        otherUseId = data['recieveremail'];
+      } else {
+        otherUseId = data['workeremail'];
       }
 
-      return userList;
+      if (userEmail != otherUseId) {
+        QuerySnapshot latestSnapshot =
+        await _chatService.getMessages(userEmail, otherUseId,data['chatRoomId']).first;
+
+        String latestMessage = '';
+        if (latestSnapshot.docs.isNotEmpty) {
+          latestMessage = latestSnapshot.docs.last['message'];
+        }
+
+        latestMessages[otherUseId] = latestMessage;
+        userList.add(data);
+      }
     }
+
+    return userList;
+  }
+
+
 
 
 }
