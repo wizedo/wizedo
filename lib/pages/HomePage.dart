@@ -99,6 +99,8 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     getUserCollege();
+    print('below is height we got using getx');
+    print(Get.height);
   }
 
   @override

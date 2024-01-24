@@ -30,6 +30,8 @@ class ProfilePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    double screenHeight = MediaQuery.of(context).size.height;
+
     return Scaffold(
       backgroundColor: backgroundColor,
       appBar: AppBar(
@@ -46,49 +48,51 @@ class ProfilePage extends StatelessWidget {
           },
         ),
       ),
-      body: Center(
-        child: Container(
-          child: Padding(
-            padding: const EdgeInsets.all(25.0),
-            child: Column(
-              children: [
-                DottedBorder(
-                  borderType: BorderType.Circle,
-                  dashPattern: [5, 5],
-                  strokeWidth: 3,
-                  radius: Radius.circular(50),
-                  color: Color(0xFF955AF2),
-                  child: Container(
-                    width: 135,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Color(0xFF955AF2),
-                    ),
-                    child: Center(
-                      child: Text(
-                        userDetails.name.isNotEmpty
-                            ? userDetails.name[0].toUpperCase()
-                            : '-',
-                        style: GoogleFonts.rubikMicrobe(
-                          fontSize: 100,
-                          fontWeight: FontWeight.normal,
-                          color: Colors.white,
+      body: SingleChildScrollView(
+        child: Center(
+          child: Container(
+            child: Padding(
+              padding: const EdgeInsets.all(25.0),
+              child: Column(
+                children: [
+                  DottedBorder(
+                    borderType: BorderType.Circle,
+                    dashPattern: [5, 5],
+                    strokeWidth: 3,
+                    radius: Radius.circular(50),
+                    color: Color(0xFF955AF2),
+                    child: Container(
+                      width: screenHeight > 600 ? 125 : 90,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Color(0xFF955AF2),
+                      ),
+                      child: Center(
+                        child: Text(
+                          userDetails.name.isNotEmpty
+                              ? userDetails.name[0].toUpperCase()
+                              : '-',
+                          style: GoogleFonts.rubikMicrobe(
+                            fontSize: screenHeight > 600 ? 90 : 60,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
                         ),
                       ),
                     ),
                   ),
-                ),
-                SizedBox(height: 20),
-                buildInfoRow(Icons.person, '${userDetails.name.toUpperCase()}'),
-                SizedBox(height: 20),
-                buildInfoRow(Icons.perm_identity, '${userDetails.id}'),
-                SizedBox(height: 20),
-                buildInfoRow(Icons.book_outlined, '${userDetails.course}'),
-                SizedBox(height: 20),
-                buildInfoRow(Icons.school, '${userDetails.college}'),
-                SizedBox(height: 20),
-                buildInfoRow(Icons.phone, '${userDetails.phone}'),
-              ],
+                  SizedBox(height: 20),
+                  buildInfoRow(context,Icons.person, '${userDetails.name.toUpperCase()}'),
+                  SizedBox(height: 20),
+                  buildInfoRow(context, Icons.perm_identity, '${userDetails.id}'),
+                  SizedBox(height: 20),
+                  buildInfoRow(context, Icons.book_outlined, '${userDetails.course}'),
+                  SizedBox(height: 20),
+                  buildInfoRow(context, Icons.school, '${userDetails.college}'),
+                  SizedBox(height: 20),
+                  buildInfoRow(context, Icons.phone, '${userDetails.phone}'),
+                ],
+              ),
             ),
           ),
         ),
@@ -96,14 +100,16 @@ class ProfilePage extends StatelessWidget {
     );
   }
 
-  Widget buildInfoRow(IconData iconData, String text) {
+  Widget buildInfoRow(BuildContext context,IconData iconData, String text) {
+    double screenHeight = MediaQuery.of(context).size.height;
+
     return Container(
-      padding: EdgeInsets.all(20),
-      width: double.infinity,
+      padding: EdgeInsets.all(15),
+      width: Get.width * 0.99,
       decoration: BoxDecoration(
         border: Border.all(
           color: Color(0xFF955AF2), // Set border color to white
-          width: 2.0, // Set border width
+          width: 1.5, // Set border width
         ),
         borderRadius: BorderRadius.circular(15),
         color: Colors
@@ -117,6 +123,7 @@ class ProfilePage extends StatelessWidget {
               Icon(
                 iconData,
                 color: Color(0xFF955AF2),
+                size: screenHeight < 600 ? 22 : 40,
               ),
               SizedBox(width: 10),
             ],
@@ -124,7 +131,7 @@ class ProfilePage extends StatelessWidget {
           Expanded(
             child: Text(
               text,
-              style: mPlusRoundedText.copyWith(fontSize: 15,fontWeight: FontWeight.normal,),
+              style: mPlusRoundedText.copyWith(fontSize: screenHeight < 600 ? 9 : 16),
               textAlign: TextAlign.left,
               softWrap: true,
             ),

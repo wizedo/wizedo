@@ -109,165 +109,167 @@ class _acceptedPageState extends State<acceptedPage> {
       ),
       backgroundColor: Color(0xFF211B2E),
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.only(top: 15),
-          child: Column(
-            children: [
-          Padding(
-          padding: const EdgeInsets.only(top: 0,right: 20,left: 20,bottom: 10),
-          child: SearchableDropdownTextField(
-            items: [
-              'Bachelor of Arts (BA)',
-              'Bachelor of Science (BSc)',
-              'Bachelor of Commerce (BCom)',
-              'Bachelor of Technology (BTech)',
-              'Bachelor of Business Administration (BBA)',
-              'Bachelor of Computer Applications (BCA)',
-              'Bachelor of Education (BEd)',
-              'Bachelor of Medicine, Bachelor of Surgery (MBBS)',
-              'Bachelor of Dental Surgery (BDS)',
-              'Bachelor of Pharmacy (BPharm)',
-              'Bachelor of Law (LLB)',
-              'Master of Arts (MA)',
-            ],
-            labelText: 'Search your applied jobs',
-            onSelected: (selectedItem) {
-              // Handle the selected item here
-              print('Selected item: $selectedItem');
-            },
-            suffix: Icon(Icons.search_rounded,
-              color: Colors.white,
-              size: 20,
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.only(top: 15),
+            child: Column(
+              children: [
+            Padding(
+            padding: const EdgeInsets.only(top: 0,right: 20,left: 20,bottom: 10),
+            child: SearchableDropdownTextField(
+              items: [
+                'Bachelor of Arts (BA)',
+                'Bachelor of Science (BSc)',
+                'Bachelor of Commerce (BCom)',
+                'Bachelor of Technology (BTech)',
+                'Bachelor of Business Administration (BBA)',
+                'Bachelor of Computer Applications (BCA)',
+                'Bachelor of Education (BEd)',
+                'Bachelor of Medicine, Bachelor of Surgery (MBBS)',
+                'Bachelor of Dental Surgery (BDS)',
+                'Bachelor of Pharmacy (BPharm)',
+                'Bachelor of Law (LLB)',
+                'Master of Arts (MA)',
+              ],
+              labelText: 'Search your applied jobs',
+              onSelected: (selectedItem) {
+                // Handle the selected item here
+                print('Selected item: $selectedItem');
+              },
+              suffix: Icon(Icons.search_rounded,
+                color: Colors.white,
+                size: 20,
+              ),
+              width: 350,
+              height: 45,
             ),
-            width: 350,
-            height: 45,
           ),
-        ),
-              Stack(
-                children: [
-                  SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: Padding(
-                      padding: const EdgeInsets.only(top: 5,left: 50),
-                      child: Row(
-                        children: [
-                          FilterChipWidget(
-                            label: 'Applied',
-                            selectedCategory: _selectedCategory,
-                            onTap: () {
-                              setState(() {
-                                _selectedCategory = 'Applied';
-                              });
-                              print('Applied');
-                            },
-                            width: 140,
-                            height: 30,
-                          ),
-                          FilterChipWidget(
-                            label: 'Recieved',
-                            selectedCategory: _selectedCategory,
-                            onTap: () {
-                              setState(() {
-                                _selectedCategory = 'Recieved';
-                              });
-                              print('Personal Chip tapped!');
-                            },
-                            width: 160,
-                            height: 30,
-                          ),
-                        ],
+                Stack(
+                  children: [
+                    SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Padding(
+                        padding: const EdgeInsets.only(top: 5,left: 50),
+                        child: Row(
+                          children: [
+                            FilterChipWidget(
+                              label: 'Applied',
+                              selectedCategory: _selectedCategory,
+                              onTap: () {
+                                setState(() {
+                                  _selectedCategory = 'Applied';
+                                });
+                                print('Applied');
+                              },
+                              width: 140,
+                              height: 30,
+                            ),
+                            FilterChipWidget(
+                              label: 'Recieved',
+                              selectedCategory: _selectedCategory,
+                              onTap: () {
+                                setState(() {
+                                  _selectedCategory = 'Recieved';
+                                });
+                                print('Personal Chip tapped!');
+                              },
+                              width: 160,
+                              height: 30,
+                            ),
+                          ],
+                        ),
                       ),
                     ),
-                  ),
 
-                  Container(
-                    height: 40,
-                    color: Color(0xFF211B2E),
-                    child: Padding(
-                      padding: const EdgeInsets.only(left: 25,top: 5,right: 10),
-                      child: Icon(
-                        CupertinoIcons.tags_solid,
-                        color: Colors.white,
-                        size: 20,
+                    Container(
+                      height: 40,
+                      color: Color(0xFF211B2E),
+                      child: Padding(
+                        padding: const EdgeInsets.only(left: 25,top: 5,right: 10),
+                        child: Icon(
+                          CupertinoIcons.tags_solid,
+                          color: Colors.white,
+                          size: 20,
+                        ),
                       ),
                     ),
-                  ),
 
-                ],
-              ),
-
-              Center(
-                child: Container(
-                  width: 360,
-                  height: 500,
-                  child: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-                    stream: FirebaseFirestore.instance
-                        .collection('colleges')
-                        .doc(userCollegee)
-                        .collection('collegePosts')
-                        .where('status', isEqualTo: 'Applied')
-                        .where(_selectedCategory == 'Applied' ? 'workeremail' : 'recieveremail', isEqualTo: userEmail)
-                        .snapshots(),
-                    builder: (context, AsyncSnapshot<QuerySnapshot<Map<String, dynamic>>> snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return Center(child: CircularProgressIndicator());
-                      } else if (snapshot.connectionState == ConnectionState.active) {
-                        if (snapshot.data!.docs.isNotEmpty) {
-                          return ListView.builder(
-                            itemCount: snapshot.data!.docs.length,
-                            itemBuilder: (BuildContext context, int index) {
-                              var data = snapshot.data!.docs[index].data() as Map<String, dynamic>;
-                              Timestamp date = snapshot.data!.docs[index]['createdAt'];
-                              var finalDate = DateTime.parse(date.toDate().toString());
-
-                              return GestureDetector(
-                                onTap: () {
-                                  print(data);
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => DetailsScreen(
-                                        category: data['category'],
-                                        subject: data['subCategory'],
-                                        date: data['createdAt'],
-                                        description: data['description'],
-                                        priceRange: data['totalPayment'],
-                                        finalDate: data['dueDate'],
-                                        postid: data['postId'],
-                                        emailid: data['emailid'],
-                                      ),
-                                    ),
-                                  );
-                                },
-                                child: MyCustomCard(
-                                  subject: data['subCategory'],
-                                  date: '1st jan 2023',
-                                  priceRange: data['totalPayment'].toString(), // Check for null
-                                  icon: Icons.star,
-                                  description: 'hello',
-                                ),
-                              );
-                            },
-                          );
-                        } else {
-                          return const Center(
-                            child: Text('No active posts'),
-                          );
-                        }
-                      }
-                      return Center(
-                        child: Text('Something went wrong'),
-                      );
-                    },
-                  ),
-
-
-
+                  ],
                 ),
-              ),
+
+                Center(
+                  child: Container(
+                    width: 360,
+                    height: 500,
+                    child: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+                      stream: FirebaseFirestore.instance
+                          .collection('colleges')
+                          .doc(userCollegee)
+                          .collection('collegePosts')
+                          .where('status', isEqualTo: 'Applied')
+                          .where(_selectedCategory == 'Applied' ? 'workeremail' : 'recieveremail', isEqualTo: userEmail)
+                          .snapshots(),
+                      builder: (context, AsyncSnapshot<QuerySnapshot<Map<String, dynamic>>> snapshot) {
+                        if (snapshot.connectionState == ConnectionState.waiting) {
+                          return Center(child: CircularProgressIndicator());
+                        } else if (snapshot.connectionState == ConnectionState.active) {
+                          if (snapshot.data!.docs.isNotEmpty) {
+                            return ListView.builder(
+                              itemCount: snapshot.data!.docs.length,
+                              itemBuilder: (BuildContext context, int index) {
+                                var data = snapshot.data!.docs[index].data() as Map<String, dynamic>;
+                                Timestamp date = snapshot.data!.docs[index]['createdAt'];
+                                var finalDate = DateTime.parse(date.toDate().toString());
+
+                                return GestureDetector(
+                                  onTap: () {
+                                    print(data);
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => DetailsScreen(
+                                          category: data['category'],
+                                          subject: data['subCategory'],
+                                          date: data['createdAt'],
+                                          description: data['description'],
+                                          priceRange: data['totalPayment'],
+                                          finalDate: data['dueDate'],
+                                          postid: data['postId'],
+                                          emailid: data['emailid'],
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                  child: MyCustomCard(
+                                    subject: data['subCategory'],
+                                    date: '1st jan 2023',
+                                    priceRange: data['totalPayment'].toString(), // Check for null
+                                    icon: Icons.star,
+                                    description: 'hello',
+                                  ),
+                                );
+                              },
+                            );
+                          } else {
+                            return const Center(
+                              child: Text('No active posts'),
+                            );
+                          }
+                        }
+                        return Center(
+                          child: Text('Something went wrong'),
+                        );
+                      },
+                    ),
+
+
+
+                  ),
+                ),
 // ...
 
-            ],
+              ],
+            ),
           ),
         ),
       ),

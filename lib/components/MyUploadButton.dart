@@ -45,20 +45,19 @@ class MyUploadButton extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Center(
-                child: Row(
-                  children: [
-                    Text(
-                      buttonText,
-                      style: GoogleFonts.mPlusRounded1c(
-                        textStyle: TextStyle(
-                          fontSize: 12,
-                          fontWeight: fontWeight ?? FontWeight.normal,
-                        ),
+              Row(
+                children: [
+                  Text(
+                    buttonText,
+                    style: GoogleFonts.mPlusRounded1c(
+                      textStyle: TextStyle(
+                        fontSize: 12,
+                        fontWeight: fontWeight ?? FontWeight.normal,
                       ),
                     ),
-                  ],
-                ),
+                  ),
+
+                ],
               ),
               if (suffixIcon != null) // Display suffix icon if provided
                 suffixIcon!,

@@ -78,7 +78,7 @@ class BottomNavigation extends StatelessWidget {
             color: Colors.white,
             activeColor: Colors.white,
             curve: Curves.easeInToLinear,
-            gap: 10,
+            gap: 8,
             padding: EdgeInsets.all(16),
             onTabChange: (value) {
               controller.index.value = value;

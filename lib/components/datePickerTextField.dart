@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
 import 'package:intl/intl.dart';
 
 class DateSelector extends StatefulWidget {
@@ -56,7 +58,7 @@ class _DateSelectorState extends State<DateSelector> {
       },
       child: AbsorbPointer(
         child: Container(
-          width: widget.width ?? 308, // Use the provided width or default to 308
+          width: Get.width * 0.85,
           height: 51,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(15),
@@ -105,7 +107,7 @@ class _DateSelectorState extends State<DateSelector> {
                         shape: BoxShape.circle,
                         color: Colors.white,
                       ),
-                      child: Center(child: widget.suffixIcon),
+                      child: widget.suffixIcon,
                     ),
                   ),
               ],

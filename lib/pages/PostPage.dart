@@ -158,7 +158,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         ),
         title: Text(
           'Post',
-          style: mPlusRoundedText.copyWith(fontSize: 33),
+          style: mPlusRoundedText.copyWith(fontSize: 24),
         ),
         centerTitle: true,
       ),
@@ -252,13 +252,34 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         } else {
                           removeError(error: 'Project Name is required');
                         }
-                        if (value != null && value.length < 10) {
+                        // Check for leading spaces
+                        if (value != null && value.startsWith(' ')) {
+                          addError(error: 'Leading spaces at the beginning are not allowed');
+                          return 'Leading spaces at the beginning are not allowed';
+                        } else {
+                          removeError(error: 'Leading spaces at the beginning are not allowed');
+                        }
+                        // Check for trailing spaces
+                        if (value != null && value.endsWith(' ')) {
+                          addError(error: 'Spaces at the end are not allowed');
+                          return 'Spaces at the end are not allowed';
+                        } else {
+                          removeError(error: 'Spaces at the end are not allowed');
+                        }
+                        // Check for consecutive spaces
+                        if (value != null && value.contains(RegExp(r'\s{2,}'))) {
+                          addError(error: 'Consecutive spaces are not allowed');
+                          return 'Consecutive spaces within the text are not allowed';
+                        } else {
+                          removeError(error: 'Consecutive spaces are not allowed');
+                        }
+                        if (value != null && value.replaceAll(RegExp(r'\s'), '').length < 10) {
                           addError(error: 'Project Name should be of at least 10 characters');
                           return 'Project Name should be of at least 10 characters';
                         } else {
                           removeError(error: 'Project Name should be of at least 10 characters');
                         }
-                        if (value != null && value.length > 25) {
+                        if (value != null && value.replaceAll(RegExp(r'\s'), '').length > 24) {
                           addError(error: 'Maximum characters allowed is 25');
                           return 'Maximum characters allowed is 25';
                         } else {
@@ -322,13 +343,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             removeError(error: 'Consecutive spaces are not allowed');
                           }
 
-                          if (value != null && value.length < 100) {
-                            addError(error: 'Description should be of at least 100 characters');
-                            return 'Description should be of at least 100 characters';
+                          if (value != null && value.replaceAll(RegExp(r'\s'), '').length < 100) {
+                            addError(error: 'Description should be of at least 20 words');
+                            return 'Description should be of at least 20 words';
                           } else {
-                            removeError(error: 'Description should be of at least 100 characters');
+                            removeError(error: 'Description should be of at least 20 words');
                           }
-                          if (value != null && value.length > 250 ) {
+                          if (value != null && value.replaceAll(RegExp(r'\s'), '').length > 250) {
                             addError(error: 'Maximum characters allowed is 250');
                             return 'Maximum characters allowed is 250';
                           } else {
@@ -392,24 +413,26 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     },
                     child: Row(
                       children: [
-                        DateSelector(
-                          width: 340,
-                          controller: _datePicker,
-                          hint: 'Select Date (yyyy-mm-dd)',
-                          suffixIcon: Icon(
-                            Icons.calendar_month,
-                            color: Color(0xFF955AF2),
-                            size: 20,
+                        Expanded(
+                          child: DateSelector(
+                            width: Get.width * 0.85,
+                            controller: _datePicker,
+                            hint: 'Select Date (yyyy-mm-dd)',
+                            suffixIcon: Icon(
+                              Icons.calendar_month,
+                              color: Color(0xFF955AF2),
+                              size: 20,
+                            ),
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                addError(error: 'Due date is required');
+                                return 'Due date is required';
+                              } else {
+                                removeError(error: 'Due date is required');
+                              }
+                              return null;
+                            },
                           ),
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              addError(error: 'Due date is required');
-                              return 'Due date is required';
-                            } else {
-                              removeError(error: 'Due date is required');
-                            }
-                            return null;
-                          },
                         )
                       ],
                     ),
@@ -567,6 +590,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         transaction.set(collegePostRef, {
                           'postId': postId,
                           'postId':postId,
+                          'pstatus':1,
                           'userId': user.uid,
                           'emailid': email,
                           'collegeName': userCollegee, // Add the college name to the post

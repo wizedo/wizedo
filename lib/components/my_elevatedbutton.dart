@@ -5,49 +5,58 @@ class MyElevatedButton extends StatelessWidget {
   final VoidCallback onPressed;
   final String buttonText;
   final FontWeight? fontWeight; // Optional font weight parameter
+  final double width;
+  final double height;
+  final double borderRadius; // Optional border radius parameter
+  final Color customPrimaryColor; // Optional custom color parameter
 
   const MyElevatedButton({
     required this.onPressed,
     required this.buttonText,
     this.fontWeight, // Optional font weight parameter
+    this.width = 308, // Default width
+    this.height = 51, // Default height
+    this.borderRadius = 15, // Default border radius
+    this.customPrimaryColor = const Color(0xFF955AF2), // Default custom color
   });
 
   @override
   Widget build(BuildContext context) {
-    Color customPrimaryColor = Color(0xFF955AF2); // Custom color from hex code
-
     return SizedBox(
-      width: 308, // Set the desired width
-      height: 51, // Set the desired height
+      width: width,
+      height: height,
       child: DecoratedBox(
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(15),
+          borderRadius: BorderRadius.circular(borderRadius),
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              customPrimaryColor.withOpacity(0.8), // Start color with opacity
-              customPrimaryColor.withOpacity(1.0), // End color with full opacity
+              customPrimaryColor.withOpacity(0.8),
+              customPrimaryColor.withOpacity(1.0),
             ],
           ),
         ),
         child: ElevatedButton(
           onPressed: onPressed,
           style: ElevatedButton.styleFrom(
-            primary: Colors.transparent, // Make the button background transparent
-            onPrimary: Colors.white, // Customize the text color
-            elevation: 20, // No shadow for the button
+            primary: Colors.transparent,
+            onPrimary: Colors.white,
+            elevation: 20,
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(15),
+              borderRadius: BorderRadius.circular(borderRadius),
             ),
           ),
+          //task accepted
+          //in progress
+          //task completed
           child: Center(
             child: Text(
               buttonText,
-              style: GoogleFonts.mPlusRounded1c( // Use the correct font family name
+              style: GoogleFonts.mPlusRounded1c(
                 textStyle: TextStyle(
-                  fontSize: 16, // Set your desired font size
-                  fontWeight: fontWeight ?? FontWeight.normal, // Use provided font weight or default to normal
+                  fontSize: 16,
+                  fontWeight: fontWeight ?? FontWeight.normal,
                 ),
               ),
             ),

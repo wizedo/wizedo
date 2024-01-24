@@ -19,30 +19,27 @@ class MyTimeLineTile extends StatelessWidget {
   Widget build(BuildContext context) {
     Color customPrimaryColor = Color(0xFF955AF2); // Custom color from hex code
 
-    return SizedBox(
-      height: 200,
-      child: TimelineTile(
-        isFirst: isFirst,
-        isLast: isLast,
-        beforeLineStyle: LineStyle(
-            color: isPast ? customPrimaryColor:Colors.deepPurple.shade100),
-        indicatorStyle: IndicatorStyle(
-          width: 40,
-          color: isPast ? customPrimaryColor:Colors.deepPurple.shade100,
-          iconStyle: IconStyle(
-            color: isPast? Colors.white : Colors.deepPurple.shade100,
-            iconData: Icons.done_rounded,
-          )
-        ),
-
-
-        //event card
-        endChild: EventCard(
-          isPast: true,
-          child: eventCard,
-        ),
-
+    return TimelineTile(
+      isFirst: isFirst,
+      isLast: isLast,
+      beforeLineStyle: LineStyle(
+          color: isPast ? customPrimaryColor:Colors.deepPurple.shade100),
+      indicatorStyle: IndicatorStyle(
+        width: 35,
+        color: isPast ? customPrimaryColor:Colors.deepPurple.shade100,
+        iconStyle: IconStyle(
+          color: isPast? Colors.white : Colors.deepPurple.shade100,
+          iconData: Icons.done_rounded,
+        )
       ),
+
+
+      //event card
+      endChild: EventCard(
+        isPast: true,
+        child: eventCard,
+      ),
+
     );
   }
 }

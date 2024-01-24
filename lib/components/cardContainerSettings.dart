@@ -25,11 +25,13 @@ class cardSettingContainer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    double screenHeight = MediaQuery.of(context).size.height;
+
     return Center(
       child: Container(
         margin: EdgeInsets.all(10),
-        width: 100,
-        height: 100,
+        width: screenHeight < 600 ? 75 : 100,
+        height: screenHeight < 600 ? 75 : 100,
         decoration: cardContainerdecoration,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -37,12 +39,12 @@ class cardSettingContainer extends StatelessWidget {
             Icon(
               iconData,
               color: Colors.white,
-              size: 25,
+              size: screenHeight < 600 ? 16 : 25,
             ),
             SizedBox(height: 5),
             Text(
               text,
-              style: TextStyle(color: Colors.white, fontSize: 12),
+              style: TextStyle(color: Colors.white, fontSize: screenHeight < 600 ? 9 : 12),
             ),
           ],
         ),
