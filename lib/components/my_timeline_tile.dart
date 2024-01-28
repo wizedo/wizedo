@@ -25,7 +25,7 @@ class MyTimeLineTile extends StatelessWidget {
       beforeLineStyle: LineStyle(
           color: isPast ? customPrimaryColor:Colors.deepPurple.shade100),
       indicatorStyle: IndicatorStyle(
-        width: 35,
+        width: 26,
         color: isPast ? customPrimaryColor:Colors.deepPurple.shade100,
         iconStyle: IconStyle(
           color: isPast? Colors.white : Colors.deepPurple.shade100,
@@ -36,7 +36,7 @@ class MyTimeLineTile extends StatelessWidget {
 
       //event card
       endChild: EventCard(
-        isPast: true,
+        isPast: isPast,
         child: eventCard,
       ),
 

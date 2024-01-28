@@ -1,20 +1,31 @@
 import 'package:flutter/material.dart';
 import 'package:wizedo/components/white_text.dart';
+import 'package:intl/intl.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class MyCustomCard extends StatelessWidget {
   final String subject;
-  final String date;
-  final String description;
+  final Timestamp? createdAt; // Keep as Timestamp?
   final String priceRange;
-  final IconData icon;
 
   MyCustomCard({
     required this.subject,
-    required this.date,
-    required this.description,
+    required this.createdAt,
     required this.priceRange,
-    required this.icon,
   });
+
+  String formatDate(Timestamp? createdAt) {
+    if (createdAt == null) {
+      print(createdAt);
+
+      return 'N/A'; // Return a default value for null dates
+    }
+
+    DateTime date = createdAt.toDate();
+
+    // Format the date
+    return DateFormat('d MMM yyyy').format(date);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -45,20 +56,17 @@ class MyCustomCard extends StatelessWidget {
                   Expanded(
                     child: WhiteText(
                       subject,
-                      fontSize: 12, // Set text color to white
+                      fontSize: 12,
                     ),
                   ),
-                  Icon(Icons.arrow_forward_ios_rounded, color: Colors.white), // Set icon color to white
+                  Icon(Icons.arrow_forward_ios_rounded, color: Colors.white),
                 ],
               ),
               SizedBox(height: 5.0),
-              // 'Rs. ${priceRange.toString()}',
-
               WhiteText(
-                date,
+                formatDate(createdAt),
                 fontSize: 9,
               ),
-
               SizedBox(height: 2.0),
               Divider(
                 color: Colors.grey,
@@ -79,7 +87,6 @@ class MyCustomCard extends StatelessWidget {
                   ),
                 ],
               ),
-
             ],
           ),
         ),

@@ -25,33 +25,30 @@ class FilterChipWidget extends StatelessWidget {
     return Container(
       width: width,
       height: height,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 2.0),
-        child: FilterChip(
-          label: Padding(
-            padding: const EdgeInsets.only(bottom: 5),
-            child: Text(
-              label,
-              style: GoogleFonts.mPlusRounded1c(
-                textStyle: TextStyle(
-                  color: Colors.white,
-                  fontSize: fontSize ?? 8,
-                ),
+      child: FilterChip(
+        label: Padding(
+          padding: const EdgeInsets.only(bottom: 5),
+          child: Text(
+            label,
+            style: GoogleFonts.mPlusRounded1c(
+              textStyle: TextStyle(
+                color: Colors.white,
+                fontSize: fontSize ?? 8,
               ),
             ),
           ),
-          selected: selectedCategory == label,
-          onSelected: (isSelected) {
-            if (isSelected) {
-              onTap();
-            }
-          },
-          selectedColor: Color(0xFF955AF2),
-          backgroundColor: backgroundColor,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10.0),
-            side: BorderSide.none,
-          ),
+        ),
+        selected: selectedCategory == label,
+        onSelected: (isSelected) {
+          if (isSelected) {
+            onTap();
+          }
+        },
+        selectedColor: Color(0xFF955AF2),
+        backgroundColor: backgroundColor,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10.0),
+          side: BorderSide.none,
         ),
       ),
     );

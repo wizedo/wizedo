@@ -9,6 +9,8 @@ class MyElevatedButton extends StatelessWidget {
   final double height;
   final double borderRadius; // Optional border radius parameter
   final Color customPrimaryColor; // Optional custom color parameter
+  final double mfontsize;
+  final double melevation;
 
   const MyElevatedButton({
     required this.onPressed,
@@ -18,6 +20,8 @@ class MyElevatedButton extends StatelessWidget {
     this.height = 51, // Default height
     this.borderRadius = 15, // Default border radius
     this.customPrimaryColor = const Color(0xFF955AF2), // Default custom color
+    this.mfontsize=16,
+    this.melevation=20
   });
 
   @override
@@ -42,7 +46,7 @@ class MyElevatedButton extends StatelessWidget {
           style: ElevatedButton.styleFrom(
             primary: Colors.transparent,
             onPrimary: Colors.white,
-            elevation: 20,
+            elevation: melevation,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(borderRadius),
             ),
@@ -55,7 +59,7 @@ class MyElevatedButton extends StatelessWidget {
               buttonText,
               style: GoogleFonts.mPlusRounded1c(
                 textStyle: TextStyle(
-                  fontSize: 16,
+                  fontSize: mfontsize,
                   fontWeight: fontWeight ?? FontWeight.normal,
                 ),
               ),

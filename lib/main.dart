@@ -9,6 +9,7 @@ import 'package:get/get_navigation/src/root/get_material_app.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wizedo/pages/BottomNavigation.dart';
 import 'package:wizedo/pages/LoginPage.dart';
+import 'package:wizedo/pages/SplashScreen.dart';
 import 'package:wizedo/pages/UserDetailsPage.dart';
 // import 'package:firebase_app_check/firebase_app_check.dart';
 
@@ -65,7 +66,7 @@ class MyApp extends StatelessWidget {
         if (userDetailsFilledLocally == true) {
           print('User details for $userEmail is true');
           // If userDetailsFilled locally is true, redirect to BottomNavigation
-          Get.offAll(() => BottomNavigation());
+          Get.offAll(() => splashscreen());
         } else {
             Get.to(() => LoginPage());
         }

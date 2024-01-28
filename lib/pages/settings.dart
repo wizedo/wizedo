@@ -3,6 +3,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:get/get.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wizedo/components/cardContainerSettings.dart';
 import 'package:wizedo/components/white_text.dart';
 import 'package:wizedo/pages/privacyPolicy.dart';
@@ -17,20 +19,75 @@ import '../components/myCustomAppliedCard.dart';
 import 'LoginPage.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
-class settingScreen extends StatelessWidget {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
+import 'cashfree.dart';
+import 'completedtaskspage.dart';
+
+class settingScreen extends StatefulWidget {
   final CollectionReference fireStore;
-  final GoogleSignIn _googleSignIn = GoogleSignIn();
 
   settingScreen({Key? key})
       : fireStore = FirebaseFirestore.instance.collection('usersDetails'),
         super(key: key);
 
+  @override
+  State<settingScreen> createState() => _settingScreenState();
+}
+
+class _settingScreenState extends State<settingScreen> {
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+
+  final GoogleSignIn _googleSignIn = GoogleSignIn();
+
+  String userCollegee = 'null';
+
+  String userEmail='null';
+
+  String username=' ';
+
   User? user = FirebaseAuth.instance.currentUser;
 
   call() {
-    print(fireStore.id);
+    print(widget.fireStore.id);
     print(user?.email);
+  }
+
+  Future<String> getUserEmailLocally() async {
+    try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String? userEmail = prefs.getString('userEmail');
+      print('my username in acceptedjobs page is: $userEmail');
+      return userEmail ?? ''; // Return an empty string if userEmail is null
+    } catch (error) {
+      print('Error fetching user email locally: $error');
+      return '';
+    }
+  }
+
+  Future<String?> getSelectedCollegeLocally(String userEmail) async {
+    try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      print("after this statement select college locally should show");
+      print(prefs.getString('selectedCollege_$userEmail'));
+      return prefs.getString('selectedCollege_$userEmail');
+    } catch (error) {
+      print('Error getting selected college locally: $error');
+      return null;
+    }
+  }
+
+  Future<void> getUserCollege() async {
+    try {
+      print('i am in acceptedjobs page');
+      String? email=await getUserEmailLocally();
+      String? userCollege = await getSelectedCollegeLocally(email!);
+      setState(() {
+        userCollegee = userCollege ?? 'null set manually2';
+        print('User College in acceptedpage: $userCollegee'); // Print the user's college name
+      });
+
+    } catch (error) {
+      print('Error getting user college: $error');
+    }
   }
 
   Future<void> _signOut(BuildContext context) async {
@@ -68,7 +125,7 @@ class settingScreen extends StatelessWidget {
 
     if (user != null) {
       QuerySnapshot querySnapshot =
-      await fireStore.where('id', isEqualTo: user?.email).get();
+      await widget.fireStore.where('id', isEqualTo: user?.email).get();
       print('User Email: ${user?.email}');
 
       if (querySnapshot.docs.isNotEmpty) {
@@ -116,6 +173,29 @@ class settingScreen extends StatelessWidget {
     }
   }
 
+  Future<String?> getUserNameLocally(String email) async {
+    try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      return prefs.getString('userName_$email');
+    } catch (error) {
+      print('Error getting user name locally: $error');
+      return null; // You might want to handle this case appropriately in your app
+    }
+  }
+
+
+  @override
+  void initState() {
+    super.initState();
+    initializeData();
+  }
+
+  Future<void> initializeData() async {
+    userEmail = await getUserEmailLocally();
+    getUserCollege();
+    username=(await getUserNameLocally(userEmail))!;
+  }
+
   @override
   Widget build(BuildContext context) {
     double screenHeight = MediaQuery.of(context).size.height;
@@ -140,7 +220,7 @@ class settingScreen extends StatelessWidget {
             children: [
 
               Container(
-                width: 400,
+                width: Get.width*0.85,
                 // height: screenHeight < 600 ? Get.height*0.20 : 20,
                 padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 8),
                 decoration: cardContainerdecoration,
@@ -153,15 +233,24 @@ class settingScreen extends StatelessWidget {
                         child: Row(
                           children: [
                             Container(
-                              width: screenHeight < 600 ? 40 : 80,
+                              width: screenHeight < 600 ? 40 : 70,
+                              height: screenHeight < 600 ? 40 : 70,
                               decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: Color(0xFF955AF2),
+                                border: Border.all(
+                                  // color: Colors.black, // Set border color to black
+                                  // width:3, // Set border width/
+                                ),
+                                borderRadius: BorderRadius.circular(15),
+                                color: Color(0xFF955AF2), // Set container background color to transparent
                               ),
                               child: Center(
-                                child: WhiteText(
+                                child: Text(
                                   'N',
-                                  fontSize: getFontSize(40, screenHeight),
+                                  style: GoogleFonts.rubikMicrobe(
+                                    fontSize: screenHeight < 600 ? 30 : 40,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
+                                  ),
                                 ),
                               ),
                             ),
@@ -170,14 +259,14 @@ class settingScreen extends StatelessWidget {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 WhiteText(
-                                  'Naresh',
+                                  username,
                                   fontSize: screenHeight < 600 ? 16 : 20,
                                 ),
                                 SizedBox(height: 5),
                                 Container(
                                   width: 220,
                                   child: WhiteText(
-                                    'tnaresh564@gmail.com',
+                                    userEmail,
                                     fontSize: screenHeight < 600 ? 9 : 12,
                                   ),
                                 ),
@@ -185,7 +274,7 @@ class settingScreen extends StatelessWidget {
                                 Container(
                                   width: 220,
                                   child: WhiteText(
-                                    'Presidency University, Bangalore',
+                                    userCollegee,
                                     fontSize: screenHeight < 600 ? 9 : 12,
                                   ),
                                 ),
@@ -199,7 +288,7 @@ class settingScreen extends StatelessWidget {
                 ),
               ),
 
-              SizedBox(height: 20),
+              SizedBox(height: 15),
               SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
                 child: Row(
@@ -208,12 +297,13 @@ class settingScreen extends StatelessWidget {
                     InkWell(
                         onTap: (){
                           print('light theme tapped');
+                          CashFreePayment();
                           // Get.changeTheme(ThemeData.dark());
                         },
                         child: cardSettingContainer(text: 'Payment', iconData: Icons.payment)),
                     InkWell(
                       onTap: () {
-                        Get.to(statusPage());
+                        // Get.to(statusPage());
                       },
                       child: cardSettingContainer(text: 'Help', iconData: Icons.help),
                     ),
@@ -246,9 +336,11 @@ class settingScreen extends StatelessWidget {
                     // Divider(height: 0, color: Colors.grey),
                     Container(
                       child: TextButton.icon(
-                        onPressed: () {},
-                        icon: Icon(Icons.notification_important, color: Colors.white),
-                        label: Text('Notification', style: TextStyle(color: Colors.white, fontSize: screenHeight < 600 ? 9 : 12)),
+                        onPressed: () {
+                          Get.to(CompletedTasksPage());
+                        },
+                        icon: Icon(Icons.history_rounded, color: Colors.white),
+                        label: Text('History', style: TextStyle(color: Colors.white, fontSize: screenHeight < 600 ? 9 : 12)),
                         style: ButtonStyle(
                           minimumSize: MaterialStateProperty.all(Size(double.infinity, getFontSize(50, screenHeight))),
                           alignment: Alignment.centerLeft,

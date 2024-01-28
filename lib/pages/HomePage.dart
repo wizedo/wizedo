@@ -120,7 +120,6 @@ class _HomePageState extends State<HomePage> {
                     Expanded(
                       flex: 2,
                       child: Column(
-
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           CustomRichText(
@@ -131,7 +130,16 @@ class _HomePageState extends State<HomePage> {
                             firstFontSize: 20,
                             secondFontSize: 20,
                           ),
-                          WhiteText('Learn Together, Achieve Together',fontSize: 12,)
+                          WhiteText('Learn Together, Achieve Together',fontSize: 9,),
+                          SizedBox(height: 2),
+
+                          Row(
+                            children: [
+                              Icon(Icons.location_on_rounded,color: Colors.white,size: 20,),
+                              SizedBox(width: 2,),
+                              WhiteText(userCollegee,fontSize: 9,),
+                            ],
+                          ),
                         ],
                       ),
                     ),
@@ -201,7 +209,7 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
             Padding(
-              padding: const EdgeInsets.only(top: 25,right: 20,left: 20,bottom: 10),
+              padding: const EdgeInsets.only(top: 10,right: 20,left: 20,bottom: 10),
               child: SearchableDropdownTextField(
                 items: [
                   'Bachelor of Arts (BA)',
@@ -331,7 +339,7 @@ class _HomePageState extends State<HomePage> {
                                       priceRange: data['totalPayment'],
                                       finalDate: data['dueDate'],
                                       postid: data['postId'],
-                                      emailid:data['emailid']
+                                      emailid:data['emailid'],
                                     ),
                                   ),
                                 );
@@ -350,12 +358,12 @@ class _HomePageState extends State<HomePage> {
                         );
                       } else {
                         return const Center(
-                          child: Text('No active posts'),
+                          child: WhiteText('No active posts from your college'),
                         );
                       }
                     }
                     return Center(
-                      child: Text('Something went wrong'),
+                      child: WhiteText('Something went wrong'),
                     );
                   },
                 ),

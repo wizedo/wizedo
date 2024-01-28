@@ -30,12 +30,6 @@ class PrivacyPolicyPage extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              SizedBox(height: 10),
-              Text(
-                'Privacy Policy',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: screenHeight > 600 ? 20 : 16,color: Colors.red),
-              ),
-              SizedBox(height: 10),
               Text(
                 'This Privacy Policy describes how we collect, use, and disclose personal information when you use our peer-to-peer learning app.',
                 style: TextStyle(fontSize: screenHeight > 600 ? 10 : 9,color: Colors.white),
@@ -76,28 +70,28 @@ class PrivacyPolicyPage extends StatelessWidget {
                 'We take appropriate measures to protect your personal information from unauthorized access, alteration, disclosure, or destruction. However, no data transmission over the internet or stored on a server can be guaranteed to be 100% secure. Therefore, while we strive to protect your privacy, we cannot guarantee its absolute security.',
                 style: TextStyle(fontSize: screenHeight > 600 ? 10 : 9,color: Colors.white),
               ),
+              // SizedBox(height: 5),
+              // Text(
+              //   '5.Your Choices:',
+              //   style: TextStyle(fontWeight: FontWeight.bold,fontSize: screenHeight > 600 ? 12 : 10,color: Colors.red),
+              // ),
+              // Text(
+              //   'You can review, update, or delete your account and personal information at any time. Please contact us if you need assistance with these options.',
+              //   style: TextStyle(fontSize: screenHeight > 600 ? 10 : 9,color: Colors.white),
+              // ),
               SizedBox(height: 5),
               Text(
-                '5.Your Choices:',
+                '5.Changes to Privacy Policy:',
                 style: TextStyle(fontWeight: FontWeight.bold,fontSize: screenHeight > 600 ? 12 : 10,color: Colors.red),
               ),
               Text(
-                'You can review, update, or delete your account and personal information at any time. Please contact us if you need assistance with these options.',
-                style: TextStyle(fontSize: screenHeight > 600 ? 10 : 9,color: Colors.white),
-              ),
-              SizedBox(height: 5),
-              Text(
-                '6.Changes to Privacy Policy:',
-                style: TextStyle(fontWeight: FontWeight.bold,fontSize: screenHeight > 600 ? 12 : 10,color: Colors.red),
-              ),
-              Text(
-                'We reserve the right to modify this Privacy Policy at any time. You will be notified of any changes, and your continued use of the app after such modifications will constitute your acknowledgment and acceptance of the updated Privacy Policy.',
+                'We reserve the right to modify this Privacy Policy at any time.Your continued use of the app after such modifications will constitute your acknowledgment and acceptance of the updated Privacy Policy.',
                 style: TextStyle(fontSize: screenHeight > 600 ? 10 : 9,color: Colors.white),
               ),
               SizedBox(height: 20),
               Text(
                 'By using our app, you acknowledge that you have read, understood, and agreed to the terms of this Privacy Policy. If you do not agree with this Privacy Policy, please do not use the app.',
-                style: TextStyle(fontStyle: FontStyle.italic,fontSize: screenHeight > 600 ? 10 : 9),
+                style: TextStyle(fontStyle: FontStyle.italic,fontSize: screenHeight > 600 ? 10 : 9,color: Colors.red),
               ),
             ],
           ),

@@ -2,15 +2,14 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wizedo/Widgets/colors.dart';
 import 'package:wizedo/components/my_elevatedbutton.dart';
 import 'package:wizedo/components/white_text.dart';
-import 'package:wizedo/pages/PostPage.dart';
+import 'package:wizedo/pages/statusPage.dart';
 import '../components/boxDecoration.dart';
 import '../components/mPlusRoundedText.dart';
 
-class DetailsScreen extends StatefulWidget {
+class ParticularPostDetailScreen extends StatefulWidget {
   final String category;
   final String? subject;
   final Timestamp? date;
@@ -20,29 +19,28 @@ class DetailsScreen extends StatefulWidget {
   final String? finalDate;
   final String? emailid;
 
-  const DetailsScreen({
+  const ParticularPostDetailScreen({
     Key? key,
-     required this.category,
-     this.subject,
-     this.date,
-     required this.description,
-     this.priceRange,
-     this.finalDate,
-     this.postid,
-     this.emailid
+    required this.category,
+    this.subject,
+    this.date,
+    required this.description,
+    this.priceRange,
+    this.finalDate,
+    this.postid,
+    this.emailid
   }) : super(key: key);
 
 
   @override
-  State<DetailsScreen> createState() => _DetailsScreenState();
+  State<ParticularPostDetailScreen> createState() => _ParticularPostDetailScreenState();
 }
 
-class _DetailsScreenState extends State<DetailsScreen> {
+class _ParticularPostDetailScreenState extends State<ParticularPostDetailScreen> {
   final TextEditingController _projectName = TextEditingController();
   final TextEditingController _descriptionText = TextEditingController();
   final TextEditingController _datePicker = TextEditingController();
   final TextEditingController _paymentDetails = TextEditingController();
-
 
   String _selectedCategory = '';
   bool _isNumberOfPagesVisible = false;
@@ -138,7 +136,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
                   //           SizedBox(width: 5),
                   //           Expanded(
                   //             child: WhiteText(
-                  //               userCollegee,
+                  //               'International Institute of Business Studies (IIBS) Bangalore',
                   //               fontSize: 9,
                   //             ),
                   //           ),
@@ -238,110 +236,32 @@ class _DetailsScreenState extends State<DetailsScreen> {
         ),
       ),
       bottomNavigationBar: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 18),
-        child: Padding(
-          padding: const EdgeInsets.only(left: 10,right: 10,bottom: 15),
-          child: MyElevatedButton(
-            buttonText: 'Apply',
-            fontWeight: FontWeight.bold,
-            onPressed: () {
-              // Check if the current user's email matches the email associated with the post
-              final user = FirebaseAuth.instance.currentUser;
-              if (user != null) {
-                // Ensure that widget.emailid is not null
-                if (widget.emailid != null) {
-                  if (user.email == widget.emailid) {
-                    // User's email matches the email associated with the post, show a Snackbar
-                    Get.snackbar('Cannot Apply', 'You have posted this job, and you cannot apply for it.');
-                  } else {
-                    // User's email is different, proceed to apply
-                    addToAcceptedCollection(
-                      category: widget.category,
-                      subject: widget.subject,
-                      finalDate: widget.finalDate,
-                      description: widget.description,
-                      priceRange: widget.priceRange,
+          padding: const EdgeInsets.symmetric(horizontal: 18),
+          child: Padding(
+            padding: const EdgeInsets.only(left: 10,right: 10,bottom: 15),
+            child: MyElevatedButton(
+              buttonText: 'Check Status',
+              fontWeight: FontWeight.bold,
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => statusPage(
                       postid: widget.postid,
-                      emailid: widget.emailid
-                    );
-                  }
-                } else {
-                  // Handle the case where widget.emailid is null
-                  print('Widget emailid is null.');
-                  // You might want to show an error message or handle it according to your logic.
-                }
-              }
-            },
-          ),
+                    ),
+                  ),
+                );
+              },
+            ),
 
-        )
+          )
       ),
 
     );
   }
 }
 
-Future<void> addToAcceptedCollection({
-  required String? category,
-  required String? subject,
-  required String? finalDate,
-  required String? description,
-  required int? priceRange,
-  required String? postid,
-  required String? emailid,
-}) async {
-  try {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user != null) {
-      final firestore = FirebaseFirestore.instance;
-      final workeremail = user.email!;
 
-      // Fetch user college from Firestore
-      final userDoc = await firestore.collection('usersDetails').doc(workeremail).get();
-      String userCollege = userDoc['college'] ?? 'Unknown College';
-      print(userCollege);
-
-      final userDocRef = firestore.collection('accepted').doc(workeremail);
-
-      // Check if the document with the given postid already exists
-      final docSnapshot = await userDocRef.collection('acceptedPosts').doc(postid).get();
-
-      if (docSnapshot.exists) {
-        // Document with the given postid already exists
-        Get.snackbar('Already Applied', 'You have already applied for this job.');
-      } else {
-        // Document with the given postid doesn't exist, add the details
-        await firestore.runTransaction((transaction) async {
-          // Optionally, add the post to a subcollection under the college document
-          final collegePostRef = firestore
-              .collection('colleges')
-              .doc(userCollege)
-              .collection('collegePosts')
-              .doc(postid);
-
-          List<String> ids = [workeremail ?? '', emailid ?? '', postid ?? ''];
-
-          String chatRoomId = ids.join("_"); // Combine workeremail, emailid, and postid
-
-          // Update the status of the post in the 'collegePosts' collection
-          transaction.update(collegePostRef, {
-            'status': 'Applied',
-            'pstatus':2,
-            'workeremail': workeremail,
-            'recieveremail': emailid,
-            'amountpaid': 'yes',
-            'chatRoomId': chatRoomId, // Add chatRoomId to the data
-          });
-
-          Get.snackbar('Success', 'Details added to the accepted collection');
-        });
-      }
-    }
-  } catch (error) {
-    print('Error adding to accepted collection: $error');
-    Get.snackbar('Error', 'Failed to add details to accepted collection');
-  }
-}
 
 
 

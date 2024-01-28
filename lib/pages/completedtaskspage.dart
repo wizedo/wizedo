@@ -13,14 +13,14 @@ import '../components/searchable_dropdown.dart';
 import 'ParticularPostDetailScreen.dart';
 import 'detailsPage.dart';
 
-class acceptedPage extends StatefulWidget {
-  const acceptedPage({Key? key});
+class CompletedTasksPage extends StatefulWidget {
+  const CompletedTasksPage({Key? key});
 
   @override
-  State<acceptedPage> createState() => _acceptedPageState();
+  State<CompletedTasksPage> createState() => _CompletedTasksPageState();
 }
 
-class _acceptedPageState extends State<acceptedPage> {
+class _CompletedTasksPageState extends State<CompletedTasksPage> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   String _selectedCategory = 'Applied';
   String userCollegee = 'null';
@@ -96,7 +96,7 @@ class _acceptedPageState extends State<acceptedPage> {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         title: WhiteText(
-          'Pending Jobs',
+          'History',
           fontSize: 20,
           fontWeight: FontWeight.bold,
         ),
@@ -110,57 +110,6 @@ class _acceptedPageState extends State<acceptedPage> {
             child: Column(
               children: [
 
-                Stack(
-                  children: [
-                    SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      child: Padding(
-                        padding: const EdgeInsets.only(top: 5,left: 50),
-                        child: Row(
-                          children: [
-                            FilterChipWidget(
-                              label: 'Applied',
-                              selectedCategory: _selectedCategory,
-                              onTap: () {
-                                setState(() {
-                                  _selectedCategory = 'Applied';
-                                });
-                              },
-                              width: 140,
-                              height: 30,
-                            ),
-                            FilterChipWidget(
-                              label: 'Recieved',
-                              selectedCategory: _selectedCategory,
-                              onTap: () {
-                                setState(() {
-                                  _selectedCategory = 'Recieved';
-                                });
-                              },
-                              width: 160,
-                              height: 30,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-
-                    Container(
-                      height: 40,
-                      color: Color(0xFF211B2E),
-                      child: Padding(
-                        padding: const EdgeInsets.only(left: 25,top: 5,right: 10),
-                        child: Icon(
-                          CupertinoIcons.tags_solid,
-                          color: Colors.white,
-                          size: 20,
-                        ),
-                      ),
-                    ),
-
-                  ],
-                ),
-
                 Center(
                   child: Container(
                     width: 360,
@@ -170,9 +119,7 @@ class _acceptedPageState extends State<acceptedPage> {
                           .collection('colleges')
                           .doc(userCollegee)
                           .collection('collegePosts')
-                          .where('status', isEqualTo: 'Applied')
-                          // .where('status', whereIn: ['Applied', 'Completed'])// To filter either one
-                          .where(_selectedCategory == 'Applied' ? 'workeremail' : 'recieveremail', isEqualTo: userEmail)
+                          .where('status', isEqualTo: 'Completed')
                           .snapshots(),
                       builder: (context, AsyncSnapshot<QuerySnapshot<Map<String, dynamic>>> snapshot) {
                         if (snapshot.connectionState == ConnectionState.waiting) {

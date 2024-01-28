@@ -35,7 +35,7 @@ class ProfilePage extends StatelessWidget {
     return Scaffold(
       backgroundColor: backgroundColor,
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
+        backgroundColor: Color(0xFF955AF2),
         title: Text('Profile',style: mPlusRoundedText.copyWith(fontSize: 18)),
         centerTitle: true,
         leading: IconButton(
@@ -50,50 +50,55 @@ class ProfilePage extends StatelessWidget {
       ),
       body: SingleChildScrollView(
         child: Center(
-          child: Container(
-            child: Padding(
-              padding: const EdgeInsets.all(25.0),
-              child: Column(
-                children: [
-                  DottedBorder(
-                    borderType: BorderType.Circle,
-                    dashPattern: [5, 5],
-                    strokeWidth: 3,
-                    radius: Radius.circular(50),
-                    color: Color(0xFF955AF2),
-                    child: Container(
-                      width: screenHeight > 600 ? 125 : 90,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Color(0xFF955AF2),
-                      ),
-                      child: Center(
-                        child: Text(
-                          userDetails.name.isNotEmpty
-                              ? userDetails.name[0].toUpperCase()
-                              : '-',
-                          style: GoogleFonts.rubikMicrobe(
-                            fontSize: screenHeight > 600 ? 90 : 60,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
+          child: Stack(
+            children: [
+              Container(
+                color: Color(0xFF955AF2),
+                height: 70,
+              ),
+              Container(
+                child: Padding(
+                  padding: const EdgeInsets.only(bottom: 25,right: 25,left: 25),
+                  child: Column(
+                    children: [
+                      Container(
+                        width: screenHeight > 600 ? 125 : 70,
+                        decoration: BoxDecoration(
+                          border: Border.all(
+                            color: Colors.black, // Set border color to black
+                            width:3, // Set border width
+                          ),
+                          borderRadius: BorderRadius.circular(20),
+                          color: Color(0xFF955AF2), // Set container background color to transparent
+                        ),
+                        child: Center(
+                          child: Text(
+                            userDetails.name.isNotEmpty
+                                ? userDetails.name[0].toUpperCase()
+                                : '-',
+                            style: GoogleFonts.rubikMicrobe(
+                              fontSize: screenHeight < 600 ? 50 : 70,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
                           ),
                         ),
                       ),
-                    ),
+                      SizedBox(height: 20),
+                      buildInfoRow(context,Icons.person, '${userDetails.name.toUpperCase()}'),
+                      SizedBox(height: 20),
+                      buildInfoRow(context, Icons.mail_outline_rounded, '${userDetails.id}'),
+                      SizedBox(height: 20),
+                      buildInfoRow(context, Icons.book_outlined, '${userDetails.course}'),
+                      SizedBox(height: 20),
+                      buildInfoRow(context, Icons.school, '${userDetails.college}'),
+                      SizedBox(height: 20),
+                      buildInfoRow(context, Icons.phone, '${userDetails.phone}'),
+                    ],
                   ),
-                  SizedBox(height: 20),
-                  buildInfoRow(context,Icons.person, '${userDetails.name.toUpperCase()}'),
-                  SizedBox(height: 20),
-                  buildInfoRow(context, Icons.perm_identity, '${userDetails.id}'),
-                  SizedBox(height: 20),
-                  buildInfoRow(context, Icons.book_outlined, '${userDetails.course}'),
-                  SizedBox(height: 20),
-                  buildInfoRow(context, Icons.school, '${userDetails.college}'),
-                  SizedBox(height: 20),
-                  buildInfoRow(context, Icons.phone, '${userDetails.phone}'),
-                ],
+                ),
               ),
-            ),
+            ],
           ),
         ),
       ),
@@ -108,12 +113,11 @@ class ProfilePage extends StatelessWidget {
       width: Get.width * 0.99,
       decoration: BoxDecoration(
         border: Border.all(
-          color: Color(0xFF955AF2), // Set border color to white
+          color: Colors.black, // Set border color to black
           width: 1.5, // Set border width
         ),
         borderRadius: BorderRadius.circular(15),
-        color: Colors
-            .transparent, // Set container background color to transparent
+        color: Colors.transparent, // Set container background color to transparent
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -123,7 +127,7 @@ class ProfilePage extends StatelessWidget {
               Icon(
                 iconData,
                 color: Color(0xFF955AF2),
-                size: screenHeight < 600 ? 22 : 40,
+                size: screenHeight < 600 ? 22 : 32,
               ),
               SizedBox(width: 10),
             ],
@@ -131,7 +135,7 @@ class ProfilePage extends StatelessWidget {
           Expanded(
             child: Text(
               text,
-              style: mPlusRoundedText.copyWith(fontSize: screenHeight < 600 ? 9 : 16),
+              style: mPlusRoundedText.copyWith(fontSize: screenHeight < 600 ? 9 : 12),
               textAlign: TextAlign.left,
               softWrap: true,
             ),

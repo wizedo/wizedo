@@ -25,16 +25,11 @@ class TermsConditionsPage extends StatelessWidget {
         ),
       ),
       body: Padding(
-        padding: const EdgeInsets.all(20.0),
+        padding: const EdgeInsets.only(bottom: 20,left: 20,right: 20),
         child: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              SizedBox(height: 10),
-              Text(
-                'Terms and Conditions',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: screenHeight > 600 ? 20 : 16,color: Colors.red),
-              ),
               Text(
                 'Please read these terms carefully before using the app.',
                 style: TextStyle(fontSize: screenHeight > 600 ? 10 : 9,color: Colors.white)),

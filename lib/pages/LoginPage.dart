@@ -70,6 +70,16 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
+  Future<void> setUserNameLocally(String email, String name) async {
+    try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      await prefs.setString('userName_$email', name);
+    } catch (error) {
+      print('Error setting user name locally: $error');
+    }
+  }
+
+
   Future<void> login(BuildContext context) async {
     try {
       UserCredential userCredential = await _auth.signInWithEmailAndPassword(
@@ -140,8 +150,10 @@ class _LoginPageState extends State<LoginPage> {
 
       // Now, check userDetailsfilled and redirect the user
       bool userDetailsfilled = await getUserDetailsFilled(userEmail);
+      String userName=await getUserName(userEmail);
       print(userDetailsfilled);
       await setUserDetailsFilledLocally(userEmail, userDetailsfilled);
+      await setUserNameLocally(userEmail, userName);
 
       if (userDetailsfilled == true) {
         await storeUserCollegeLocally(userEmail);
@@ -206,11 +218,8 @@ class _LoginPageState extends State<LoginPage> {
         print('Error: Empty email passed to getUserDetailsFilled');
         return false;
       }
-
       DocumentReference userDocRef = _firestore.collection('usersDetails').doc(userEmail);
       DocumentSnapshot userDocSnapshot = await userDocRef.get();
-
-
       if (userDocSnapshot.exists) {
         bool userDetailsfilled = userDocSnapshot['userDetailsfilled'];
         print('User details value printed');
@@ -224,6 +233,31 @@ class _LoginPageState extends State<LoginPage> {
       return false;
     }
   }
+
+
+  Future<String> getUserName(String userEmail) async {
+    try {
+      if (userEmail.isEmpty) {
+        print('Error: Empty email passed to getUserName');
+        return ''; // Return an empty string or handle the error case accordingly
+      }
+      DocumentReference userDocRef = _firestore.collection('usersDetails').doc(userEmail);
+      DocumentSnapshot userDocSnapshot = await userDocRef.get();
+
+      if (userDocSnapshot.exists) {
+        String username = userDocSnapshot['name'];
+        print('User details value printed');
+        print('username value for $userEmail: $username');
+        return username;
+      } else {
+        return ''; // Return an empty string or handle the case where the document doesn't exist
+      }
+    } catch (error) {
+      print('Error getting user details: $error');
+      return ''; // Return an empty string or handle the error case accordingly
+    }
+  }
+
 
   @override
   Widget build(BuildContext context) {
