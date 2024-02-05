@@ -7,7 +7,6 @@ import 'package:get/get_core/src/get_main.dart';
 import 'package:get_time_ago/get_time_ago.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wizedo/components/CustomRichText.dart';
-import 'package:wizedo/components/searchable_dropdown.dart';
 import 'package:wizedo/components/white_text.dart';
 import 'package:shimmer/shimmer.dart';
 import '../components/FliterChip.dart';
@@ -28,7 +27,8 @@ class _HomePageState extends State<HomePage> {
 
   final FirebaseAuth _auth = FirebaseAuth.instance;
   TextEditingController emailController=TextEditingController();
-
+  final searchFilter=TextEditingController();
+  String searchTerm = '';
   String _selectedCategory = 'College Project';
   String userCollegee = 'null';
 
@@ -68,12 +68,12 @@ class _HomePageState extends State<HomePage> {
 
   Future<void> getUserCollege() async {
     try {
-        String? email=await getUserEmailLocally();
-        String? userCollege = await getSelectedCollegeLocally(email!);
-        setState(() {
-          userCollegee = userCollege ?? 'null set manually2';
-          print('User College in homepage: $userCollegee'); // Print the user's college name
-        });
+      String? email=await getUserEmailLocally();
+      String? userCollege = await getSelectedCollegeLocally(email!);
+      setState(() {
+        userCollegee = userCollege ?? 'null set manually2';
+        print('User College in homepage: $userCollegee'); // Print the user's college name
+      });
 
     } catch (error) {
       print('Error getting user college: $error');
@@ -135,9 +135,14 @@ class _HomePageState extends State<HomePage> {
 
                           Row(
                             children: [
-                              Icon(Icons.location_on_rounded,color: Colors.white,size: 20,),
-                              SizedBox(width: 2,),
-                              WhiteText(userCollegee,fontSize: 9,),
+                              Icon(Icons.location_on_rounded, color: Colors.white, size: 20),
+                              SizedBox(width: 2),
+                              WhiteText(
+                                userCollegee.length <= 45
+                                    ? userCollegee
+                                    : userCollegee.substring(0, 45) + '...',
+                                fontSize: 9,
+                              ),
                             ],
                           ),
                         ],
@@ -208,36 +213,33 @@ class _HomePageState extends State<HomePage> {
                 ),
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.only(top: 10,right: 20,left: 20,bottom: 10),
-              child: SearchableDropdownTextField(
-                items: [
-                  'Bachelor of Arts (BA)',
-                  'Bachelor of Science (BSc)',
-                  'Bachelor of Commerce (BCom)',
-                  'Bachelor of Technology (BTech)',
-                  'Bachelor of Business Administration (BBA)',
-                  'Bachelor of Computer Applications (BCA)',
-                  'Bachelor of Education (BEd)',
-                  'Bachelor of Medicine, Bachelor of Surgery (MBBS)',
-                  'Bachelor of Dental Surgery (BDS)',
-                  'Bachelor of Pharmacy (BPharm)',
-                  'Bachelor of Law (LLB)',
-                  'Master of Arts (MA)',
-                ],
-                labelText: 'Search',
-                onSelected: (selectedItem) {
-                  // Handle the selected item here
-                  print('Selected item: $selectedItem');
-                },
-                suffix: Icon(Icons.search_rounded,
-                  color: Colors.white,
-                  size: 20,
+            Container(
+              height: 45, // Set the desired height
+              width: Get.width*0.9,
+              margin: const EdgeInsets.only(top: 10, bottom: 10, right: 15, left: 15),
+              child: TextFormField(
+                controller: searchFilter,
+                style: TextStyle(color: Colors.white,fontWeight: FontWeight.normal,fontSize: 12), // Text color
+                decoration: InputDecoration(
+                  hintText: 'Search',
+                  hintStyle: TextStyle(color: Colors.grey), // Hint text color
+                  filled: true,
+                  fillColor: Color(0xFF39304D).withOpacity(0.9), // Background color
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(15), // Border radius
+                    borderSide: BorderSide.none, // Remove the border
+                  ),
+                  contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 14), // Padding
                 ),
-                width: 350,
-                height: 45,
+                onChanged: (String value) {
+                  setState(() {
+                    searchTerm = value;
+                  });
+                },
               ),
             ),
+
+
 
             Stack(
               children: [
@@ -308,23 +310,32 @@ class _HomePageState extends State<HomePage> {
                 child: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
                   stream: FirebaseFirestore.instance
                       .collection('colleges')
-                      .doc(userCollegee) // Replace with the actual document ID or field name
+                      .doc(userCollegee)
                       .collection('collegePosts')
                       .where('category', isEqualTo: _selectedCategory)
-                      .where('status', isEqualTo: 'active')  // Filter for 'active' posts
+                      .where('status', isEqualTo: 'active')
                       .snapshots(),
                   builder: (context, AsyncSnapshot<QuerySnapshot<Map<String, dynamic>>> snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
                       return Center(child: CircularProgressIndicator());
                     } else if (snapshot.connectionState == ConnectionState.active) {
-                      if (snapshot.data!.docs.isNotEmpty) {
-                        return ListView.builder(
-                          itemCount: snapshot.data!.docs.length,
-                          itemBuilder: (BuildContext context, int index) {
-                            var data = snapshot.data!.docs[index].data() as Map<String, dynamic>;
-                            Timestamp date = snapshot.data!.docs[index]['createdAt'];
-                            var finalDate = DateTime.parse(date.toDate().toString());
+                      return ListView.builder(
+                        itemCount: snapshot.data!.docs.length,
+                        itemBuilder: (BuildContext context, int index) {
+                          var data = snapshot.data!.docs[index].data() as Map<String, dynamic>;
+                          Timestamp date = snapshot.data!.docs[index]['createdAt'];
+                          var finalDate = DateTime.parse(date.toDate().toString());
 
+                          // Convert description to lowercase for case-insensitive search
+                          String lowerCaseDescription = data['description'].toLowerCase();
+
+                          // Split the description into an array of words
+                          List<String> descriptionWords = lowerCaseDescription.split(' ');
+
+                          // Check if any of the words in the description array contains the search term
+                          bool containsSearchTerm = descriptionWords.any((word) => word.contains(searchTerm.toLowerCase()));
+
+                          if (containsSearchTerm) {
                             return GestureDetector(
                               onTap: () {
                                 print(data);
@@ -339,7 +350,7 @@ class _HomePageState extends State<HomePage> {
                                       priceRange: data['totalPayment'],
                                       finalDate: data['dueDate'],
                                       postid: data['postId'],
-                                      emailid:data['emailid'],
+                                      emailid: data['emailid'],
                                     ),
                                   ),
                                 );
@@ -354,19 +365,19 @@ class _HomePageState extends State<HomePage> {
                                 finalDate: finalDate,
                               ),
                             );
-                          },
-                        );
-                      } else {
-                        return const Center(
-                          child: WhiteText('No active posts from your college'),
-                        );
-                      }
+                          } else {
+                            // If the description does not contain the search term, return an empty container
+                            return Container();
+                          }
+                        },
+                      );
                     }
                     return Center(
                       child: WhiteText('Something went wrong'),
                     );
                   },
                 ),
+
               ),
             )
 

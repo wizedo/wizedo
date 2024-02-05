@@ -10,6 +10,7 @@ class WhiteText extends StatelessWidget {
   final TextOverflow? overflow; // Add overflow parameter
   final int? maxLines; // Add maxLines parameter
 
+
   const WhiteText(
       this.text, {
         this.fontSize,

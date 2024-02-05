@@ -266,6 +266,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
+                    SizedBox(height: 35,),
                     Align(
                       alignment: Alignment.topLeft,
                       child: WhiteText(
@@ -422,6 +423,8 @@ class _RegisterPageState extends State<RegisterPage> {
                         ),
                       ],
                     ),
+                    SizedBox(height: MediaQuery.of(context).viewInsets.bottom + 250),
+
                   ],
                 ),
               ),

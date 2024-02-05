@@ -4,22 +4,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wizedo/components/cardContainerSettings.dart';
 import 'package:wizedo/components/white_text.dart';
 import 'package:wizedo/pages/privacyPolicy.dart';
 import 'package:wizedo/pages/profilepage.dart';
-import 'package:wizedo/pages/statusPage.dart';
 import 'package:wizedo/pages/terms&cond.dart';
-
 import '../Widgets/colors.dart';
-import '../components/gradientBoxDecoration.dart';
 import '../components/mPlusRoundedText.dart';
-import '../components/myCustomAppliedCard.dart';
 import 'LoginPage.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-
-import 'cashfree.dart';
+import 'PhoneNumberVerification.dart';
 import 'completedtaskspage.dart';
 
 class settingScreen extends StatefulWidget {
@@ -42,7 +38,7 @@ class _settingScreenState extends State<settingScreen> {
 
   String userEmail='null';
 
-  String username=' ';
+  String username='null';
 
   User? user = FirebaseAuth.instance.currentUser;
 
@@ -134,12 +130,14 @@ class _settingScreenState extends State<settingScreen> {
 
         final String id = userData['id'];
         final String college = userData['college'];
-        final String name = userData['name'];
+        final String firstname = userData['firstname'];
+        final String lastname =userData['lastname'];
+        final String fullName = '$firstname $lastname';
         final String course = userData['course'];
-        final int phoneNumber = userData['phoneNumber'];
+        final int phoneNumber = 1234567898;
 
         print(
-            'ID: $id, College: $college, Name: $name, Course: $course, Phone: $phoneNumber');
+            'ID: $id, College: $college, Name: $fullName, Course: $course, Phone: $phoneNumber');
         print(userData);
 
         Navigator.of(context).push(
@@ -147,7 +145,7 @@ class _settingScreenState extends State<settingScreen> {
             builder: (context) => ProfilePage(
               userDetails: UserDetails(
                 id: id,
-                name: name,
+                name: fullName,
                 course: course,
                 college: college,
                 phone: phoneNumber,
@@ -183,6 +181,31 @@ class _settingScreenState extends State<settingScreen> {
     }
   }
 
+  Future<void> sendOTP() async {
+    final apiKey = "d6EOwRnQ4uLD1NPj7Ui39HXG2SJqtWIb8oxZyfkCsm0AvMazVrRljzV8ugf6AhpnSd2tI37MqDNFTZHO";
+    final url = "https://www.fast2sms.com/dev/bulkV2";
+    final phoneNumber = "8123341257";
+    final otpValue = "5599";
+
+    final response = await http.post(
+      Uri.parse(url),
+      headers: {
+        "authorization": apiKey,
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body: "variables_values=$otpValue&route=otp&numbers=$phoneNumber",
+    );
+    if (response.statusCode == 200) {
+      print("OTP sent successfully");
+      // Handle success response here
+      // You can also access response.body to get the JSON response
+      // Example: var jsonResponse = json.decode(response.body);
+    } else {
+      print("Failed to send OTP. Status code: ${response.statusCode}");
+      print("Response body: ${response.body}");
+      // Handle the error accordingly
+    }
+  }
 
   @override
   void initState() {
@@ -193,7 +216,9 @@ class _settingScreenState extends State<settingScreen> {
   Future<void> initializeData() async {
     userEmail = await getUserEmailLocally();
     getUserCollege();
-    username=(await getUserNameLocally(userEmail))!;
+    username = await getUserNameLocally(userEmail) ?? 'DefaultUsername';
+    print(username);
+
   }
 
   @override
@@ -218,7 +243,6 @@ class _settingScreenState extends State<settingScreen> {
         child: SingleChildScrollView(
           child: Column(
             children: [
-
               Container(
                 width: Get.width*0.85,
                 // height: screenHeight < 600 ? Get.height*0.20 : 20,
@@ -245,7 +269,7 @@ class _settingScreenState extends State<settingScreen> {
                               ),
                               child: Center(
                                 child: Text(
-                                  'N',
+                                  username[0],
                                   style: GoogleFonts.rubikMicrobe(
                                     fontSize: screenHeight < 600 ? 30 : 40,
                                     fontWeight: FontWeight.bold,
@@ -260,24 +284,23 @@ class _settingScreenState extends State<settingScreen> {
                               children: [
                                 WhiteText(
                                   username,
-                                  fontSize: screenHeight < 600 ? 16 : 20,
+                                  fontSize: screenHeight < 600 ? 14 : 16,
                                 ),
-                                SizedBox(height: 5),
                                 Container(
                                   width: 220,
                                   child: WhiteText(
                                     userEmail,
-                                    fontSize: screenHeight < 600 ? 9 : 12,
+                                    fontSize: screenHeight < 600 ? 9 : 11,
                                   ),
                                 ),
-                                SizedBox(height: 5),
                                 Container(
                                   width: 220,
                                   child: WhiteText(
                                     userCollegee,
-                                    fontSize: screenHeight < 600 ? 9 : 12,
+                                    fontSize: screenHeight < 600 ? 9 : 11,
                                   ),
                                 ),
+                                SizedBox(height: 2),
                               ],
                             ),
                           ],
@@ -296,14 +319,14 @@ class _settingScreenState extends State<settingScreen> {
                     cardSettingContainer(text: 'Earnings', iconData: Icons.currency_rupee_rounded),
                     InkWell(
                         onTap: (){
-                          print('light theme tapped');
-                          CashFreePayment();
+                          // sendOTP();
                           // Get.changeTheme(ThemeData.dark());
+                          Get.to(PhoneNumberVerification());
                         },
                         child: cardSettingContainer(text: 'Payment', iconData: Icons.payment)),
                     InkWell(
                       onTap: () {
-                        // Get.to(statusPage());
+                        // Get.to(OtpScreen());
                       },
                       child: cardSettingContainer(text: 'Help', iconData: Icons.help),
                     ),
@@ -383,6 +406,19 @@ class _settingScreenState extends State<settingScreen> {
                         ),
                       ),
                     ),
+                    Container(
+                      child: TextButton.icon(
+                        onPressed: () {
+                          Get.to(PhoneNumberVerification());
+                        },
+                        icon: Icon(Icons.phone, color: Colors.white),
+                        label: Text('Phone Number Verification', style: TextStyle(color: Colors.white, fontSize: screenHeight < 600 ? 9 : 12)),
+                        style: ButtonStyle(
+                          minimumSize: MaterialStateProperty.all(Size(double.infinity, getFontSize(50, screenHeight))),
+                          alignment: Alignment.centerLeft,
+                        ),
+                      ),
+                    ),
                     // Divider(height: 0.2, color: Colors.grey),
                     Container(
                       child: TextButton.icon(
@@ -397,6 +433,7 @@ class _settingScreenState extends State<settingScreen> {
                         ),
                       ),
                     ),
+
                   ],
                 ),
               ),

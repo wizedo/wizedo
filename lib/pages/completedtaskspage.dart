@@ -9,7 +9,6 @@ import 'package:wizedo/components/mPlusRoundedText.dart';
 import 'package:wizedo/components/white_text.dart';
 import '../components/FliterChip.dart';
 import '../components/myCustomAppliedCard.dart';
-import '../components/searchable_dropdown.dart';
 import 'ParticularPostDetailScreen.dart';
 import 'detailsPage.dart';
 
@@ -101,6 +100,15 @@ class _CompletedTasksPageState extends State<CompletedTasksPage> {
           fontWeight: FontWeight.bold,
         ),
         centerTitle: true,
+        leading: IconButton(
+          icon: Icon(
+            Icons.arrow_back_ios_rounded,
+            color: Colors.white,
+          ),
+          onPressed: (){
+            Get.back();
+          },
+        ),
       ),
       backgroundColor: Color(0xFF211B2E),
       body: SafeArea(
@@ -109,7 +117,6 @@ class _CompletedTasksPageState extends State<CompletedTasksPage> {
             padding: const EdgeInsets.only(top: 15),
             child: Column(
               children: [
-
                 Center(
                   child: Container(
                     width: 360,
@@ -128,7 +135,6 @@ class _CompletedTasksPageState extends State<CompletedTasksPage> {
                           print('i am in accpeted page 1');
                           if (snapshot.data!.docs.isNotEmpty) {
                             print('i am in accpeted page 2');
-
                             return ListView.builder(
                               itemCount: snapshot.data!.docs.length,
                               itemBuilder: (BuildContext context, int index) {

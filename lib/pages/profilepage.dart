@@ -85,7 +85,7 @@ class ProfilePage extends StatelessWidget {
                         ),
                       ),
                       SizedBox(height: 20),
-                      buildInfoRow(context,Icons.person, '${userDetails.name.toUpperCase()}'),
+                      buildInfoRow(context,Icons.person, '${userDetails.name}'),
                       SizedBox(height: 20),
                       buildInfoRow(context, Icons.mail_outline_rounded, '${userDetails.id}'),
                       SizedBox(height: 20),

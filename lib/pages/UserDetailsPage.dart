@@ -33,6 +33,7 @@ class _UserDetailsState extends State<UserDetails> with WidgetsBindingObserver {
   final TextEditingController _searchController = TextEditingController();
   final TextEditingController _universityNameController = TextEditingController();
   final TextEditingController unameController = TextEditingController();
+  final TextEditingController ulastnameController = TextEditingController();
   final TextEditingController phonenoController = TextEditingController();
   final TextEditingController userYearController = TextEditingController();
   bool _sliderValue = false;
@@ -89,6 +90,7 @@ class _UserDetailsState extends State<UserDetails> with WidgetsBindingObserver {
     _searchController.dispose();
     _universityNameController.dispose();
     unameController.dispose();
+    ulastnameController.dispose();
     phonenoController.dispose();
     userYearController.dispose();
     WidgetsBinding.instance?.removeObserver(this);
@@ -113,6 +115,13 @@ class _UserDetailsState extends State<UserDetails> with WidgetsBindingObserver {
     } catch (error) {
       print('Error saving college locally: $error');
     }
+  }
+
+  String _capitalizeFirstLetter(String text) {
+    if (text.isNotEmpty) {
+      return text[0].toUpperCase() + text.substring(1);
+    }
+    return text;
   }
 
   @override
@@ -146,7 +155,7 @@ class _UserDetailsState extends State<UserDetails> with WidgetsBindingObserver {
                   SizedBox(height: 20),
                   MyTextField(
                     controller: unameController,
-                    label: 'Your Name',
+                    label: 'First Name',
                     obscureText: false,
                     keyboardType: TextInputType.name,
                     textColor: Color(0xFFdacfe6),
@@ -162,19 +171,22 @@ class _UserDetailsState extends State<UserDetails> with WidgetsBindingObserver {
                       } else {
                         removeError(error: 'Name is required');
                       }
-                      if (value != null && value.length < 5) {
+                      // Capitalize the first letter of the name
+                      final capitalizedValue = _capitalizeFirstLetter(value);
+
+                      if (capitalizedValue.length < 5) {
                         addError(error: 'Name should be at least 5 characters');
                         return 'Name should be at least 5 characters';
                       } else {
                         removeError(error: 'Name should be at least 5 characters');
                       }
-                      if (value != null && value.length > 27) {
-                        addError(error: 'Maximum characters allowed is 27');
-                        return 'Maximum characters allowed is 27';
+                      if (capitalizedValue.length > 20) {
+                        addError(error: 'Maximum characters allowed is 20');
+                        return 'Maximum characters allowed is 20';
                       } else {
-                        removeError(error: 'Maximum characters allowed is 30');
+                        removeError(error: 'Maximum characters allowed is 20');
                       }
-                      if (value != null && RegExp(r'[0-9]').hasMatch(value)) {
+                      if (RegExp(r'[0-9]').hasMatch(capitalizedValue)) {
                         addError(error: 'Name should not contain numbers');
                         return 'Name should not contain numbers';
                       } else {
@@ -184,42 +196,118 @@ class _UserDetailsState extends State<UserDetails> with WidgetsBindingObserver {
                     },
                   ),
 
+
                   SizedBox(height: 15),
+                  //phone number controller or text field
+                  // MyTextField(
+                  //   controller: phonenoController,
+                  //   label: 'Phone Number',
+                  //   obscureText: false,
+                  //   keyboardType: TextInputType.number,
+                  //   textColor: Color(0xFFdacfe6),
+                  //   prefixIcon: Center(
+                  //     child: Text(
+                  //       '+91',
+                  //       style: TextStyle(fontSize: 12, color: Colors.white),
+                  //     ),
+                  //   ),
+                  //   fontSize: 12,
+                  //   validator: (value) {
+                  //     if (value == null || value.isEmpty) {
+                  //       addError(error: 'Phone Number is required');
+                  //       return 'Phone Number is required';
+                  //     } else {
+                  //       removeError(error: 'Phone Number is required');
+                  //     }
+                  //     if (value != null && value.length < 10) {
+                  //       addError(error: 'Enter full 10 digit number');
+                  //       return 'Enter full 10 digit number';
+                  //     } else {
+                  //       removeError(error: 'Enter full 10 digit number');
+                  //     }
+                  //     if (value != null && value.length > 10) {
+                  //       addError(error: 'Maximum Numbers allowed is 10');
+                  //       return 'Maximum Numbers allowed is 10';
+                  //     } else {
+                  //       removeError(error: 'Maximum Numbers allowed is 10');
+                  //     }
+                  //     return null;
+                  //   },
+                  // ),
+                  //*****************************************
+
                   MyTextField(
-                    controller: phonenoController,
-                    label: 'Phone Number',
+                    controller: ulastnameController,
+                    label: 'Last Name',
                     obscureText: false,
-                    keyboardType: TextInputType.number,
+                    keyboardType: TextInputType.name,
                     textColor: Color(0xFFdacfe6),
-                    prefixIcon: Center(
-                      child: Text(
-                        '+91',
-                        style: TextStyle(fontSize: 12, color: Colors.white),
-                      ),
+                    prefixIcon: Image.asset(
+                      'lib/images/uname.png',
+                      color: Colors.white,
                     ),
                     fontSize: 12,
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        addError(error: 'Phone Number is required');
-                        return 'Phone Number is required';
+                        addError(error: 'Last Name is required');
+                        return 'Last Name is required';
                       } else {
-                        removeError(error: 'Phone Number is required');
+                        removeError(error: 'Last Name is required');
                       }
-                      if (value != null && value.length < 10) {
-                        addError(error: 'Enter full 10 digit number');
-                        return 'Enter full 10 digit number';
+
+
+                      // Capitalize the first letter of the name
+                      final capitalizedValue = _capitalizeFirstLetter(value);
+
+                      if (capitalizedValue.length < 5) {
+                        addError(error: 'Last Name should be at least 5 characters');
+                        return 'Last Name should be at least 5 characters';
                       } else {
-                        removeError(error: 'Enter full 10 digit number');
+                        removeError(error: 'Last Name should be at least 5 characters');
                       }
-                      if (value != null && value.length > 10) {
-                        addError(error: 'Maximum Numbers allowed is 10');
-                        return 'Maximum Numbers allowed is 10';
+
+                      // Check for leading spaces
+                      if (capitalizedValue != null && capitalizedValue.startsWith(' ')) {
+                      addError(error: 'Leading spaces at the beginning are not allowed');
+                      return 'Leading spaces at the beginning are not allowed';
                       } else {
-                        removeError(error: 'Maximum Numbers allowed is 10');
+                        removeError(
+                            error: 'Leading spaces at the beginning are not allowed');
+                      }
+
+                      // Check for trailing spaces
+                      if (capitalizedValue != null && capitalizedValue.endsWith(' ')) {
+                        addError(error: 'Spaces at the end are not allowed');
+                        return 'Spaces at the end are not allowed';
+                      } else {
+                        removeError(error: 'Spaces at the end are not allowed');
+                      }
+
+                      // Check for consecutive spaces
+                      if (capitalizedValue != null && capitalizedValue.contains(RegExp(r'\s{2,}'))) {
+                        addError(error: 'Consecutive spaces are not allowed');
+                        return 'Consecutive spaces within the text are not allowed';
+                      } else {
+                        removeError(error: 'Consecutive spaces are not allowed');
+                      }
+
+
+                      if (capitalizedValue.length > 27) {
+                        addError(error: 'Maximum characters allowed is 27');
+                        return 'Maximum characters allowed is 27';
+                      } else {
+                        removeError(error: 'Maximum characters allowed is 30');
+                      }
+                      if (RegExp(r'[0-9]').hasMatch(capitalizedValue)) {
+                        addError(error: 'Last Name should not contain numbers');
+                        return 'Last Name should not contain numbers';
+                      } else {
+                        removeError(error: 'Last Name should not contain numbers');
                       }
                       return null;
                     },
                   ),
+
                   SizedBox(height: 10),
 
 
@@ -533,8 +621,9 @@ class _UserDetailsState extends State<UserDetails> with WidgetsBindingObserver {
                                       // Update the document
                                       transaction.set(docRef, {
                                         'id': email,
-                                        'name': unameController.text.toString(),
-                                        'phoneNumber': int.tryParse(phonenoController.text) ?? 0,
+                                        'firstname': _capitalizeFirstLetter(unameController.text),
+                                        'lastname':_capitalizeFirstLetter(ulastnameController.text),// Capitalize the first letter
+                                        // 'phoneNumber': int.tryParse(phonenoController.text) ?? 0,
                                         'country': _selectedState,
                                         'college': _selectedCollege,
                                         'course': _selectedCourse,

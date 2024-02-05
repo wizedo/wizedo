@@ -82,11 +82,13 @@ class _JobCardState extends State<JobCard> {
                           textColor: Colors.grey.shade500,
                         ),
                         SizedBox(height: sizingInformation.screenSize.width > 600 ? 12.0 : 8.0),
-                        WhiteText(
-                          widget.description.length > 100
-                              ? '${widget.description.substring(0, 100)}...' // Display only first 100 characters
-                              : widget.description,
-                          fontSize: sizingInformation.screenSize.width > 600 ? 14.0 : 10.0,
+                        Expanded(
+                          child: WhiteText(
+                            widget.description.length > 100
+                                ? '${widget.description.substring(0, 100)}...' // Display only first 100 characters
+                                : widget.description,
+                            fontSize: sizingInformation.screenSize.width > 600 ? 14.0 : 10.0,
+                          ),
                         ),
                         SizedBox(height: sizingInformation.screenSize.width > 600 ? 16.0 : 12.0),
                         Row(

@@ -9,7 +9,6 @@ import 'package:wizedo/components/mPlusRoundedText.dart';
 import 'package:wizedo/components/white_text.dart';
 import '../components/FliterChip.dart';
 import '../components/myCustomAppliedCard.dart';
-import '../components/searchable_dropdown.dart';
 import 'ParticularPostDetailScreen.dart';
 import 'detailsPage.dart';
 

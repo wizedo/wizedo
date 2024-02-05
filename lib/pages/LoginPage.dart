@@ -100,8 +100,18 @@ class _LoginPageState extends State<LoginPage> {
       // Save user Gmail ID locally using shared preferences
       await saveUserEmailLocally(emailController.text);
 
+
       bool userDetailsfilled = await getUserDetailsFilled(emailController.text);
       await setUserDetailsFilledLocally(emailController.text,userDetailsfilled);
+      print('belwo is useeemail');
+      print(emailController.text);
+
+      String userName=await getUserName(emailController.text);
+      await setUserNameLocally(emailController.text, userName);
+      print('below is username');
+      print(userName);
+
+
 
       if (userDetailsfilled == true) {
         await storeUserCollegeLocally(emailController.text);
@@ -152,6 +162,8 @@ class _LoginPageState extends State<LoginPage> {
       bool userDetailsfilled = await getUserDetailsFilled(userEmail);
       String userName=await getUserName(userEmail);
       print(userDetailsfilled);
+      print('Below is username');
+      print(userName);
       await setUserDetailsFilledLocally(userEmail, userDetailsfilled);
       await setUserNameLocally(userEmail, userName);
 
@@ -245,7 +257,7 @@ class _LoginPageState extends State<LoginPage> {
       DocumentSnapshot userDocSnapshot = await userDocRef.get();
 
       if (userDocSnapshot.exists) {
-        String username = userDocSnapshot['name'];
+        String username = userDocSnapshot['firstname'];
         print('User details value printed');
         print('username value for $userEmail: $username');
         return username;
@@ -273,6 +285,7 @@ class _LoginPageState extends State<LoginPage> {
               child: Container(
                 width: 310,
                 child: Column(
+
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     SizedBox(height: 50),
@@ -426,6 +439,7 @@ class _LoginPageState extends State<LoginPage> {
                         ),
                       ],
                     ),
+                    SizedBox(height: MediaQuery.of(context).viewInsets.bottom + 150),
                   ],
                 ),
               ),

@@ -14,6 +14,9 @@ class MyTextField extends StatefulWidget {
   final TextInputType keyboardType;
   final String? Function(String?)? validator;
   final Color? textColor; // Added parameter for text color
+  final double width;
+  final FocusNode? focusNode;
+
 
   const MyTextField({
     Key? key,
@@ -29,6 +32,8 @@ class MyTextField extends StatefulWidget {
     this.keyboardType = TextInputType.text,
     this.validator,
     this.textColor,
+    this.width = 308, // Default custom color
+    this.focusNode,
   }) : super(key: key);
 
   @override
@@ -60,7 +65,7 @@ class _MyTextFieldState extends State<MyTextField> {
       mainAxisSize: MainAxisSize.min,
       children: [
         Container(
-          width: 308,
+          width: widget.width,
           height: 51,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(15),
