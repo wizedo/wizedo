@@ -219,8 +219,19 @@ class _statusPageState extends State<statusPage> {
                                               .doc(userCollegee)
                                               .collection('collegePosts')
                                               .doc(widget.postid);
+
+                                          List<String> ids = [
+                                            documentData['workeremail'] ?? '',
+                                            documentData['emailid'] ?? '',
+                                            documentData['postId'] ?? '',
+                                          ];
+
+                                          String chatRoomId = ids.join("_");
+
                                           transaction.update(collegePostRef, {
                                             'pstatus':3,
+                                            'amountpaid': 'yes',
+                                            'chatRoomId': chatRoomId, // Add chatRoomId to the data
                                           });
                                         });
 

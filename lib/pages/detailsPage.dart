@@ -301,47 +301,36 @@ Future<void> addToAcceptedCollection({
       String userCollege = userDoc['college'] ?? 'Unknown College';
       print(userCollege);
 
-      final userDocRef = firestore.collection('accepted').doc(workeremail);
+      // Add the details to the accepted collection
+      await firestore.runTransaction((transaction) async {
+        // Optionally, add the post to a subcollection under the college document
+        final collegePostRef = firestore
+            .collection('colleges')
+            .doc(userCollege)
+            .collection('collegePosts')
+            .doc(postid);
 
-      // Check if the document with the given postid already exists
-      final docSnapshot = await userDocRef.collection('acceptedPosts').doc(postid).get();
+        // List<String> ids = [workeremail ?? '', emailid ?? '', postid ?? ''];
+        //
+        // String chatRoomId = ids.join("_"); // Combine workeremail, emailid, and postid
 
-      if (docSnapshot.exists) {
-        // Document with the given postid already exists
-        Get.snackbar('Already Applied', 'You have already applied for this job.');
-      } else {
-        // Document with the given postid doesn't exist, add the details
-        await firestore.runTransaction((transaction) async {
-          // Optionally, add the post to a subcollection under the college document
-          final collegePostRef = firestore
-              .collection('colleges')
-              .doc(userCollege)
-              .collection('collegePosts')
-              .doc(postid);
-
-          List<String> ids = [workeremail ?? '', emailid ?? '', postid ?? ''];
-
-          String chatRoomId = ids.join("_"); // Combine workeremail, emailid, and postid
-
-          // Update the status of the post in the 'collegePosts' collection
-          transaction.update(collegePostRef, {
-            'status': 'Applied',
-            'pstatus':2,
-            'workeremail': workeremail,
-            'recieveremail': emailid,
-            'amountpaid': 'yes',
-            'chatRoomId': chatRoomId, // Add chatRoomId to the data
-          });
-
-          Get.snackbar('Success', 'Details added to the accepted collection');
+        // Update the status of the post in the 'collegePosts' collection
+        transaction.update(collegePostRef, {
+          'status': 'Applied',
+          'pstatus': 2,
+          'workeremail': workeremail,
+          'recieveremail': emailid,
         });
-      }
+
+        Get.snackbar('Success', 'Details added to the accepted collection');
+      });
     }
   } catch (error) {
     print('Error adding to accepted collection: $error');
     Get.snackbar('Error', 'Failed to add details to accepted collection');
   }
 }
+
 
 
 

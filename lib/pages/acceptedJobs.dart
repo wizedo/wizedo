@@ -2,15 +2,11 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:wizedo/components/JobCard.dart';
-import 'package:wizedo/components/mPlusRoundedText.dart';
 import 'package:wizedo/components/white_text.dart';
 import '../components/FliterChip.dart';
 import '../components/myCustomAppliedCard.dart';
 import 'ParticularPostDetailScreen.dart';
-import 'detailsPage.dart';
 
 class acceptedPage extends StatefulWidget {
   const acceptedPage({Key? key});

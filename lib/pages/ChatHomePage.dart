@@ -117,6 +117,7 @@ class _ChatHomePageState extends State<ChatHomePage> {
             // onPressed: _signOut,
             //       ),
           ],
+          automaticallyImplyLeading: false,
         ),
         body: _buildUserList(),
       ),

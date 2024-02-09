@@ -56,7 +56,6 @@ class _ChatPageState extends State<ChatPage> {
     print(widget.workeremail);
     print(widget.recieveremail);
     print(widget.receiverUserID);
-    otherEmail = getOtherEmail(userEmail, widget.workeremail, widget.recieveremail);
     print('below is otheremail');
     print(otherEmail);
     print('below printig boka');
@@ -66,7 +65,7 @@ class _ChatPageState extends State<ChatPage> {
 
   Future<void> _initializeData() async {
     await initializeData();
-    otherEmail = getOtherEmail(userEmail, widget.workeremail, widget.recieveremail);
+    otherEmail = await getOtherEmail(userEmail, widget.workeremail, widget.recieveremail);
     _getLatestMessage();
   }
 
@@ -117,7 +116,6 @@ class _ChatPageState extends State<ChatPage> {
 
   String latestMessage = ''; // Store the latest received message here
 
-
   // Function to get the latest message
   void _getLatestMessage() async {
     QuerySnapshot latestSnapshot = await _chatService.getMessages(
@@ -144,57 +142,63 @@ class _ChatPageState extends State<ChatPage> {
 
   @override
   Widget build(BuildContext context) {
-    // Set the system overlay style
-    // Set the system overlay style for status and navigation bars
-    // String receiverDisplayName = widget.receiveruserEmail.split('@').first;
-
-
-
-
-    return Scaffold(
-      appBar: AppBar(
-        title: Center(
-          child: Text(otherEmail.split('@').first ?? 'Default Title',style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold,fontSize: 16),
+    return SafeArea(
+      child: Scaffold(
+        appBar: AppBar(
+          title: Center(
+            child: FutureBuilder(
+              future: initializeData(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.done) {
+                  return Text(
+                    otherEmail.split('@').first ?? 'Default Title',
+                    style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
+                  );
+                } else {
+                  return CircularProgressIndicator(); // Or any other loading indicator
+                }
+              },
+            ),
           ),
-        ),
-        backgroundColor: backgroundColor,
-        automaticallyImplyLeading: false,
-        actions: [
-          IconButton(
-            icon: Icon(Icons.delete_rounded,size: 16,),
-            onPressed: () {
-              Get.snackbar(
-                '', // Empty title for a transparent style
-                'Are you sure you want to delete this chat??',
-                snackPosition: SnackPosition.TOP,
-                duration: Duration(seconds: 6),
-                margin: EdgeInsets.only(top: 50,left: 10,right: 10),
-                backgroundColor: Colors.transparent,
-                borderRadius: 20,
-                mainButton: TextButton(
-                  onPressed: () {
-                    _chatController.deleteChat(widget.receiverUserID); // Pass the chatId
-                    Get.back(); // Close the snackbar
-                  },
-                  child: Text(
-                    'Yes',
-                    style: TextStyle(color: Color(0xFF21215E)), // Change button text color
+          backgroundColor: backgroundColor,
+          automaticallyImplyLeading: false,
+          actions: [
+            IconButton(
+              icon: Icon(Icons.delete_rounded, size: 16,),
+              onPressed: () {
+                Get.snackbar(
+                  '', // Empty title for a transparent style
+                  'Are you sure you want to delete this chat??',
+                  snackPosition: SnackPosition.TOP,
+                  duration: Duration(seconds: 6),
+                  margin: EdgeInsets.only(top: 50, left: 10, right: 10),
+                  backgroundColor: Colors.transparent,
+                  borderRadius: 20,
+                  mainButton: TextButton(
+                    onPressed: () {
+                      _chatController.deleteChat(widget.receiverUserID); // Pass the chatId
+                      Get.back(); // Close the snackbar
+                    },
+                    child: Text(
+                      'Yes',
+                      style: TextStyle(color: Color(0xFF21215E)), // Change button text color
+                    ),
                   ),
-                ),
-              );
-            },
-          ),
-        ],
-      ),
-      body: Container(
-        child: Column(
-          children: [
-            Expanded(child: _buildMessageList()),
-
-            //User Input
-            _buildMessageInput(),
-            const SizedBox(height: 25,)
+                );
+              },
+            ),
           ],
+        ),
+        body: Container(
+          child: Column(
+            children: [
+              Expanded(child: _buildMessageList()),
+              //User Input
+              _buildMessageInput(),
+              const SizedBox(height: 20)
+            ],
+          ),
+
         ),
       ),
     );
@@ -225,134 +229,100 @@ class _ChatPageState extends State<ChatPage> {
         });
   }
 
-    //build message item
-    Widget _buildMessageItem(DocumentSnapshot document){
-      Map<String,dynamic> data=document.data() as Map<String,dynamic>;
+  //build message item
+  Widget _buildMessageItem(DocumentSnapshot document){
+    Map<String,dynamic> data=document.data() as Map<String,dynamic>;
 
-      //align msg to right if sender is user otherwise left
-      var alignment =(data['senderId']==_firebaseAuth.currentUser!.uid)?
-      Alignment.centerRight : Alignment.centerLeft;
-
-
-      // Determine the background color based on the sender's ID
-      Color bubbleColor = (data['senderId'] == _firebaseAuth.currentUser!.uid)
-          ? Color(0xFF21215E).withOpacity(0.7) // User sending the message
-          : Colors.white.withOpacity(0.5); // User receiving the message
-
-      Color textColor = (data['senderId'] == _firebaseAuth.currentUser!.uid) ? Colors.white : Color(0xFF21215E);
-      Color borderColor = (data['senderId'] == _firebaseAuth.currentUser!.uid) ? Colors.white : Color(0xFF21215E);
-
-      BoxShadow boxShadow = (data['senderId'] == _firebaseAuth.currentUser!.uid)
-          ? BoxShadow(color: Color(0xFF21215E).withOpacity(0.7), blurRadius: 80.0) // Transparent box shadow for sent messages
-          : BoxShadow(color: Color(0xFF21215E).withOpacity(0.7), blurRadius: 80.0); // Colored box shadow for received messages
+    //align msg to right if sender is user otherwise left
+    var alignment =(data['senderId']==_firebaseAuth.currentUser!.uid)?
+    Alignment.centerRight : Alignment.centerLeft;
 
 
-      // Determine the border radius based on the sender's ID
-      BorderRadiusGeometry borderRadius = (data['senderId'] == _firebaseAuth.currentUser!.uid)
-          ? BorderRadius.only(
-        topLeft: Radius.circular(15),
-        topRight: Radius.circular(15),
-        bottomLeft: Radius.circular(15),
-        bottomRight: Radius.circular(0.5), // Slightly different radius for user sending
-      )
-          : BorderRadius.only(
-        topLeft: Radius.circular(15),
-        topRight: Radius.circular(15),
-        bottomLeft: Radius.circular(0.5), // Slightly different radius for user receiving
-        bottomRight: Radius.circular(15),
-      );
+    // Determine the background color based on the sender's ID
+    Color bubbleColor = (data['senderId'] == _firebaseAuth.currentUser!.uid)
+        ? Color(0xFF21215E).withOpacity(0.7) // User sending the message
+        : Colors.white.withOpacity(0.5); // User receiving the message
 
-      // Extract part of the email before '@gmail.com'
-      String senderDisplayName = (data['senderEmail'] ?? '').split('@')[0];
+    Color textColor = (data['senderId'] == _firebaseAuth.currentUser!.uid) ? Colors.white : Color(0xFF21215E);
+    Color borderColor = (data['senderId'] == _firebaseAuth.currentUser!.uid) ? Colors.white : Color(0xFF21215E);
+
+    BoxShadow boxShadow = (data['senderId'] == _firebaseAuth.currentUser!.uid)
+        ? BoxShadow(color: Color(0xFF21215E).withOpacity(0.7), blurRadius: 80.0) // Transparent box shadow for sent messages
+        : BoxShadow(color: Color(0xFF21215E).withOpacity(0.7), blurRadius: 80.0); // Colored box shadow for received messages
+
+
+    // Determine the border radius based on the sender's ID
+    BorderRadiusGeometry borderRadius = (data['senderId'] == _firebaseAuth.currentUser!.uid)
+        ? BorderRadius.only(
+      topLeft: Radius.circular(15),
+      topRight: Radius.circular(15),
+      bottomLeft: Radius.circular(15),
+      bottomRight: Radius.circular(0.5), // Slightly different radius for user sending
+    )
+        : BorderRadius.only(
+      topLeft: Radius.circular(15),
+      topRight: Radius.circular(15),
+      bottomLeft: Radius.circular(0.5), // Slightly different radius for user receiving
+      bottomRight: Radius.circular(15),
+    );
+
+    // Extract part of the email before '@gmail.com'
+    String senderDisplayName = (data['senderEmail'] ?? '').split('@')[0];
 
 // Determine the alignment and padding based on sender's ID
-      CrossAxisAlignment crossAlignment = (data['senderId'] == _firebaseAuth.currentUser!.uid)
-          ? CrossAxisAlignment.end
-          : CrossAxisAlignment.start;
+    CrossAxisAlignment crossAlignment = (data['senderId'] == _firebaseAuth.currentUser!.uid)
+        ? CrossAxisAlignment.end
+        : CrossAxisAlignment.start;
 
-      double leftPadding = (data['senderId'] == _firebaseAuth.currentUser!.uid)
-          ? MediaQuery.of(context).size.width * 0.15 // 15% of screen width for sent messages
-          : 0; // No left padding for received messages
+    double leftPadding = (data['senderId'] == _firebaseAuth.currentUser!.uid)
+        ? MediaQuery.of(context).size.width * 0.15 // 15% of screen width for sent messages
+        : 0; // No left padding for received messages
 
-      double rightPadding = (data['senderId'] == _firebaseAuth.currentUser!.uid)
-          ? 0 // No right padding for sent messages
-          : MediaQuery.of(context).size.width * 0.15; // 15% of screen width for received messages
+    double rightPadding = (data['senderId'] == _firebaseAuth.currentUser!.uid)
+        ? 0 // No right padding for sent messages
+        : MediaQuery.of(context).size.width * 0.15; // 15% of screen width for received messages
 
-      EdgeInsets padding = (data['senderId'] == _firebaseAuth.currentUser!.uid)
-          ? EdgeInsets.fromLTRB(leftPadding, 10.0, rightPadding, 10.0)
-          : EdgeInsets.fromLTRB(leftPadding, 10.0, rightPadding, 10.0);
+    EdgeInsets padding = (data['senderId'] == _firebaseAuth.currentUser!.uid)
+        ? EdgeInsets.fromLTRB(leftPadding, 10.0, rightPadding, 10.0)
+        : EdgeInsets.fromLTRB(leftPadding, 10.0, rightPadding, 10.0);
 
-      if (data['timestamp'] == null) {
-        return Container(); // Return an empty container if the timestamp is null
-      }
+    if (data['timestamp'] == null) {
+      return Container(); // Return an empty container if the timestamp is null
+    }
 
-      return Container(
-        alignment: alignment,
+    return Container(
+      alignment: alignment,
+      child: Padding(
+        padding: padding,
         child: Padding(
-          padding: padding,
-          child: Padding(
-            padding: const EdgeInsets.only(top: 5,bottom: 5,left: 10,right: 10),
-            child: Column(
-              //This determines the horizontal alignment of the column's children based on the condition.
-              crossAxisAlignment: (data['senderId']==_firebaseAuth.currentUser!.uid)?
-              CrossAxisAlignment.end : CrossAxisAlignment.start,
-              //If the senderId matches the current user's UID, the children will be aligned to the bottom, otherwise to the top.
-              mainAxisAlignment: (data['senderId']==_firebaseAuth.currentUser!.uid)?
-              MainAxisAlignment.end : MainAxisAlignment.start,
-              children: [
-                Text(senderDisplayName, style: TextStyle(fontSize: 9)),
-                const SizedBox(height: 5),
-                Container(
-                  padding: EdgeInsets.all(9),
-                  decoration: BoxDecoration(
+          padding: const EdgeInsets.only(top: 5,bottom: 5,left: 10,right: 10),
+          child: Column(
+            //This determines the horizontal alignment of the column's children based on the condition.
+            crossAxisAlignment: (data['senderId']==_firebaseAuth.currentUser!.uid)?
+            CrossAxisAlignment.end : CrossAxisAlignment.start,
+            //If the senderId matches the current user's UID, the children will be aligned to the bottom, otherwise to the top.
+            mainAxisAlignment: (data['senderId']==_firebaseAuth.currentUser!.uid)?
+            MainAxisAlignment.end : MainAxisAlignment.start,
+            children: [
+              Text(senderDisplayName, style: TextStyle(fontSize: 9)),
+              const SizedBox(height: 5),
+              Container(
+                padding: EdgeInsets.all(9),
+                decoration: BoxDecoration(
                     borderRadius: borderRadius,
                     color: bubbleColor,
                     // border: Border.all(color: borderColor, width: 0.7),
                     boxShadow: [boxShadow]// Set the border color
-                  ),
-                  child: Text(
-                    data['message'],
-                    style: TextStyle(fontSize: 13, color: textColor),
-                  ),
                 ),
-                const SizedBox(height: 2),
-                Text(
-                  _formatTimestamp(data['timestamp']), // Format the timestamp here
-                  style: TextStyle(fontSize: 8, color: Colors.grey),
-                ),
-              ],
-            ),
-          ),
-        ),
-      );
-    }
-
-  //build message input
-  //build message input
-  Widget _buildMessageInput(){
-    return Container(
-      color: Colors.transparent,
-      child: Padding(
-        padding: const EdgeInsets.only(top: 0,bottom: 2,right: 0,left: 20),
-        child: SingleChildScrollView(
-          child: Row(
-            children: [
-              Expanded(
-                child: MyTextField(
-                  controller: _messageController,
-                  label: 'Enter Message',
-                  obscureText: false,
+                child: Text(
+                  data['message'],
+                  style: TextStyle(fontSize: 13, color: textColor),
                 ),
               ),
-              //send button
-              Container(
-                child: Padding(
-                  padding: const EdgeInsets.all(10.0),
-                  child: IconButton(
-                    onPressed: sendMessage,
-                    icon: Icon(Icons.send, color: Color(0xFF21215E).withOpacity(0.7)),
-                  ),
-                ),
+              const SizedBox(height: 2),
+              Text(
+                _formatTimestamp(data['timestamp']), // Format the timestamp here
+                style: TextStyle(fontSize: 8, color: Colors.grey),
               ),
             ],
           ),
@@ -360,5 +330,38 @@ class _ChatPageState extends State<ChatPage> {
       ),
     );
   }
+
+  //build message input
+// Build Message Input
+  Widget _buildMessageInput() {
+    return Container(
+      color: Colors.transparent,
+      child: Padding(
+        padding: const EdgeInsets.only(top: 0, bottom: 2, right: 0, left: 20),
+        child: Row(
+          children: [
+            Expanded(
+              child: MyTextField(
+                controller: _messageController,
+                label: 'Enter Message',
+                obscureText: false,
+              ),
+            ),
+            // Send button
+            Container(
+              child: Padding(
+                padding: const EdgeInsets.all(10.0),
+                child: IconButton(
+                  onPressed: sendMessage,
+                  icon: Icon(Icons.send, color: Color(0xFF21215E).withOpacity(0.7)),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
 
 }
