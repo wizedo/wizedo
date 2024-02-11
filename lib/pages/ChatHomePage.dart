@@ -25,7 +25,9 @@ class _ChatHomePageState extends State<ChatHomePage> {
 
 
   //Create a Map to store the latest messages for each user
-  Map<String, String> latestMessages = {}; // Map to store latest messages
+  Map<String, String> latestMessages = {
+
+  }; // Map to store latest messages
 
 
   Future<void> _signOut() async {
@@ -87,12 +89,6 @@ class _ChatHomePageState extends State<ChatHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    //     SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
-    //             statusBarColor: Color(0xFF21215E).withOpacity(0.5), // Set the status bar color
-    //             statusBarIconBrightness: Brightness.light, // Set the status bar icons color
-    //             systemNavigationBarColor: Color(0xFF21215E).withOpacity(0.7), // Set the navigation bar color
-    //             systemNavigationBarDividerColor: Colors.transparent, // Set the navigation bar divider color
-    // ));
     return WillPopScope(
       onWillPop: () async {
         // Override the back button behavior to prevent going back to LoginPage.
@@ -142,7 +138,6 @@ class _ChatHomePageState extends State<ChatHomePage> {
 
           List<Widget> userItems = [];
           snapshot.data!.forEach((userData) {
-            // String email = userData['emailid'] ?? '';
             String displayName;
 
             if (userData['workeremail'] == userEmail) {
@@ -156,11 +151,11 @@ class _ChatHomePageState extends State<ChatHomePage> {
                 onTap: () {
                   //navigating to user's chat page and also giving reciveremail and uid
                   Get.to(ChatPage(
-                    receiveruserEmail: userData['emailid'],
-                    receiverUserID: userData['userId'],
-                    workeremail: userData['workeremail'],
-                    recieveremail: userData['recieveremail'],
-                    chatroomid:userData['chatRoomId']
+                      receiveruserEmail: userData['emailid'],
+                      receiverUserID: userData['userId'],
+                      workeremail: userData['workeremail'],
+                      recieveremail: userData['recieveremail'],
+                      chatroomid:userData['chatRoomId']
                   ));
                 },
                 child: Padding(
@@ -168,12 +163,11 @@ class _ChatHomePageState extends State<ChatHomePage> {
                   child: Card(
                     elevation: 2, // Add elevation for 3D effect
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10.0),
+                      borderRadius: BorderRadius.circular(15.0),
                     ),
                     child: ListTile(
                       dense: true,
                       title: Text(displayName,style: TextStyle(fontSize: 15,color: backgroundColor),),
-                      subtitle: Text(latestMessages[userData['userId']] ?? ''),
                     ),
                   ),
                 ),
@@ -188,7 +182,6 @@ class _ChatHomePageState extends State<ChatHomePage> {
       ),
     );
   }
-
 
 
   Future<List<Map<String, dynamic>>> _fetchUserList() async {
@@ -231,6 +224,7 @@ class _ChatHomePageState extends State<ChatHomePage> {
         String latestMessage = '';
         if (latestSnapshot.docs.isNotEmpty) {
           latestMessage = latestSnapshot.docs.last['message'];
+          print(latestMessage);
         }
 
         latestMessages[otherUseId] = latestMessage;

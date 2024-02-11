@@ -13,6 +13,7 @@ import 'package:wizedo/pages/profilepage.dart';
 import 'package:wizedo/pages/terms&cond.dart';
 import '../Widgets/colors.dart';
 import '../components/mPlusRoundedText.dart';
+
 import 'LoginPage.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'PhoneNumberVerification.dart';
@@ -264,7 +265,7 @@ class _settingScreenState extends State<settingScreen> {
                                   // color: Colors.black, // Set border color to black
                                   // width:3, // Set border width/
                                 ),
-                                borderRadius: BorderRadius.circular(15),
+                                borderRadius: BorderRadius.circular(100),
                                 color: Color(0xFF955AF2), // Set container background color to transparent
                               ),
                               child: Center(
@@ -326,7 +327,6 @@ class _settingScreenState extends State<settingScreen> {
                         child: cardSettingContainer(text: 'Payment', iconData: Icons.payment)),
                     InkWell(
                       onTap: () {
-                        // Get.to(OtpScreen());
                       },
                       child: cardSettingContainer(text: 'Help', iconData: Icons.help),
                     ),

@@ -439,7 +439,7 @@ class _LoginPageState extends State<LoginPage> {
                         ),
                       ],
                     ),
-                    SizedBox(height: MediaQuery.of(context).viewInsets.bottom + 150),
+                    // SizedBox(height: MediaQuery.of(context).viewInsets.bottom + 150),
                   ],
                 ),
               ),

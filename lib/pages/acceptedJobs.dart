@@ -173,9 +173,7 @@ class _acceptedPageState extends State<acceptedPage> {
                         if (snapshot.connectionState == ConnectionState.waiting) {
                           return Center(child: CircularProgressIndicator());
                         } else if (snapshot.connectionState == ConnectionState.active) {
-                          print('i am in accpeted page 1');
                           if (snapshot.data!.docs.isNotEmpty) {
-                            print('i am in accpeted page 2');
 
                             return ListView.builder(
                               itemCount: snapshot.data!.docs.length,

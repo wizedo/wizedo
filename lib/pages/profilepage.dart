@@ -68,7 +68,7 @@ class ProfilePage extends StatelessWidget {
                             color: Colors.black, // Set border color to black
                             width:3, // Set border width
                           ),
-                          borderRadius: BorderRadius.circular(20),
+                          borderRadius: BorderRadius.circular(100),
                           color: Color(0xFF955AF2), // Set container background color to transparent
                         ),
                         child: Center(

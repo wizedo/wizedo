@@ -8,11 +8,8 @@ import 'package:get_time_ago/get_time_ago.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wizedo/components/CustomRichText.dart';
 import 'package:wizedo/components/white_text.dart';
-import 'package:shimmer/shimmer.dart';
 import '../components/FliterChip.dart';
 import '../components/JobCard.dart';
-import '../controller/BottomNavigationController.dart';
-import '../services/email_verification_page.dart';
 import 'LoginPage.dart';
 import 'detailsPage.dart';
 

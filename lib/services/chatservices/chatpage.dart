@@ -47,6 +47,9 @@ class _ChatPageState extends State<ChatPage> {
   String otherEmail='null';
   String boka='null';
 
+  // for textfield focus
+  FocusNode myFocusNode=FocusNode();
+
 
   @override
   void initState() {
@@ -61,6 +64,33 @@ class _ChatPageState extends State<ChatPage> {
     print('below printig boka');
     print(boka);
     _getLatestMessage(); // Fetch the latest message when the widget is initialized
+
+    //add listener to focus node
+    myFocusNode.addListener(() {
+      Future.delayed(const Duration(milliseconds: 650),
+        ()=> scrollDown(),
+      );
+    });
+
+    //wait a bit for listview to be build, then scroll to bottom
+    Future.delayed(
+      const Duration(milliseconds: 650),
+        () => scrollDown(),
+    );
+  }
+
+  @override
+  void dispose(){
+    myFocusNode.dispose();
+    _messageController.dispose();
+    super.dispose();
+  }
+
+  void scrollDown(){
+    _scrollController.animateTo(
+        _scrollController.position.maxScrollExtent,
+        duration: const Duration(seconds: 1),
+        curve: Curves.fastOutSlowIn);
   }
 
   Future<void> _initializeData() async {
@@ -140,6 +170,8 @@ class _ChatPageState extends State<ChatPage> {
   }
 
 
+
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -195,7 +227,7 @@ class _ChatPageState extends State<ChatPage> {
               Expanded(child: _buildMessageList()),
               //User Input
               _buildMessageInput(),
-              const SizedBox(height: 20)
+              const SizedBox(height: 10)
             ],
           ),
 
@@ -224,6 +256,7 @@ class _ChatPageState extends State<ChatPage> {
           });
           return ListView(
             controller: _scrollController, // Attach the ScrollController
+            padding: EdgeInsets.only(bottom: 10),
             children: snapshot.data!.docs.map((document) => _buildMessageItem(document)).toList(),
           );
         });
@@ -267,7 +300,7 @@ class _ChatPageState extends State<ChatPage> {
     );
 
     // Extract part of the email before '@gmail.com'
-    String senderDisplayName = (data['senderEmail'] ?? '').split('@')[0];
+    // String senderDisplayName = (data['senderEmail'] ?? '').split('@')[0];
 
 // Determine the alignment and padding based on sender's ID
     CrossAxisAlignment crossAlignment = (data['senderId'] == _firebaseAuth.currentUser!.uid)
@@ -304,8 +337,8 @@ class _ChatPageState extends State<ChatPage> {
             mainAxisAlignment: (data['senderId']==_firebaseAuth.currentUser!.uid)?
             MainAxisAlignment.end : MainAxisAlignment.start,
             children: [
-              Text(senderDisplayName, style: TextStyle(fontSize: 9)),
-              const SizedBox(height: 5),
+              // Text(senderDisplayName, style: TextStyle(fontSize: 9)),
+              // const SizedBox(height: 5),
               Container(
                 padding: EdgeInsets.all(9),
                 decoration: BoxDecoration(
@@ -331,34 +364,38 @@ class _ChatPageState extends State<ChatPage> {
     );
   }
 
-  //build message input
 // Build Message Input
   Widget _buildMessageInput() {
-    return Container(
-      color: Colors.transparent,
-      child: Padding(
-        padding: const EdgeInsets.only(top: 0, bottom: 2, right: 0, left: 20),
-        child: Row(
-          children: [
-            Expanded(
-              child: MyTextField(
-                controller: _messageController,
-                label: 'Enter Message',
-                obscureText: false,
+    return Padding(
+      padding: const EdgeInsets.only(top: 10, bottom: 0, right: 0, left: 20),
+      child: Row(
+        children: [
+          Expanded(
+            child: TextField(
+              style: TextStyle(color: Colors.black),
+              controller: _messageController,
+              cursorHeight: 25,
+              textCapitalization: TextCapitalization.sentences,
+              autocorrect: true,
+              enableSuggestions: true,
+              focusNode: myFocusNode,
+              maxLines: null, // Set to null for multiline
+              decoration: InputDecoration(
+                labelText: 'Send Message...',
+                labelStyle: TextStyle(color: Colors.black),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(15)),
               ),
             ),
-            // Send button
-            Container(
-              child: Padding(
-                padding: const EdgeInsets.all(10.0),
-                child: IconButton(
-                  onPressed: sendMessage,
-                  icon: Icon(Icons.send, color: Color(0xFF21215E).withOpacity(0.7)),
-                ),
-              ),
+          ),
+          // Send button
+          Padding(
+            padding: const EdgeInsets.all(10.0),
+            child: IconButton(
+              onPressed: sendMessage,
+              icon: Icon(Icons.send_rounded, size: 32,color: Color(0xFF21215E).withOpacity(0.7)),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

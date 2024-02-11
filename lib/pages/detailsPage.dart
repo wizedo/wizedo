@@ -1,12 +1,11 @@
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wizedo/Widgets/colors.dart';
 import 'package:wizedo/components/my_elevatedbutton.dart';
 import 'package:wizedo/components/white_text.dart';
-import 'package:wizedo/pages/PostPage.dart';
 import '../components/boxDecoration.dart';
 import '../components/mPlusRoundedText.dart';
 
@@ -22,14 +21,14 @@ class DetailsScreen extends StatefulWidget {
 
   const DetailsScreen({
     Key? key,
-     required this.category,
-     this.subject,
-     this.date,
-     required this.description,
-     this.priceRange,
-     this.finalDate,
-     this.postid,
-     this.emailid
+    required this.category,
+    this.subject,
+    this.date,
+    required this.description,
+    this.priceRange,
+    this.finalDate,
+    this.postid,
+    this.emailid
   }) : super(key: key);
 
 
@@ -238,43 +237,72 @@ class _DetailsScreenState extends State<DetailsScreen> {
         ),
       ),
       bottomNavigationBar: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 18),
-        child: Padding(
-          padding: const EdgeInsets.only(left: 10,right: 10,bottom: 15),
-          child: MyElevatedButton(
-            buttonText: 'Apply',
-            fontWeight: FontWeight.bold,
-            onPressed: () {
-              // Check if the current user's email matches the email associated with the post
-              final user = FirebaseAuth.instance.currentUser;
-              if (user != null) {
-                // Ensure that widget.emailid is not null
-                if (widget.emailid != null) {
-                  if (user.email == widget.emailid) {
-                    // User's email matches the email associated with the post, show a Snackbar
-                    Get.snackbar('Cannot Apply', 'You have posted this job, and you cannot apply for it.');
+          padding: const EdgeInsets.symmetric(horizontal: 18),
+          child: Padding(
+            padding: const EdgeInsets.only(left: 10,right: 10,bottom: 15),
+            child: MyElevatedButton(
+              buttonText: 'Apply',
+              fontWeight: FontWeight.bold,
+              onPressed: () {
+                // Check if the current user's email matches the email associated with the post
+                final user = FirebaseAuth.instance.currentUser;
+                if (user != null) {
+                  // Ensure that widget.emailid is not null
+                  if (widget.emailid != null) {
+                    if (user.email == widget.emailid) {
+                      Get.showSnackbar(
+                        GetSnackBar(
+                          borderRadius: 8,
+                          padding: EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+                          animationDuration: Duration(milliseconds: 800),
+                          duration: Duration(milliseconds: 4500),
+                          margin: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                          snackPosition: SnackPosition.TOP,
+                          isDismissible: true,
+                          backgroundColor: Color(0xFF955AF2), // Set your desired color here
+                          titleText: Row(
+                            children: [
+                              Icon(
+                                Icons.warning,
+                                color: Colors.white,
+                                size: 20,
+                              ),
+                              SizedBox(width: 8),
+                              WhiteText(
+                                'Attention',
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ],
+                          ),
+                          messageText: WhiteText(
+                            "Task posters can't apply for their own tasks.",
+                            fontSize: 12,
+                          ),
+                        ),
+                      );
+                    } else {
+                      // User's email is different, proceed to apply
+                      addToAcceptedCollection(
+                          category: widget.category,
+                          subject: widget.subject,
+                          finalDate: widget.finalDate,
+                          description: widget.description,
+                          priceRange: widget.priceRange,
+                          postid: widget.postid,
+                          emailid: widget.emailid
+                      );
+                    }
                   } else {
-                    // User's email is different, proceed to apply
-                    addToAcceptedCollection(
-                      category: widget.category,
-                      subject: widget.subject,
-                      finalDate: widget.finalDate,
-                      description: widget.description,
-                      priceRange: widget.priceRange,
-                      postid: widget.postid,
-                      emailid: widget.emailid
-                    );
+                    // Handle the case where widget.emailid is null
+                    print('Widget emailid is null.');
+                    // You might want to show an error message or handle it according to your logic.
                   }
-                } else {
-                  // Handle the case where widget.emailid is null
-                  print('Widget emailid is null.');
-                  // You might want to show an error message or handle it according to your logic.
                 }
-              }
-            },
-          ),
+              },
+            ),
 
-        )
+          )
       ),
 
     );
@@ -301,38 +329,108 @@ Future<void> addToAcceptedCollection({
       String userCollege = userDoc['college'] ?? 'Unknown College';
       print(userCollege);
 
-      // Add the details to the accepted collection
-      await firestore.runTransaction((transaction) async {
-        // Optionally, add the post to a subcollection under the college document
-        final collegePostRef = firestore
-            .collection('colleges')
-            .doc(userCollege)
-            .collection('collegePosts')
-            .doc(postid);
+      // Check if emailid and currentuserid are already associated with any post
+      final sameUserQuery = await firestore
+          .collection('colleges')
+          .doc(userCollege)
+          .collection('collegePosts')
+          .where('status', isEqualTo: 'Applied') // Change 'Applied' to the status representing 'working'
+          .where('workeremail', whereIn: [workeremail, emailid])
+          .get();
 
-        // List<String> ids = [workeremail ?? '', emailid ?? '', postid ?? ''];
-        //
-        // String chatRoomId = ids.join("_"); // Combine workeremail, emailid, and postid
+      print('this is sameuserquery $sameUserQuery');
 
-        // Update the status of the post in the 'collegePosts' collection
-        transaction.update(collegePostRef, {
-          'status': 'Applied',
-          'pstatus': 2,
-          'workeremail': workeremail,
-          'recieveremail': emailid,
+      if (sameUserQuery.docs.isNotEmpty) {
+        Get.showSnackbar(
+          GetSnackBar(
+            borderRadius: 8,
+            padding: EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+            animationDuration: Duration(milliseconds: 800),
+            duration: Duration(milliseconds: 4500),
+            margin: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+            snackPosition: SnackPosition.TOP,
+            isDismissible: true,
+            backgroundColor: Color(0xFF955AF2), // Set your desired color here
+            titleText: Row(
+              children: [
+                Icon(
+                  Icons.warning,
+                  color: Colors.white,
+                  size: 20,
+                ),
+                SizedBox(width: 8),
+                WhiteText(
+                  'Attention',
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
+                ),
+              ],
+            ),
+            messageText: WhiteText(
+              'You are already working on one project. Please complete that to apply for new projects.',
+              fontSize: 12,
+            ),
+          ),
+        );
+
+        // Users are already working together on some project, show a message
+        // Get.snackbar('Cannot Apply', 'You are already working with this user on another project.');
+      } else {
+        // Add the details to the accepted collection
+        await firestore.runTransaction((transaction) async {
+          // Optionally, add the post to a subcollection under the college document
+          final collegePostRef = firestore
+              .collection('colleges')
+              .doc(userCollege)
+              .collection('collegePosts')
+              .doc(postid);
+
+          // Update the status of the post in the 'collegePosts' collection
+          transaction.update(collegePostRef, {
+            'status': 'Applied',
+            'pstatus': 2,
+            'workeremail': workeremail,
+            'recieveremail': emailid,
+          });
+
+          Get.showSnackbar(
+            GetSnackBar(
+              borderRadius: 8,
+              padding: EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+              animationDuration: Duration(milliseconds: 800),
+              duration: Duration(milliseconds: 4500),
+              margin: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+              snackPosition: SnackPosition.TOP,
+              isDismissible: true,
+              backgroundColor: Color(0xFF955AF2), // Set your desired color here
+              titleText: Row(
+                children: [
+                  Icon(
+                    Icons.done_rounded,
+                    color: Colors.white,
+                    size: 20,
+                  ),
+                  SizedBox(width: 8),
+                  WhiteText(
+                    'Success',
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ],
+              ),
+              messageText: WhiteText(
+                'You have successfully applied for the task.',
+                fontSize: 12,
+              ),
+            ),
+          );
         });
+      }
 
-        Get.snackbar('Success', 'Details added to the accepted collection');
-      });
+
     }
   } catch (error) {
     print('Error adding to accepted collection: $error');
     Get.snackbar('Error', 'Failed to add details to accepted collection');
   }
 }
-
-
-
-
-
-

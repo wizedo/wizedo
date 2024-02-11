@@ -13,10 +13,11 @@ class MyTextField extends StatefulWidget {
   final String? hint;
   final TextInputType keyboardType;
   final String? Function(String?)? validator;
-  final Color? textColor; // Added parameter for text color
+  final Color? textColor;
   final double width;
+  final double? bottomPadding;
   final FocusNode? focusNode;
-
+  final VoidCallback? onTap; // New property for onTap callback
 
   const MyTextField({
     Key? key,
@@ -32,8 +33,10 @@ class MyTextField extends StatefulWidget {
     this.keyboardType = TextInputType.text,
     this.validator,
     this.textColor,
-    this.width = 308, // Default custom color
+    this.width = 308,
+    this.bottomPadding,
     this.focusNode,
+    this.onTap,
   }) : super(key: key);
 
   @override
@@ -64,60 +67,64 @@ class _MyTextFieldState extends State<MyTextField> {
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
-        Container(
-          width: widget.width,
-          height: 51,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(15),
-            color: backgroundColor,
-          ),
-          child: TextFormField(
-            controller: widget.controller,
-            obscureText: widget.obscureText,
-            keyboardType: widget.keyboardType,
-            style: GoogleFonts.mPlusRounded1c(
-              textStyle: TextStyle(
-                color: widget.textColor ?? Colors.white, // Use optional text color
-                fontSize: widget.fontSize ?? 16,
-              ),
+        GestureDetector(
+          onTap: widget.onTap,
+          child: Container(
+            width: widget.width,
+            height: 51,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(15),
+              color: backgroundColor,
             ),
-            decoration: InputDecoration(
-              hintText: widget.hint,
-              hintStyle: TextStyle(color: Colors.white, fontSize: 13),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(15),
-                borderSide: BorderSide(color: backgroundColor),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(15),
-                borderSide: BorderSide(color: backgroundColor),
-              ),
-              labelText: widget.label,
-              labelStyle: TextStyle(
-                color: Color(0xFFEEEEEE),
-                fontWeight: FontWeight.normal,
-                fontSize: 12,
-              ),
-              contentPadding:
-              const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-              prefixIcon: widget.prefixIcon != null
-                  ? Padding(
-                padding: EdgeInsets.all(8.0),
-                child: SizedBox(
-                  width: widget.iconWidth ?? 23,
-                  height: widget.iconHeight ?? 23,
-                  child: widget.prefixIcon,
+            child: TextFormField(
+              controller: widget.controller,
+              obscureText: widget.obscureText,
+              keyboardType: widget.keyboardType,
+              style: GoogleFonts.mPlusRounded1c(
+                textStyle: TextStyle(
+                  color: widget.textColor ?? Colors.white,
+                  fontSize: widget.fontSize ?? 16,
                 ),
-              )
-                  : null,
-              suffixIcon: widget.suffixIcon,
+              ),
+              decoration: InputDecoration(
+                hintText: widget.hint,
+                hintStyle: TextStyle(color: Colors.white, fontSize: 13),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(15),
+                  borderSide: BorderSide(color: backgroundColor),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(15),
+                  borderSide: BorderSide(color: backgroundColor),
+                ),
+                labelText: widget.label,
+                labelStyle: TextStyle(
+                  color: Color(0xFFEEEEEE),
+                  fontWeight: FontWeight.normal,
+                  fontSize: 12,
+                ),
+                contentPadding: EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 14 + (widget.bottomPadding ?? 0),
+                ),
+                prefixIcon: widget.prefixIcon != null
+                    ? Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: SizedBox(
+                    width: widget.iconWidth ?? 23,
+                    height: widget.iconHeight ?? 23,
+                    child: widget.prefixIcon,
+                  ),
+                )
+                    : null,
+                suffixIcon: widget.suffixIcon,
+              ),
             ),
           ),
         ),
-        // Display error message outside the text field
         if (errorMessage != null && widget.controller.text.isNotEmpty)
           Padding(
-            padding: const EdgeInsets.only(left: 16, top: 4),
+            padding: EdgeInsets.only(left: 16, top: 4 + (widget.bottomPadding ?? 0)),
             child: Text(
               errorMessage!,
               style: TextStyle(color: vTextColor, fontSize: 12),
