@@ -95,7 +95,37 @@ class _LoginPageState extends State<LoginPage> {
         return;
       }
 
-      Get.snackbar('Success', 'Sign in successful');
+      Get.showSnackbar(
+        GetSnackBar(
+          borderRadius: 8,
+          padding: EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+          animationDuration: Duration(milliseconds: 800),
+          duration: Duration(milliseconds: 3000),
+          margin: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+          snackPosition: SnackPosition.TOP,
+          isDismissible: true,
+          backgroundColor: Color(0xFF955AF2), // Set your desired color here
+          titleText: Row(
+            children: [
+              Icon(
+                Icons.check_circle,
+                color: Colors.white,
+                size: 20,
+              ),
+              SizedBox(width: 8),
+              WhiteText(
+                'Success',
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+              ),
+            ],
+          ),
+          messageText: WhiteText(
+            'You have successfully logged in',
+            fontSize: 12,
+          ),
+        ),
+      );
 
       // Save user Gmail ID locally using shared preferences
       await saveUserEmailLocally(emailController.text);
@@ -122,7 +152,37 @@ class _LoginPageState extends State<LoginPage> {
       }
     } catch (error) {
       String errorMessage = _handleFirebaseError(error);
-      Get.snackbar('Error', errorMessage);
+      Get.showSnackbar(
+        GetSnackBar(
+          borderRadius: 8,
+          padding: EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+          animationDuration: Duration(milliseconds: 800),
+          duration: Duration(milliseconds: 3000),
+          margin: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+          snackPosition: SnackPosition.TOP,
+          isDismissible: true,
+          backgroundColor: Color(0xFF955AF2), // Set your desired color here
+          titleText: Row(
+            children: [
+              Icon(
+                Icons.warning,
+                color: Colors.white,
+                size: 20,
+              ),
+              SizedBox(width: 8),
+              WhiteText(
+                'Error',
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+              ),
+            ],
+          ),
+          messageText: WhiteText(
+            'Unable to log in',
+            fontSize: 12,
+          ),
+        ),
+      );
 
       // Handle the specific FirebaseAuthException
       if (error is FirebaseAuthException && error.code == 'account-exists-with-different-credential') {
@@ -150,7 +210,37 @@ class _LoginPageState extends State<LoginPage> {
         idToken: googleAuth?.idToken,
       );
 
-      Get.snackbar('Error', 'user logged in');
+      Get.showSnackbar(
+        GetSnackBar(
+          borderRadius: 8,
+          padding: EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+          animationDuration: Duration(milliseconds: 800),
+          duration: Duration(milliseconds: 3000),
+          margin: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+          snackPosition: SnackPosition.TOP,
+          isDismissible: true,
+          backgroundColor: Color(0xFF955AF2), // Set your desired color here
+          titleText: Row(
+            children: [
+              Icon(
+                Icons.check_circle,
+                color: Colors.white,
+                size: 20,
+              ),
+              SizedBox(width: 8),
+              WhiteText(
+                'Success',
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+              ),
+            ],
+          ),
+          messageText: WhiteText(
+            'You have successfully logged in',
+            fontSize: 12,
+          ),
+        ),
+      );
 
       String userEmail = googleUser.email;
       print("useremail through google sign is: $userEmail");

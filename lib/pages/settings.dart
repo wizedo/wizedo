@@ -109,7 +109,38 @@ class _settingScreenState extends State<settingScreen> {
       DefaultCacheManager().emptyCache();
 
       // Show success message and navigate to the login page
-      Get.snackbar('Success', 'Sign out successful');
+      Get.showSnackbar(
+        GetSnackBar(
+          borderRadius: 8,
+          padding: EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+          animationDuration: Duration(milliseconds: 800),
+          duration: Duration(milliseconds: 3500),
+          margin: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+          snackPosition: SnackPosition.TOP,
+          isDismissible: true,
+          backgroundColor: Color(0xFF955AF2), // Set your desired color for success
+          titleText: Row(
+            children: [
+              Icon(
+                Icons.check_circle,
+                color: Colors.white,
+                size: 20,
+              ),
+              SizedBox(width: 8),
+              WhiteText(
+                'Success',
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+              ),
+            ],
+          ),
+          messageText: WhiteText(
+            'Logged out successfully',
+            fontSize: 12,
+          ),
+        ),
+      );
+
       Get.to(LoginPage());
     } catch (error) {
       // Show error message if there's an issue with sign-out

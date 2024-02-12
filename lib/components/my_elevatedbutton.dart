@@ -21,7 +21,7 @@ class MyElevatedButton extends StatelessWidget {
     this.borderRadius = 15, // Default border radius
     this.customPrimaryColor = const Color(0xFF955AF2), // Default custom color
     this.mfontsize=16,
-    this.melevation=20
+    this.melevation=70
   });
 
   @override
