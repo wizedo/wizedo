@@ -53,8 +53,6 @@ dependencies:
   google_sign_in: ^6.1.6
   shared_preferences: ^2.2.2
   dropdown_button2: ^2.3.9
-  firebase_storage: ^11.5.3
-  flutter_document_picker: ^5.2.3
   firebase_app_check: ^0.2.1+6
   get_time_ago: ^1.2.5
   dotted_border: ^2.1.0

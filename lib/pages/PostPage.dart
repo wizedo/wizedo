@@ -1,25 +1,13 @@
-import 'dart:io';
-import 'dart:math';
-
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter_document_picker/flutter_document_picker.dart';
-import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'package:flutter/material.dart';
-import 'package:flutter_document_picker/flutter_document_picker.dart';
 import 'package:get/get.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:swipeable_button_view/swipeable_button_view.dart';
 import 'package:wizedo/Widgets/colors.dart';
 import 'package:intl/intl.dart';
-import 'package:wizedo/components/YearPickerTextField.dart';
 import 'package:wizedo/components/datePickerTextField.dart';
 import 'package:wizedo/components/mPlusRoundedText.dart';
-import 'package:wizedo/components/my_text_field.dart';
-
-import '../components/MyUploadButton.dart';
 import '../components/my_elevatedbutton.dart';
 import '../components/my_post_text_field.dart';
 import '../components/my_textmultiline_field.dart';
@@ -38,9 +26,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final TextEditingController _projectName = TextEditingController();
   final TextEditingController _numberOfPages = TextEditingController();
   final TextEditingController _descriptionText = TextEditingController();
-  final TextEditingController _pdf = TextEditingController();
   final TextEditingController _datePicker = TextEditingController();
   final TextEditingController _paymentDetails = TextEditingController();
+  final TextEditingController _googledrivefilelink=TextEditingController();
   String? _selectedCategory; // Change the type to String?
   bool _isNumberOfPagesVisible = false;
   DateTime _selectedDate = DateTime.now();
@@ -48,43 +36,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   List<String> errors = [];
   String? buttonText;
 
-  Future<firebase_storage.UploadTask?> uploadFile(File file, User? user) async {
-    if (file == null) {
-      Get.snackbar('Error', 'Unable to Upload');
-      print('No file was picked');
-      return null;
-    }
 
-    try {
-      firebase_storage.UploadTask uploadTask;
-
-      // Generate a unique filename using timestamp, random identifier, and user UID
-      String timestamp = DateTime.now().millisecondsSinceEpoch.toString();
-      String randomIdentifier = Random().nextInt(10000).toString();
-      String fileName = 'file_${user?.uid ?? 'unknown'}_$timestamp$randomIdentifier.pdf';
-
-      // Create a Reference to the file with the generated filename
-      firebase_storage.Reference ref = firebase_storage.FirebaseStorage.instance
-          .ref()
-          .child('Reference Files')
-          .child(fileName);
-
-      final metadata = firebase_storage.SettableMetadata(
-        contentType: 'file/pdf',
-        customMetadata: {'picked-file-path': file.path},
-      );
-
-      print("Uploading..!");
-      uploadTask = ref.putData(await file.readAsBytes(), metadata);
-      print("done..!");
-
-      return Future.value(uploadTask);
-    } catch (error) {
-      print('Error uploading file: $error');
-      Get.snackbar('Error', 'Failed to upload file');
-      return null;
-    }
-  }
 
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
@@ -127,6 +79,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
     }
   }
 
+  bool isGoogleDriveLink(String link) {
+    // Updated Google Drive link format
+    RegExp regex = RegExp(r'^https:\/\/drive\.google\.com\/(file\/d\/|open\?id=)([a-zA-Z0-9_-]+)\/?.*');
+    return regex.hasMatch(link);
+  }
+
 
 
 
@@ -138,9 +96,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
     _projectName.dispose();
     _numberOfPages.dispose();
     _descriptionText.dispose();
-    _pdf.dispose();
     _datePicker.dispose();
     _paymentDetails.dispose();
+    _googledrivefilelink.dispose();
     super.dispose();
   }
 
@@ -440,53 +398,46 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   //lib/images/pdf.png
                   SizedBox(height: 10),
                   Text(
-                    'Upload a reference file: ',
+                    'Upload a reference file link: ',
                     style: mPlusRoundedText.copyWith(fontSize: 12),
                   ),
                   SizedBox(height: 10),
-                  MyUploadButton(
-                    onPressed: () async {
+                  Container(
+                    width: double.infinity,
+                    child: MyPostTextField(
+                      prefixIcon: Icon(Icons.link, color: Colors.red),
+                      fontSize: 12,
+                      controller: _googledrivefilelink,
+                      obscureText: false,
+                      hint: 'Google Drive Link',
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          addError(error: 'Google Drive link is required');
+                          return 'Google Drive link is required';
+                        } else {
+                          removeError(error: 'Google Drive link is required');
+                        }
 
-                      // Your onPressed logic here
-                    },
-                    suffixIcon: Container(
-                      width: 40, // Set the width to control the size of the white circle
-                      height: 40, // Set the height to control the size of the white circle
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(12),
-                        color: Colors.white, // White circle color
-                      ),
-                      child: InkWell(
-                        child: Icon(Icons.upload, color: Color(0xFF955AF2), size: 25),
-                        onTap: () async {
-                          final path = await FlutterDocumentPicker.openDocument();
-                          if (path != null && path.isNotEmpty) {
-                            print(path);
+                        // Check if the entered link is a valid Google Drive link
+                        if (!isGoogleDriveLink(value)) {
+                          addError(error: 'Invalid Google Drive link');
+                          return 'Invalid Google Drive link';
+                        } else {
+                          removeError(error: 'Invalid Google Drive link');
+                        }
 
-                            // Check if the selected file has a .pdf extension
-                            if (!path.toLowerCase().endsWith('.pdf')) {
-                              Get.snackbar('Error', 'Please select a PDF file only');
-                              return;
-                            }
+                        // Check if the link is too long
+                        if (value.length > 200) {
+                          addError(error: 'Google Drive link is too long');
+                          return 'Google Drive link is too long';
+                        } else {
+                          removeError(error: 'Google Drive link is too long');
+                        }
 
-                            // Do not upload the file here; just update the _pdf controller
-                            setState(() {
-                              _pdf.text = path;
-                              String fileName = path.split('/').last;
-                              if (fileName.length > 25) {
-                                fileName = fileName.substring(0, 25) + '...pdf'; // Truncate the file name
-                              }
-                              buttonText = fileName;
-                            });
-                          } else {
-                            Get.snackbar('Error', 'No file selected');
-                          }
-                        },
-                      ),
+                        return null;
+                      },
                     ),
-                    buttonText: buttonText ?? 'Upload a PDF',
                   ),
-
 
 
                   SizedBox(height: 10),
@@ -568,12 +519,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         }
                       }
 
-                      firebase_storage.UploadTask? uploadTask;
 
-                      if (_pdf.text.isNotEmpty) {
-                        File file = File(_pdf.text);
-                        uploadTask = await uploadFile(file, user);
-                      }
+
 
 
 
@@ -590,6 +537,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         transaction.set(collegePostRef, {
                           'postId': postId,
                           'postId':postId,
+                          'googledrivelink':_googledrivefilelink.text,
                           'pstatus':1,
                           'userId': user.uid,
                           'emailid': email,
