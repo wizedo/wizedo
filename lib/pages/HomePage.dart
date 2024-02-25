@@ -37,7 +37,6 @@ class _HomePageState extends State<HomePage> {
   final RxMap<String, List<DocumentSnapshot<Map<String, dynamic>>>> _categoryDocuments =
       <String, List<DocumentSnapshot<Map<String, dynamic>>>>{}.obs;
 
-
   Future<String?> getUserEmailLocally() async {
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -90,11 +89,10 @@ class _HomePageState extends State<HomePage> {
 
     _scrollController.addListener(() {
       if (_scrollController.position.pixels == _scrollController.position.maxScrollExtent) {
-          isLoadingMore = true;
+        isLoadingMore = true;
         fetchMoreDocuments(_selectedCategory);
       }
     });
-
   }
 
   Stream<DocumentSnapshot<Map<String, dynamic>>> buildDocumentStream(String postId) {
@@ -157,90 +155,47 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  StreamBuilder<DocumentSnapshot<Map<String, dynamic>>> buildStreamBuilder(String postId) {
-    print('Building stream for post ID: $postId');
-    return StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
-      stream: buildDocumentStream(postId),
-      builder: (context, AsyncSnapshot<DocumentSnapshot<Map<String, dynamic>>> snapshot) {
-        // if (snapshot.connectionState == ConnectionState.waiting) {
-        //   return CircularProgressIndicator();
-        // } else
-          if (snapshot.hasError) {
-          return WhiteText('Error: ${snapshot.error}');
-        } else if (!snapshot.hasData || snapshot.data == null) {
-          return Container(); // Or any placeholder widget
-        } else {
-          return buildPostWidget(snapshot.data!);
-        }
-      },
-    );
-  }
+  // Map to store streams for each post ID
+  final Map<String, StreamSubscription<DocumentSnapshot<Map<String, dynamic>>>> _postSubscriptions = {};
 
-  Widget buildListViewForCategory(String category) {
-    print('building list view category for $category');
-    if (_categoryDocuments[category] == null || _categoryDocuments[category]!.isEmpty) {
-      return Center(child: WhiteText('No data available'));
+  StreamSubscription<DocumentSnapshot<Map<String, dynamic>>> subscribeToStream(String postId) {
+    // Check if a subscription for the post ID already exists
+    if (_postSubscriptions.containsKey(postId)) {
+      return _postSubscriptions[postId]!;
     } else {
-      return Obx(() => ListView.builder(
-        controller: _scrollController,
-        itemCount: _categoryDocuments[category]!.length + (isLoadingMore ? 1 : 0),
-        itemBuilder: (BuildContext context, int index) {
-          if (index == _categoryDocuments[category]!.length) {
-            // If the index is equal to the number of existing items,
-            // show the loading indicator
-            return Center(child: CircularProgressIndicator());
-          } else {
-            var data = _categoryDocuments[category]![index].data() as Map<String, dynamic>;
-
-            // Check if the current index is within the last 3 indices
-            if (index >= _categoryDocuments[category]!.length - 4) {
-              return buildStreamBuilder(data['postId']);
-            } else {
-              // Return buildPostWidget for other indices
-              return buildPostWidget(_categoryDocuments[category]![index]);
-            }
-          }
-        },
-      ));
+      // If not, create a new subscription and store it in the map
+      StreamSubscription<DocumentSnapshot<Map<String, dynamic>>> newSubscription =
+      getOrCreateStream(postId).listen((snapshot) {
+        // Handle snapshot updates here
+      });
+      _postSubscriptions[postId] = newSubscription;
+      return newSubscription;
     }
   }
 
+  final Map<String, Stream<DocumentSnapshot<Map<String, dynamic>>>> _postStreams = {};
 
-  StreamBuilder<QuerySnapshot<Map<String, dynamic>>> buildStreamBuilderForCategory(String category) {
-    print('Building stream for category: $category');
-    return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-      stream: FirebaseFirestore.instance
-          .collection('colleges')
-          .doc(userCollegee)
-          .collection('collegePosts')
-          .where('category', isEqualTo: category)
-          .where('status', isEqualTo: 'active')
-          .limit(4)
-          .snapshots(),
-      builder: (context, AsyncSnapshot<QuerySnapshot<Map<String, dynamic>>> snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return Center(child: CircularProgressIndicator());
-        } else if (snapshot.hasError) {
-          return Center(child: WhiteText('Error: ${snapshot.error}'));
-        } else {
-          if (_categoryDocuments[category] == null) {
-            print('Initially it was null, so if statement');
-            _categoryDocuments[category] = snapshot.data!.docs;
-            _lastDocument = _categoryDocuments[category]!.last;
-          }
-          print('Data received. Number of documents: ${snapshot.data!.docs.length}');
-          print('Below is item count');
-          print(_categoryDocuments[category]!.length);
-
-          return buildListViewForCategory(category);
-        }
-      },
-    );
-
+  Stream<DocumentSnapshot<Map<String, dynamic>>> getOrCreateStream(String postId) {
+    // Check if the stream for the post ID already exists
+    if (_postStreams.containsKey(postId)) {
+      return _postStreams[postId]!;
+    } else {
+      // If not, create a new stream and store it in the map
+      Stream<DocumentSnapshot<Map<String, dynamic>>> newStream = buildDocumentStream(postId);
+      _postStreams[postId] = newStream;
+      return newStream;
+    }
   }
 
-
-
+  @override
+  void dispose() {
+    print('widget and streams disposed');
+    // Dispose all the subscriptions when the widget is disposed
+    _postSubscriptions.values.forEach((subscription) {
+      subscription.cancel();
+    });
+    super.dispose();
+  }
 
   Future<void> fetchMoreDocuments(String category) async {
     try {
@@ -276,6 +231,83 @@ class _HomePageState extends State<HomePage> {
       // Notify the UI that loading has finished
       isLoading.value = false;
     }
+  }
+
+  StreamBuilder<DocumentSnapshot<Map<String, dynamic>>> buildStreamBuilder(String postId) {
+    print('Building stream for post ID but not fetching or creating stream: $postId');
+    return StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+      stream: getOrCreateStream(postId),
+      builder: (context, AsyncSnapshot<DocumentSnapshot<Map<String, dynamic>>> snapshot) {
+        // if (snapshot.connectionState == ConnectionState.waiting) {
+        //   return CircularProgressIndicator();
+        // } else
+        if (snapshot.hasError) {
+          return WhiteText('Error: ${snapshot.error}');
+        } else if (!snapshot.hasData || snapshot.data == null) {
+          return Container(); // Or any placeholder widget
+        } else {
+          return buildPostWidget(snapshot.data!);
+        }
+      },
+    );
+  }
+
+  Widget buildListViewForCategory(String category) {
+    print('building list view category for $category');
+    if (_categoryDocuments[category] == null || _categoryDocuments[category]!.isEmpty) {
+      return Center(child: WhiteText('No data available'));
+    } else {
+      return Obx(() => ListView.builder(
+        // controller: _scrollController,
+        itemCount: _categoryDocuments[category]!.length + (isLoadingMore ? 1 : 0),
+        itemBuilder: (BuildContext context, int index) {
+          if (index == _categoryDocuments[category]!.length) {
+            // If the index is equal to the number of existing items,
+            // show the loading indicator
+            return Center(child: CircularProgressIndicator());
+          } else {
+            var data = _categoryDocuments[category]![index].data() as Map<String, dynamic>;
+            // print(' i am in catedcouments else buldlisviewfor category statement');
+            // print('below is data for postid');
+            // print(index);
+            // print(_categoryDocuments[category]!.length);
+            return buildStreamBuilder(data['postId']);
+            // }
+          }
+        },
+      ));
+    }
+  }
+
+  StreamBuilder<QuerySnapshot<Map<String, dynamic>>> buildStreamBuilderForCategory(String category) {
+    print('Building stream for category: $category');
+    return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+      stream: FirebaseFirestore.instance
+          .collection('colleges')
+          .doc(userCollegee)
+          .collection('collegePosts')
+          .where('category', isEqualTo: category)
+          .where('status', isEqualTo: 'active')
+          .limit(4)
+          .snapshots(),
+      builder: (context, AsyncSnapshot<QuerySnapshot<Map<String, dynamic>>> snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Center(child: CircularProgressIndicator());
+        } else if (snapshot.hasError) {
+          return Center(child: WhiteText('Error: ${snapshot.error}'));
+        } else {
+          if (_categoryDocuments[category] == null) {
+            print('Initially it was null, so if statement');
+            _categoryDocuments[category] = snapshot.data!.docs;
+            _lastDocument = _categoryDocuments[category]!.last;
+          }
+          print('Data received. Number of documents: ${snapshot.data!.docs.length}');
+          print('Below is item count');
+          print(_categoryDocuments[category]!.length);
+          return buildListViewForCategory(category);
+        }
+      },
+    );
   }
 
   @override
