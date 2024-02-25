@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wizedo/pages/PostPage.dart';
 import '../controller/BottomNavigationController.dart';
 import 'detailsPage.dart'; // Import your BottomNavigationController file here
@@ -53,7 +54,18 @@ class BottomNavigation extends StatelessWidget {
                       child: FloatingActionButton(
                         heroTag: 'bottom_navigation_fab_hero_tag',
                         backgroundColor: Colors.transparent,
-                        onPressed: () {
+                        onPressed: () async {
+                          SharedPreferences prefs = await SharedPreferences.getInstance();
+                          print('setting postpage values');
+                          await prefs.setString('lastOpenedPage', '');
+                          await prefs.setString('projectName', '');
+                          await prefs.setString('numberOfPages', '');
+                          await prefs.setString('descriptionText', '');
+                          await prefs.setString('datePicker', '');
+                          await prefs.setString('paymentDetails', '');
+                          await prefs.setString('googledrivefilelink', '');
+                          await prefs.setString('selectedCategory', 'College Project');
+                          print('postpage value setting done');
                           // Add your onPressed logic here
                           print('Redirected to Post Page');
                           Get.to(RegisterScreen());

@@ -6,20 +6,23 @@ import 'package:get/get.dart';
 import 'package:get/get_navigation/src/root/get_material_app.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wizedo/pages/LoginPage.dart';
+import 'package:wizedo/pages/PostPage.dart';
 import 'package:wizedo/pages/SplashScreen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await Firebase.initializeApp();
-  // await FirebaseAppCheck.instance.activate();
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  String lastOpenedPage = prefs.getString('lastOpenedPage') ?? 'HomePage';
+  print('below is lastopenpage');
+  print(lastOpenedPage);
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp])
       .then((value) => runApp(MyApp()));
 }
 
 class MyApp extends StatelessWidget {
   const MyApp({Key? key});
-
 
   @override
   Widget build(BuildContext context) {
@@ -65,10 +68,10 @@ class MyApp extends StatelessWidget {
         print(userDetailsFilledLocally);
         if (userDetailsFilledLocally == true) {
           print('User details for $userEmail is true');
-          // If userDetailsFilled locally is true, redirect to BottomNavigation
-          Get.offAll(() => splashscreen());
+          // If userDetailsFilled locally is true, navigate to the last opened page
+          navigateToLastOpenedPage();
         } else {
-            Get.to(() => LoginPage());
+          Get.to(() => LoginPage());
         }
       });
       return Container(); // You may need to return a placeholder widget here.
@@ -78,17 +81,38 @@ class MyApp extends StatelessWidget {
       return Scaffold(body: Center(child: Text('Error')));
     }
   }
-}
 
-  Future<bool> getUserDetailsFilledLocally(String email) async {
-    try {
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      bool userDetailsFilledLocally = prefs.getBool('userDetailsFilled_$email') ?? false;
-      return userDetailsFilledLocally;
-    } catch (error) {
-      print('Error getting user details locally: $error');
-      return false;
+  void navigateToLastOpenedPage() async {
+    String lastOpenedPage = await getLastOpenedPage();
+    switch (lastOpenedPage) {
+      case 'RegisterScreen':
+        Get.offAll(() => RegisterScreen());
+        break;
+    // Add cases for other pages if needed
+      default:
+        Get.offAll(() => splashscreen());
     }
   }
 
+  Future<String> getLastOpenedPage() async {
+    try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String lastOpenedPage = prefs.getString('lastOpenedPage') ?? 'splashscreen';
+      return lastOpenedPage;
+    } catch (error) {
+      print('Error getting last opened page: $error');
+      return 'splashscreen'; // Default to splashscreen in case of an error
+    }
+  }
+}
 
+Future<bool> getUserDetailsFilledLocally(String email) async {
+  try {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    bool userDetailsFilledLocally = prefs.getBool('userDetailsFilled_$email') ?? false;
+    return userDetailsFilledLocally;
+  } catch (error) {
+    print('Error getting user details locally: $error');
+    return false;
+  }
+}

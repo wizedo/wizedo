@@ -5,12 +5,12 @@ import 'package:get/get.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wizedo/Widgets/colors.dart';
-import 'package:intl/intl.dart';
 import 'package:wizedo/components/datePickerTextField.dart';
 import 'package:wizedo/components/mPlusRoundedText.dart';
 import '../components/my_elevatedbutton.dart';
 import '../components/my_post_text_field.dart';
 import '../components/my_textmultiline_field.dart';
+import '../components/white_text.dart';
 import 'BottomNavigation.dart';
 
 class RegisterScreen extends StatefulWidget {
@@ -20,37 +20,27 @@ class RegisterScreen extends StatefulWidget {
   State<RegisterScreen> createState() => _RegisterScreenState();
 }
 
-class _RegisterScreenState extends State<RegisterScreen> {
+class _RegisterScreenState extends State<RegisterScreen> with WidgetsBindingObserver{
   bool isFinished = false;
-  bool _sliderValue = false;
   final TextEditingController _projectName = TextEditingController();
   final TextEditingController _numberOfPages = TextEditingController();
   final TextEditingController _descriptionText = TextEditingController();
   final TextEditingController _datePicker = TextEditingController();
   final TextEditingController _paymentDetails = TextEditingController();
   final TextEditingController _googledrivefilelink=TextEditingController();
-  String? _selectedCategory; // Change the type to String?
+  String _selectedCategory = 'College Project';
   bool _isNumberOfPagesVisible = false;
-  DateTime _selectedDate = DateTime.now();
   final _formKey = GlobalKey<FormState>();
   List<String> errors = [];
   String? buttonText;
 
-
-
-  Future<void> _selectDate(BuildContext context) async {
-    final DateTime? picked = await showDatePicker(
-      context: context,
-      initialDate: _selectedDate,
-      firstDate: DateTime(2000),
-      lastDate: DateTime(2101),
-    );
-    if (picked != null && picked != _selectedDate) {
-      setState(() {
-        _selectedDate = picked;
-      });
-    }
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance!.addObserver(this);
+    loadSavedValues();
   }
+
 
   void addError({required String error}) {
     if (!errors.contains(error)) {
@@ -85,9 +75,66 @@ class _RegisterScreenState extends State<RegisterScreen> {
     return regex.hasMatch(link);
   }
 
+  Future<void> loadSavedValues() async {
+    print('getting field values from locally');
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _projectName.text = prefs.getString('projectName') ?? '';
+      _numberOfPages.text = prefs.getString('numberOfPages') ?? '';
+      _descriptionText.text = prefs.getString('descriptionText') ?? '';
+      _datePicker.text = prefs.getString('datePicker') ?? '';
+      _paymentDetails.text = prefs.getString('paymentDetails') ?? '';
+      _googledrivefilelink.text = prefs.getString('googledrivefilelink') ?? '';
+      _selectedCategory = prefs.getString('selectedCategory') ?? 'College Project';
+
+    });
+  }
+
+  Future<void> saveLastOpenedPageAndData() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+
+      print('setting values normally');
+      // Save the values normally
+      prefs.setString('lastOpenedPage', 'RegisterScreen');
+      prefs.setString('projectName', _projectName.text);
+      prefs.setString('numberOfPages', _numberOfPages.text);
+      prefs.setString('descriptionText', _descriptionText.text);
+      prefs.setString('datePicker', _datePicker.text);
+      prefs.setString('paymentDetails', _paymentDetails.text);
+      prefs.setString('googledrivefilelink', _googledrivefilelink.text);
+      prefs.setString('selectedCategory', _selectedCategory);
+
+  }
 
 
+  Future<void> resetSharedPreferencesValues() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setString('lastOpenedPage', '');
+    prefs.setString('projectName', '');
+    prefs.setString('numberOfPages', '');
+    prefs.setString('descriptionText', '');
+    prefs.setString('datePicker', '');
+    prefs.setString('paymentDetails', '');
+    prefs.setString('googledrivefilelink', '');
+    prefs.setString('selectedCategory', '');
+  }
 
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    if (state == AppLifecycleState.paused) {
+      // Save the last opened page and form data when the app is in the background
+      await saveLastOpenedPageAndData();
+    }else if(state==AppLifecycleState.detached){
+      print('reset  detached state called');
+      prefs.setString('lastOpenedPage', '');
+      await resetSharedPreferencesValues();
+      prefs.setString('lastOpenedPage', '');
+      prefs.setString('lastOpenedPage', '');
+
+      print('Detached state values reset');
+    }
+  }
 
   @override
   void dispose() {
@@ -99,6 +146,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     _datePicker.dispose();
     _paymentDetails.dispose();
     _googledrivefilelink.dispose();
+    WidgetsBinding.instance!.removeObserver(this);
     super.dispose();
   }
 
@@ -111,7 +159,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         leading: IconButton(
           icon: Icon(Icons.arrow_back_ios_rounded, color: Colors.white),
           onPressed: () {
-            Get.back();
+            Get.to(BottomNavigation());
           },
         ),
         title: Text(
@@ -172,7 +220,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           .toList(),
                       onChanged: (String? value) {
                         setState(() {
-                          _selectedCategory = value;
+                          _selectedCategory = value!;
                           _isNumberOfPagesVisible =
                               _selectedCategory == 'Assignment';
                         });
@@ -365,35 +413,30 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     style: mPlusRoundedText.copyWith(fontSize: 12),
                   ),
                   SizedBox(height: 10),
-                  GestureDetector(
-                    onTap: () {
-                      _selectDate(context);
-                    },
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: DateSelector(
-                            width: Get.width * 0.85,
-                            controller: _datePicker,
-                            hint: 'Select Date (yyyy-mm-dd)',
-                            suffixIcon: Icon(
-                              Icons.calendar_month,
-                              color: Color(0xFF955AF2),
-                              size: 20,
-                            ),
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                addError(error: 'Due date is required');
-                                return 'Due date is required';
-                              } else {
-                                removeError(error: 'Due date is required');
-                              }
-                              return null;
-                            },
+                  Row(
+                    children: [
+                      Expanded(
+                        child: DateSelector(
+                          width: Get.width * 0.85,
+                          controller: _datePicker,
+                          hint: 'Select Date (yyyy-mm-dd)',
+                          suffixIcon: Icon(
+                            Icons.calendar_month,
+                            color: Color(0xFF955AF2),
+                            size: 20,
                           ),
-                        )
-                      ],
-                    ),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              addError(error: 'Due date is required');
+                              return 'Due date is required';
+                            } else {
+                              removeError(error: 'Due date is required');
+                            }
+                            return null;
+                          },
+                        ),
+                      )
+                    ],
                   ),
                   //lib/images/pdf.png
                   SizedBox(height: 10),
@@ -485,7 +528,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 _formKey.currentState!.save();
 
                 bool isValid = _validateInputs();
-
                 if (isValid) {
                   try {
                     final user = FirebaseAuth.instance.currentUser;
@@ -521,11 +563,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
 
 
-
-
-
-
-
                       // Use a transaction for the Firestore write operations
                       await firestore.runTransaction((transaction) async {
                         // Optionally, add the post to a subcollection under the college document
@@ -550,7 +587,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               ? _descriptionText.text[0].toUpperCase() + _descriptionText.text.substring(1)
                               : _descriptionText.text,
                           'pages': _numberOfPages.text,
-                          'dueDate': DateFormat('yyyy-MM-dd').format(_selectedDate),
+                          'dueDate': _datePicker.text,
                           'totalPayment': int.tryParse(_paymentDetails.text) ?? 0,
                           'status': 'active', // active or rejected or applied
                           'createdAt': FieldValue.serverTimestamp(),
@@ -558,7 +595,38 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         });
                       });
 
-                      Get.snackbar('Success', 'Post created successfully');
+                      Get.showSnackbar(
+                        GetSnackBar(
+                          borderRadius: 8,
+                          padding: EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+                          animationDuration: Duration(milliseconds: 800),
+                          duration: Duration(milliseconds: 3000),
+                          margin: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                          snackPosition: SnackPosition.TOP,
+                          isDismissible: true,
+                          backgroundColor: Color(0xFF955AF2), // Set your desired color here
+                          titleText: Row(
+                            children: [
+                              Icon(
+                                Icons.check_circle,
+                                color: Colors.white,
+                                size: 20,
+                              ),
+                              SizedBox(width: 8),
+                              WhiteText(
+                                'Success',
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ],
+                          ),
+                          messageText: WhiteText(
+                            'Task posted successfully!',
+                            fontSize: 12,
+                          ),
+                        ),
+                      );
+
 
                       // Redirect to the desired screen, e.g., BottomNavigation
                       await Navigator.push(
@@ -573,6 +641,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         isFinished = false;
                       });
                     }
+
                   } catch (error) {
                     print('Error creating post: $error');
                     Get.snackbar('Error', 'Failed to create post');
@@ -591,12 +660,32 @@ class _RegisterScreenState extends State<RegisterScreen> {
     );
   }
 
+
   bool _validateInputs() {
     bool isValid = errors.isEmpty;
 
-    if (!isValid) {
-      Get.rawSnackbar(message: "Please Give a valid INPUT");
+    // Check for empty due date
+    if (_datePicker.text.isEmpty || _datePicker.text == 'null') {
+      addError(error: 'Please select a valid due date');
+      isValid = false;
+    } else {
+      removeError(error: 'Please select a valid due date');
     }
+
+    // Check for null due date
+    if (_datePicker.text == null || _datePicker.text.trim().isEmpty) {
+      addError(error: 'Due date cannot be null');
+      isValid = false;
+    } else {
+      removeError(error: 'Due date cannot be null');
+    }
+
+    if (!isValid) {
+      Get.rawSnackbar(message: "Please give a valid input");
+    }
+
     return isValid;
   }
+
+
 }

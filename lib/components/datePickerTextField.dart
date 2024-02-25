@@ -27,11 +27,14 @@ class DateSelector extends StatefulWidget {
 
 class _DateSelectorState extends State<DateSelector> {
   Future<void> _selectYear(BuildContext context) async {
+    DateTime currentDate = DateTime.now();
+    DateTime next2Months = currentDate.add(Duration(days: 60)); // Add 60 days for the next 2 months
+
     DateTime? picked = await showDatePicker(
       context: context,
-      initialDate: DateTime.now(),
-      firstDate: DateTime(DateTime.now().year - 50),
-      lastDate: DateTime.now(),
+      initialDate: null,
+      firstDate: currentDate,
+      lastDate: next2Months,
       builder: (BuildContext context, Widget? child) {
         return Theme(
           data: ThemeData.dark(),
@@ -45,7 +48,11 @@ class _DateSelectorState extends State<DateSelector> {
       if (widget.validator != null) {
         widget.validator!(widget.controller.text);
       }
+    } else {
+      print('date is not selected');
+      widget.controller.text = 'null'; // Set it to an empty string or null based on your preference
     }
+
   }
 
   @override
