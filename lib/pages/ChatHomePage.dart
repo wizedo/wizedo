@@ -191,6 +191,7 @@ class _ChatHomePageState extends State<ChatHomePage> {
         .collection('colleges')
         .doc(userCollegee)
         .collection('collegePosts')
+        .where('status', isEqualTo: 'Applied')
         .where('amountpaid', isEqualTo: 'yes')
         .where('workeremail', isEqualTo: userEmail)
         .get();
@@ -199,6 +200,7 @@ class _ChatHomePageState extends State<ChatHomePage> {
         .collection('colleges')
         .doc(userCollegee)
         .collection('collegePosts')
+        .where('status', isEqualTo: 'Applied')
         .where('amountpaid', isEqualTo: 'yes')
         .where('recieveremail', isEqualTo: userEmail)
         .get();

@@ -32,10 +32,19 @@ class _HomePageState extends State<HomePage> {
   final ScrollController _scrollController = ScrollController();
   bool isFirstRun = true;
   final RxBool isLoading = true.obs;
+  bool alldocumentsfetched=false;
   bool isLoadingMore = false;
+  final FocusNode _searchFocusNode = FocusNode();
+  int searchResultsCount = 0;
+  List<String> searchedPostIds = [];
+
+
+
 
   final RxMap<String, List<DocumentSnapshot<Map<String, dynamic>>>> _categoryDocuments =
       <String, List<DocumentSnapshot<Map<String, dynamic>>>>{}.obs;
+
+  Map<String, List<DocumentSnapshot<Map<String, dynamic>>>> _tempDocuments = {};
 
   Future<String?> getUserEmailLocally() async {
     try {
@@ -155,6 +164,56 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  Future<void> fetchDocumentsBySearch(String category, String searchTerm) async {
+    try {
+      QuerySnapshot<Map<String, dynamic>> snapshot = await FirebaseFirestore.instance
+          .collection('colleges')
+          .doc(userCollegee)
+          .collection('collegePosts')
+          .where('category', isEqualTo: category)
+          .where('status', isEqualTo: 'active')
+          .where('description', isGreaterThanOrEqualTo: searchTerm)
+          .where('description', isLessThanOrEqualTo: searchTerm + '\uf8ff')
+          .get();
+
+      if (snapshot.docs.isNotEmpty) {
+        // Create a new list and add elements from _categoryDocuments[category]
+        _tempDocuments[category] = List.from(_categoryDocuments[category]!);
+        print('below is temp documents');
+        print(_tempDocuments[category]);
+
+        // Store the fetched post IDs in the list
+        List<String> newPostIds = snapshot.docs.map((doc) => doc['postId'] as String).toList();
+
+        // Print the number of posts/documents fetched
+        print('Number of documents fetched: ${newPostIds.length}');
+
+        // Add each postId to the searchPostIds list individually
+        for (String postId in newPostIds) {
+          searchedPostIds.add(postId);
+        }
+
+        _categoryDocuments[category]?.addAll(snapshot.docs);
+
+        // Print the length of _categoryDocuments for the specific category
+        print('Length of _categoryDocuments[$category]: ${_categoryDocuments[category]?.length}');
+
+        print(_categoryDocuments[category]);
+        print('below is again end temp documents');
+        print(_tempDocuments[category]);
+
+        // Notify the UI that data has changed
+      }
+    } catch (error) {
+      print('Error fetching documents by search: $error');
+    } finally {
+      // Set isLoadingMore to false to prevent fetching more documents
+      isLoadingMore = false;
+    }
+  }
+
+
+
   // Map to store streams for each post ID
   final Map<String, StreamSubscription<DocumentSnapshot<Map<String, dynamic>>>> _postSubscriptions = {};
 
@@ -223,6 +282,7 @@ class _HomePageState extends State<HomePage> {
         print('below is new snapshot fetched');
         print(newSnapshot.docs);
       } else {
+        alldocumentsfetched=true;
         print('No more documents');
       }
     } catch (error) {
@@ -258,13 +318,13 @@ class _HomePageState extends State<HomePage> {
       return Center(child: WhiteText('No data available'));
     } else {
       return Obx(() => ListView.builder(
-        // controller: _scrollController,
+        controller: _scrollController,
         itemCount: _categoryDocuments[category]!.length + (isLoadingMore ? 1 : 0),
         itemBuilder: (BuildContext context, int index) {
           if (index == _categoryDocuments[category]!.length) {
             // If the index is equal to the number of existing items,
             // show the loading indicator
-            return Center(child: CircularProgressIndicator());
+            return !alldocumentsfetched ? Center(child: CircularProgressIndicator()) : Container();
           } else {
             var data = _categoryDocuments[category]![index].data() as Map<String, dynamic>;
             // print(' i am in catedcouments else buldlisviewfor category statement');
@@ -288,6 +348,7 @@ class _HomePageState extends State<HomePage> {
           .collection('collegePosts')
           .where('category', isEqualTo: category)
           .where('status', isEqualTo: 'active')
+      // .orderBy('createdAt', descending: false)
           .limit(4)
           .snapshots(),
       builder: (context, AsyncSnapshot<QuerySnapshot<Map<String, dynamic>>> snapshot) {
@@ -349,11 +410,20 @@ class _HomePageState extends State<HomePage> {
                             children: [
                               Icon(Icons.location_on_rounded, color: Colors.white, size: 20),
                               SizedBox(width: 2),
-                              WhiteText(
-                                userCollegee.length <= 45
-                                    ? userCollegee
-                                    : userCollegee.substring(0, 45) + '...',
-                                fontSize: 9,
+                              InkWell(
+                                onTap: (){
+                                  print('refresh');
+                                  _categoryDocuments.refresh();
+                                  print('Searched Post IDs for College Project: $searchedPostIds');
+                                  print('belwo is number of fetched search resulsts');
+                                  print(searchResultsCount);
+                                },
+                                child: WhiteText(
+                                  userCollegee.length <= 45
+                                      ? userCollegee
+                                      : userCollegee.substring(0, 45) + '...',
+                                  fontSize: 9,
+                                ),
                               ),
                             ],
                           ),
@@ -428,6 +498,7 @@ class _HomePageState extends State<HomePage> {
               width: Get.width * 0.9,
               margin: const EdgeInsets.only(top: 10, bottom: 10, right: 15, left: 15),
               child: TextFormField(
+                focusNode: _searchFocusNode, // Assign the FocusNode
                 controller: searchFilter,
                 style: TextStyle(color: Colors.white, fontWeight: FontWeight.normal, fontSize: 12),
                 decoration: InputDecoration(
@@ -440,12 +511,55 @@ class _HomePageState extends State<HomePage> {
                     borderSide: BorderSide.none,
                   ),
                   contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                  suffixIcon: searchFilter.text.isNotEmpty
+                      ? IconButton(
+                    icon: Icon(Icons.clear_rounded, color: Colors.grey),
+                    onPressed: () {
+                      // Clear the search field
+                      searchFilter.clear();
+
+                      setState(() {
+                        // Reset the search term
+                        searchTerm = '';
+
+                        _categoryDocuments[_selectedCategory] = List.from(_tempDocuments[_selectedCategory]!);
+
+                        // Clear the list of searched post IDs
+                        searchedPostIds.clear();
+
+                        // Notify the UI that data has changed
+                        _categoryDocuments.refresh();
+                      });
+                    },
+                  )
+
+                      : IconButton(
+                    icon: Icon(Icons.search, color: Colors.grey),
+                    onPressed: () {
+                      // Move focus to the TextFormField when search button is pressed
+                      FocusScope.of(context).requestFocus(_searchFocusNode);
+                      // Perform search or any other action when the search icon is pressed
+                      // You can customize this part based on your requirements
+                    },
+                  ),
+
                 ),
                 onChanged: (String value) {
-                  _debouncer(() {
+                  _debouncer(() async {
                     setState(() {
                       searchTerm = value;
+
                     });
+                    if (searchTerm.isNotEmpty) {
+                      await fetchDocumentsBySearch(_selectedCategory, searchTerm);
+                    }else if (searchTerm.isEmpty) {
+                      print('searchterm is empty');
+                      _categoryDocuments.refresh();
+                    }
+
+                    // Fetch more documents as before
+                    isLoading.value = true;
+                    await fetchMoreDocuments(_selectedCategory);
                   });
                 },
               ),
@@ -465,6 +579,8 @@ class _HomePageState extends State<HomePage> {
                             if (_selectedCategory != 'College Project') {
                               setState(() {
                                 _selectedCategory = 'College Project';
+                                searchTerm = ''; // Reset search term
+                                searchFilter.clear(); // Clear search filter text field
                               });
                             }
                             print('College Chip tapped!');
@@ -479,6 +595,8 @@ class _HomePageState extends State<HomePage> {
                             if (_selectedCategory != 'Personal Development') {
                               setState(() {
                                 _selectedCategory = 'Personal Development';
+                                searchTerm = ''; // Reset search term
+                                searchFilter.clear(); // Clear search filter text field
                               });
                             }
                             print('Personal Chip tapped!');
@@ -493,6 +611,8 @@ class _HomePageState extends State<HomePage> {
                             if (_selectedCategory != 'Assignment') {
                               setState(() {
                                 _selectedCategory = 'Assignment';
+                                searchTerm = ''; // Reset search term
+                                searchFilter.clear(); // Clear search filter text field
                               });
                             }
                             print('Assignment Chip tapped!');

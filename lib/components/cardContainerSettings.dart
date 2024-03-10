@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 
 Decoration cardContainerdecoration = BoxDecoration(
-  color: Color(0xFF261D3C),
-  borderRadius: BorderRadius.circular(15),
+  color: Color(0xFF231C30),
+  borderRadius: BorderRadius.circular(10),
   boxShadow: [
     BoxShadow(
       color: Colors.black.withOpacity(0.1),
-      spreadRadius: 1,
-      blurRadius: 3,
-      offset: Offset(0, 2),
+      // spreadRadius: 1,
+      blurRadius: 10,
+      // offset: Offset(0, 50),
     ),
   ],
 );
