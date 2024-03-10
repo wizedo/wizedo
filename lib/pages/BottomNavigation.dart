@@ -3,10 +3,22 @@ import 'package:get/get.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wizedo/pages/PostPage.dart';
+import 'package:wizedo/pages/acceptedJobs.dart';
+import 'package:wizedo/pages/settings.dart';
 import '../controller/BottomNavigationController.dart';
+import 'ChatHomePage.dart';
+import 'HomePage.dart';
 import 'detailsPage.dart'; // Import your BottomNavigationController file here
 
-class BottomNavigation extends StatelessWidget {
+class BottomNavigation extends StatefulWidget {
+  @override
+  State<BottomNavigation> createState() => _BottomNavigationState();
+}
+
+class _BottomNavigationState extends State<BottomNavigation> {
+
+
+
   final BottomNavigationController controller = Get.put(BottomNavigationController());
 
   @override
@@ -144,7 +156,10 @@ class BottomNavigation extends StatelessWidget {
         ),
       ),
 
-      body: Obx(()=>controller.pages[controller.index.value]),
+      body: Obx(() => IndexedStack(
+        index: controller.index.value,
+        children: controller.pages, // Use the pages from the controller
+      )),
     );
   }
 }

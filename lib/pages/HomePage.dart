@@ -318,7 +318,7 @@ class _HomePageState extends State<HomePage> {
       return Center(child: WhiteText('No data available'));
     } else {
       return Obx(() => ListView.builder(
-        controller: _scrollController,
+        // controller: _scrollController,
         itemCount: _categoryDocuments[category]!.length + (isLoadingMore ? 1 : 0),
         itemBuilder: (BuildContext context, int index) {
           if (index == _categoryDocuments[category]!.length) {
