@@ -264,7 +264,7 @@ class _HomePageState extends State<HomePage> {
           .collection('collegePosts')
           .where('category', isEqualTo: category)
           .where('status', isEqualTo: 'active')
-          .limit(3)
+          .limit(4)
           .startAfterDocument((_categoryDocuments[category]?.last ?? _lastDocument) as DocumentSnapshot<Object?>)
           .get();
 
@@ -349,7 +349,7 @@ class _HomePageState extends State<HomePage> {
           .where('category', isEqualTo: category)
           .where('status', isEqualTo: 'active')
       // .orderBy('createdAt', descending: false)
-          .limit(4)
+          .limit(7)
           .snapshots(),
       builder: (context, AsyncSnapshot<QuerySnapshot<Map<String, dynamic>>> snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {

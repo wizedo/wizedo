@@ -8,11 +8,13 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wizedo/pages/LoginPage.dart';
 import 'package:wizedo/pages/PostPage.dart';
 import 'package:wizedo/pages/SplashScreen.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
+
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
   await Firebase.initializeApp();
+  await MobileAds.instance.initialize();
   SharedPreferences prefs = await SharedPreferences.getInstance();
   String lastOpenedPage = prefs.getString('lastOpenedPage') ?? 'HomePage';
   print('below is lastopenpage');

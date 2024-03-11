@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:wizedo/Widgets/colors.dart';
 import 'package:wizedo/components/my_elevatedbutton.dart';
 import 'package:wizedo/components/white_text.dart';
@@ -42,6 +43,30 @@ class _DetailsScreenState extends State<DetailsScreen> {
   final TextEditingController _datePicker = TextEditingController();
   final TextEditingController _paymentDetails = TextEditingController();
 
+  bool isBannerLoaded=false;
+  late BannerAd bannerAd;
+
+  inilizeBannerAd() async{
+    bannerAd = BannerAd(
+        size: AdSize.banner,
+        adUnitId: 'ca-app-pub-3940256099942544/9214589741',
+        listener: BannerAdListener(
+          onAdLoaded: (ad){
+            setState(() {
+              isBannerLoaded=true;
+            });
+          },
+          onAdFailedToLoad: (ad, error){
+            ad.dispose();
+            isBannerLoaded=false;
+            print('add failed to load below is error');
+            print(error);
+          }
+        ),
+        request: AdRequest());
+        bannerAd.load();
+  }
+
 
   String _selectedCategory = '';
   bool _isNumberOfPagesVisible = false;
@@ -50,6 +75,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
 
   void initState() {
     super.initState();
+    inilizeBannerAd();
     // Print out values in the initState method
     print('Category: ${widget.category}');
     print('Subject: ${widget.subject}');
@@ -224,15 +250,20 @@ class _DetailsScreenState extends State<DetailsScreen> {
                 ),
               ),
             ),
-            SizedBox(height: 15),
+            SizedBox(height: 200),
             // ad
             Container(
               height: 50,
+              width: 320,
               decoration: BoxDecoration(
                 color: boxDecorationColor,
                 borderRadius: BorderRadius.zero,
               ),
-            ),
+              child: isBannerLoaded == true
+                  ? AdWidget(ad: bannerAd)  // Display the ad if isBannerLoaded is true
+                  : Container(),  // Otherwise, display an empty container
+            )
+
           ],
         ),
       ),
