@@ -1,4 +1,4 @@
-package com.example.wizedo
+package com.scanpick.peermate
 
 import io.flutter.embedding.android.FlutterActivity
 

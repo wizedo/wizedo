@@ -1,26 +1,44 @@
 {
   "project_info": {
-    "project_number": "744019466360",
-    "project_id": "wizedo-d5d09",
-    "storage_bucket": "wizedo-d5d09.appspot.com"
+    "project_number": "373039519856",
+    "project_id": "peermaterelease",
+    "storage_bucket": "peermaterelease.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:744019466360:android:3bc73bbaed6df26d28358d",
+        "mobilesdk_app_id": "1:373039519856:android:4a22801297fad55f0ebcb5",
         "android_client_info": {
-          "package_name": "com.example.wizedo"
+          "package_name": "com.scanpick.peermate"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "373039519856-pq1pdfia54bsieresbq3oo87ud5in15g.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.scanpick.peermate",
+            "certificate_hash": "19927eec96a420ffd2a989f7ed91f659f4e49d04"
+          }
+        },
+        {
+          "client_id": "373039519856-l19775ppas4mqf706q0l1to8o8j5iskq.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
-          "current_key": "AIzaSyAXnPciD8bkdqQY03XPCV0h6_hzVDgGjhA"
+          "current_key": "AIzaSyCGZ1R8lBaMggaF2KY-SJZvjvbF3muEqc8"
         }
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "373039519856-l19775ppas4mqf706q0l1to8o8j5iskq.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }

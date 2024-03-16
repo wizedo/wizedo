@@ -8,7 +8,7 @@
 PRODUCT_NAME = wizedo
 
 // The application's bundle identifier
-PRODUCT_BUNDLE_IDENTIFIER = com.example.wizedo
+PRODUCT_BUNDLE_IDENTIFIER = com.scanpick.peermate
 
 // The copyright displayed in application information
 PRODUCT_COPYRIGHT = Copyright © 2023 com.example. All rights reserved.
