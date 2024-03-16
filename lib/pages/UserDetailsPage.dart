@@ -663,7 +663,7 @@ class _UserDetailsState extends State<UserDetails> with WidgetsBindingObserver {
 
 
                           style: ElevatedButton.styleFrom(
-                            primary: Color(0xFF955AF2),
+                            backgroundColor: Color(0xFF955AF2),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(15),
                             ),
