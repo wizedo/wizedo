@@ -35,8 +35,7 @@ class MyUploadButton extends StatelessWidget {
         child: ElevatedButton(
           onPressed: onPressed,
           style: ElevatedButton.styleFrom(
-            primary: Colors.transparent,
-            onPrimary: Colors.white,
+            foregroundColor: Colors.white, backgroundColor: Colors.transparent,
             elevation: 0,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(15),

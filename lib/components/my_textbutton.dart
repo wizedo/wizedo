@@ -17,8 +17,7 @@ class MyTextButton extends StatelessWidget {
     return TextButton(
       onPressed: onPressed,
       style: TextButton.styleFrom(
-        primary: Color(0xFF955AF2), // Customize the text color
-        textStyle: GoogleFonts.mPlusRounded1c( // Apply the custom font here
+        foregroundColor: Color(0xFF955AF2), textStyle: GoogleFonts.mPlusRounded1c( // Apply the custom font here
           textStyle: TextStyle(
             fontSize: fontSize ?? 16, // Use provided font size or default value (16)
           ),
