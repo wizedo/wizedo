@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "373039519856",
+    "project_id": "peermaterelease",
+    "storage_bucket": "peermaterelease.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:373039519856:android:4a22801297fad55f0ebcb5",
+        "android_client_info": {
+          "package_name": "com.scanpick.peermate"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "373039519856-4ftkoh6ma4i493d9em8vklps1q5ujush.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.scanpick.peermate",
+            "certificate_hash": "75fc440d3a6d4f45c453cceb50416ece79d11dd7"
+          }
+        },
+        {
+          "client_id": "373039519856-ll0mbe788plmrhs48c4d4r8pskhjm3di.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.scanpick.peermate",
+            "certificate_hash": "279d29e1c607d47cf8577aedcafdfa9f3eb80c72"
+          }
+        },
+        {
+          "client_id": "373039519856-l19775ppas4mqf706q0l1to8o8j5iskq.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCGZ1R8lBaMggaF2KY-SJZvjvbF3muEqc8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "373039519856-l19775ppas4mqf706q0l1to8o8j5iskq.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
