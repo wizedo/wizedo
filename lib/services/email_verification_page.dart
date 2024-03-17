@@ -1,197 +1,196 @@
 import 'dart:async';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart'; // Import Firestore
 import 'package:get/get.dart';
-import 'package:wizedo/pages/LoginPage.dart';
+import '../pages/LoginPage.dart';
+import '../pages/RegisterPage.dart';
 import '../pages/UserDetailsPage.dart';
 
 class EmailVerificationScreen extends StatefulWidget {
   final String userEmail;
-  final String userPassword; // Make password optional
-  // Remove userConfirmPassword since it's no longer needed
+  final String userPassword;
 
-  const EmailVerificationScreen({
-    Key? key,
-    required this.userEmail,
-    this.userPassword = '', // Provide a default value for userPassword
-  }) : super(key: key);
+  const EmailVerificationScreen({Key? key, required this.userEmail, required this.userPassword}) : super(key: key);
 
   @override
-  State<EmailVerificationScreen> createState() =>
-      _EmailVerificationScreenState();
+  _EmailVerificationScreenState createState() => _EmailVerificationScreenState();
 }
 
 class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
-  bool isEmailVerified = false;
-  Timer? timer;
-  int countdown = 30; // Countdown duration in seconds
-  //instance of auth
-  FirebaseAuth _auth=FirebaseAuth.instance;  //creaing instance for easier use through _auth
-  //instance of firestore
-  final FirebaseFirestore _firestore=FirebaseFirestore.instance;
-  final fireStore=FirebaseFirestore.instance.collection('users').snapshots();
-  //collection for firstore
-  CollectionReference ref=FirebaseFirestore.instance.collection('usersDetails');
-
-
+  Timer? _timer;
+  int _elapsedSeconds = 90;
+  bool _isEmailVerified = false;
 
   @override
   void initState() {
     super.initState();
-    createAccountAndSendEmailVerification();
-    timer = Timer.periodic(const Duration(seconds: 1), (_) => updateCountdown());
-  }
-
-  createAccountAndSendEmailVerification() async {
-    try {
-      await FirebaseAuth.instance.createUserWithEmailAndPassword(
-        email: widget.userEmail,
-        password: widget.userPassword,
-      );
-      // Send email verification
-      await FirebaseAuth.instance.currentUser?.sendEmailVerification();
-    } catch (e) {
-      // print(e);
-      debugPrint('$e');
-      // Handle error creating account or sending verification email
-      // If an error occurs, delete the created user account
-      await FirebaseAuth.instance.currentUser?.delete();
-      // Check if the error message indicates that the user is already registered
-      if (e.toString().contains('email-already-in-use')) {
-        // Show a Snackbar indicating that the user is already registered
-        Get.snackbar('Invalid', 'User is already registered. Click below to login Now.');
-        Get.to(() => LoginPage());
-      } else {
-        // Show a generic error Snackbar
-        Get.snackbar('Error', 'Registration failed. Please try again later.');
-      }
-      // Optionally, navigate back to the login page or display an error message
-    }
-  }
-
-  updateCountdown() {
-    checkEmailVerified();
-    if (countdown > 0) {
-      setState(() {
-        countdown--;
-      });
-    } else {
-      // Countdown reached, delete the user and perform any additional actions
-      deleteAndNavigate();
-    }
-  }
-
-  checkEmailVerified() async {
-    await FirebaseAuth.instance.currentUser?.reload();
-
-    setState(() {
-      isEmailVerified = FirebaseAuth.instance.currentUser!.emailVerified;
-    });
-
-    if (isEmailVerified) {
-      await _firestore.collection('users').doc(widget.userEmail).set({
-        'uid': _auth.currentUser!.uid,
-        'email': widget.userEmail,
-      });
-
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text("Email Successfully Verified")));
-      // Creating a collection
-      final fireStore = FirebaseFirestore.instance.collection('usersDetails');
-      // Get the current user
-      User? user = FirebaseAuth.instance.currentUser;
-      if (user != null) {
-        String email = user.email!;
-        await fireStore.doc(email).set({
-          'id': email,
-          'userDetailsfilled': false,
-        }).then((value) {
-          Get.snackbar('Success', 'Updated successfully');
-        });
-      }
-      // Redirect to UserDetailsPage after email is verified
-      Get.to(() => UserDetails(userEmail: widget.userEmail));
-      timer?.cancel();
-    }
-  }
-
-
-  deleteAndNavigate() async {
-    await FirebaseAuth.instance.currentUser?.delete();
-    // Optionally, navigate back to the login page or display an error message
-    Get.to(() => LoginPage());
-    timer?.cancel();
+    _startTimer();
+    _sendEmailVerification();
   }
 
   @override
   void dispose() {
-    timer?.cancel();
+    _timer?.cancel();
     super.dispose();
+  }
+
+  void _startTimer() {
+    const oneSec = Duration(seconds: 1);
+    _timer = Timer.periodic(
+      oneSec,
+          (timer) {
+        setState(() {
+          _elapsedSeconds--;
+          if (_elapsedSeconds <= 0) {
+            // If not verified within one minute, delete the user account
+            _deleteUserAccount();
+          } else {
+            // Check email verification status every second
+            _checkEmailVerification();
+          }
+        });
+      },
+    );
+  }
+
+  Future<void> _sendEmailVerification() async {
+    try {
+      User? user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        await user.sendEmailVerification();
+      }
+    } catch (error) {
+      print('Error sending email verification: $error');
+    }
+  }
+
+  Future<void> _deleteUserAccount() async {
+    try {
+      User? user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        await user.delete();
+        Get.offAll(LoginPage());
+        Get.snackbar(
+          'Account Creation Failed',
+          'Email verification failed. Please try registering again.',
+        );
+      }
+    } catch (error) {
+      print('Error deleting user account: $error');
+    }
+  }
+
+  Future<void> _checkEmailVerification() async {
+    try {
+      await FirebaseAuth.instance.currentUser?.reload();
+      if (FirebaseAuth.instance.currentUser?.emailVerified == true) {
+        // Set emailVerified to true in Firestore
+        await FirebaseFirestore.instance
+            .collection('usersDetails')
+            .doc(widget.userEmail)
+            .update({'emailVerified': 'yes'});
+
+        _timer?.cancel();
+        setState(() {
+          _isEmailVerified = true;
+        });
+        Get.to(() => UserDetails(userEmail: widget.userEmail));
+        Get.snackbar('Email Verified', 'Your email has been verified successfully.');
+      }
+    } catch (error) {
+      print('Error checking email verification: $error');
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
+    return WillPopScope(
+      onWillPop: () async {
+        // Intercept back button press
+        await _deleteUserAccount(); // Delete user account when navigating back to registration page
+        return true;
+      },
       child: Scaffold(
-        body: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              const SizedBox(height: 35),
-              const SizedBox(height: 30),
-              const Center(
-                child: Text(
-                  'Check your \n Email',
+        appBar: AppBar(
+          title: Text('Email Verification'),
+        ),
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.only(top: 50,left: 8 ,right: 8),
+            child: Column(
+              children: <Widget>[
+                // Countdown Timer
+                Container(
+                  width: 180,
+                  height: 180,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Color(0xFF955AF2),
+                  ),
+                  child: Center(
+                    child: Text(
+                      '$_elapsedSeconds',
+                      style: TextStyle(
+                        fontFamily: 'MPlusRounded1c',
+                        fontSize: 60, // Adjust font size as needed
+                        fontWeight: FontWeight.bold, // Make the text bold
+                        color: Colors.white, // Set text color to white
+                      ),
+                    ),
+                  ),
+                ),
+
+                SizedBox(height: 20),
+                RichText(
                   textAlign: TextAlign.center,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 32.0),
-                child: Center(
-                  child: Text(
-                    'We have sent you an Email on  ${widget.userEmail}',
-                    textAlign: TextAlign.center,
+                  text: TextSpan(
+                    style: TextStyle(
+                      fontFamily: 'MPlusRounded1c',
+                      fontSize: 16, // Adjust font size as needed
+                      color: Colors.black, // Set text color to black
+                    ),
+                    children: [
+                      TextSpan(
+                        text: 'An email has been sent to ',
+                      ),
+                      TextSpan(
+                        text: widget.userEmail,
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold, // Make userEmail extra bold
+                        ),
+                      ),
+                      TextSpan(
+                        text: ' for verification.',
+                      ),
+                    ],
                   ),
                 ),
-              ),
-              const SizedBox(height: 16),
-              const Center(child: CircularProgressIndicator()),
-              const SizedBox(height: 8),
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 32.0),
-                child: Center(
-                  child: Text(
-                    'Verifying email....',
-                    textAlign: TextAlign.center,
-                  ),
+
+                SizedBox(height: 20),
+                Text(
+                  'Please verify your email within 1 minute.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontFamily: 'MPlusRounded1c'),
                 ),
-              ),
-              const SizedBox(height: 57),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 32.0),
-                child: ElevatedButton(
-                  child: const Text('Resend'),
-                  onPressed: () {
-                    try {
-                      FirebaseAuth.instance.currentUser
-                          ?.sendEmailVerification();
-                    } catch (e) {
-                      debugPrint('$e');
-                    }
+
+                SizedBox(height: 20),
+                ElevatedButton(
+                  onPressed: () async {
+                    await _checkEmailVerification();
                   },
+                  child: Text('Check Email Verification'),
                 ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Resend in $countdown seconds',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 18,
-                ),
-              ),
-            ],
+                SizedBox(height: 20),
+                if (_isEmailVerified)
+                  Text(
+                    'Email verified successfully!',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(color: Colors.green, fontFamily: 'MPlusRounded1c'),
+                  ),
+              ],
+            ),
           ),
         ),
       ),

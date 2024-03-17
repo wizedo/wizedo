@@ -129,565 +129,571 @@ class _UserDetailsState extends State<UserDetails> with WidgetsBindingObserver {
     Color backgroundColor = ColorUtil.hexToColor(hexColor);
     String email = widget.userEmail;
     print('User email in UserDetails: ${widget.userEmail}');
-    return Scaffold(
-      backgroundColor: Color(0xFF211B2E),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          child: Container(
-            child: Form(
-              key: _formKey,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Image.asset(
-                    'lib/images/userdetails.png',
-                    width: 300,
-                    height: 150,
-                  ),
-                  Align(
-                    alignment: Alignment.center,
-                    child: WhiteText(
-                      "Let's Get To Know You!",
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
+    return WillPopScope(
+      onWillPop: () async {
+        // Disable back navigation
+        return false;
+      },
+      child: Scaffold(
+        backgroundColor: Color(0xFF211B2E),
+        body: SafeArea(
+          child: SingleChildScrollView(
+            child: Container(
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Image.asset(
+                      'lib/images/userdetails.png',
+                      width: 300,
+                      height: 150,
                     ),
-                  ),
-                  SizedBox(height: 20),
-                  MyTextField(
-                    controller: unameController,
-                    label: 'First Name',
-                    obscureText: false,
-                    keyboardType: TextInputType.name,
-                    textColor: Color(0xFFdacfe6),
-                    prefixIcon: Image.asset(
-                      'lib/images/uname.png',
-                      color: Colors.white,
-                    ),
-                    fontSize: 12,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        addError(error: 'Name is required');
-                        return 'Name is required';
-                      } else {
-                        removeError(error: 'Name is required');
-                      }
-                      // Capitalize the first letter of the name
-                      final capitalizedValue = _capitalizeFirstLetter(value);
-
-                      if (capitalizedValue.length < 5) {
-                        addError(error: 'Name should be at least 5 characters');
-                        return 'Name should be at least 5 characters';
-                      } else {
-                        removeError(error: 'Name should be at least 5 characters');
-                      }
-                      if (capitalizedValue.length > 20) {
-                        addError(error: 'Maximum characters allowed is 20');
-                        return 'Maximum characters allowed is 20';
-                      } else {
-                        removeError(error: 'Maximum characters allowed is 20');
-                      }
-                      if (RegExp(r'[0-9]').hasMatch(capitalizedValue)) {
-                        addError(error: 'Name should not contain numbers');
-                        return 'Name should not contain numbers';
-                      } else {
-                        removeError(error: 'Name should not contain numbers');
-                      }
-                      return null;
-                    },
-                  ),
-
-
-                  SizedBox(height: 15),
-                  //phone number controller or text field
-                  // MyTextField(
-                  //   controller: phonenoController,
-                  //   label: 'Phone Number',
-                  //   obscureText: false,
-                  //   keyboardType: TextInputType.number,
-                  //   textColor: Color(0xFFdacfe6),
-                  //   prefixIcon: Center(
-                  //     child: Text(
-                  //       '+91',
-                  //       style: TextStyle(fontSize: 12, color: Colors.white),
-                  //     ),
-                  //   ),
-                  //   fontSize: 12,
-                  //   validator: (value) {
-                  //     if (value == null || value.isEmpty) {
-                  //       addError(error: 'Phone Number is required');
-                  //       return 'Phone Number is required';
-                  //     } else {
-                  //       removeError(error: 'Phone Number is required');
-                  //     }
-                  //     if (value != null && value.length < 10) {
-                  //       addError(error: 'Enter full 10 digit number');
-                  //       return 'Enter full 10 digit number';
-                  //     } else {
-                  //       removeError(error: 'Enter full 10 digit number');
-                  //     }
-                  //     if (value != null && value.length > 10) {
-                  //       addError(error: 'Maximum Numbers allowed is 10');
-                  //       return 'Maximum Numbers allowed is 10';
-                  //     } else {
-                  //       removeError(error: 'Maximum Numbers allowed is 10');
-                  //     }
-                  //     return null;
-                  //   },
-                  // ),
-                  //*****************************************
-
-                  MyTextField(
-                    controller: ulastnameController,
-                    label: 'Last Name',
-                    obscureText: false,
-                    keyboardType: TextInputType.name,
-                    textColor: Color(0xFFdacfe6),
-                    prefixIcon: Image.asset(
-                      'lib/images/uname.png',
-                      color: Colors.white,
-                    ),
-                    fontSize: 12,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        addError(error: 'Last Name is required');
-                        return 'Last Name is required';
-                      } else {
-                        removeError(error: 'Last Name is required');
-                      }
-
-
-                      // Capitalize the first letter of the name
-                      final capitalizedValue = _capitalizeFirstLetter(value);
-
-                      if (capitalizedValue.length < 5) {
-                        addError(error: 'Last Name should be at least 5 characters');
-                        return 'Last Name should be at least 5 characters';
-                      } else {
-                        removeError(error: 'Last Name should be at least 5 characters');
-                      }
-
-                      // Check for leading spaces
-                      if (capitalizedValue != null && capitalizedValue.startsWith(' ')) {
-                      addError(error: 'Leading spaces at the beginning are not allowed');
-                      return 'Leading spaces at the beginning are not allowed';
-                      } else {
-                        removeError(
-                            error: 'Leading spaces at the beginning are not allowed');
-                      }
-
-                      // Check for trailing spaces
-                      if (capitalizedValue != null && capitalizedValue.endsWith(' ')) {
-                        addError(error: 'Spaces at the end are not allowed');
-                        return 'Spaces at the end are not allowed';
-                      } else {
-                        removeError(error: 'Spaces at the end are not allowed');
-                      }
-
-                      // Check for consecutive spaces
-                      if (capitalizedValue != null && capitalizedValue.contains(RegExp(r'\s{2,}'))) {
-                        addError(error: 'Consecutive spaces are not allowed');
-                        return 'Consecutive spaces within the text are not allowed';
-                      } else {
-                        removeError(error: 'Consecutive spaces are not allowed');
-                      }
-
-
-                      if (capitalizedValue.length > 27) {
-                        addError(error: 'Maximum characters allowed is 27');
-                        return 'Maximum characters allowed is 27';
-                      } else {
-                        removeError(error: 'Maximum characters allowed is 30');
-                      }
-                      if (RegExp(r'[0-9]').hasMatch(capitalizedValue)) {
-                        addError(error: 'Last Name should not contain numbers');
-                        return 'Last Name should not contain numbers';
-                      } else {
-                        removeError(error: 'Last Name should not contain numbers');
-                      }
-                      return null;
-                    },
-                  ),
-
-                  SizedBox(height: 10),
-
-
-                  // DropdownButton2 for state
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.only(left: 15, bottom: 7),
-                        child: WhiteText(
-                          'Current State',
-                          fontSize: 10,
-                        ),
+                    Align(
+                      alignment: Alignment.center,
+                      child: WhiteText(
+                        "Let's Get To Know You!",
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
                       ),
-                      Container(
-                        width: 310,
-                        height: 51,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(15),
-                          color: Color(0xFF39304D), // Adjust the color as needed
-                        ),
-                        child: Theme(
-                          data: Theme.of(context).copyWith(
-                            canvasColor: Colors.white,
-                          ),
-                          child: DropdownButtonFormField<String>(
-                            isExpanded: true,
-                            decoration: InputDecoration(
-                              border: InputBorder.none,
-                              contentPadding: EdgeInsets.symmetric(horizontal: 15),
-                            ),
-                            hint: Row(
-                              children: [
-                                Icon(
-                                  Icons.location_on_rounded,
-                                  size: 25,
-                                  color: Colors.white,
-                                ),
-                                SizedBox(width: 10),
-                                Text(
-                                  _selectedState != null ? _selectedState! : 'Select Your State',
-                                  style: TextStyle(fontSize: 12, color: Colors.white),
-                                ),
-                              ],
-                            ),
-                            value: _selectedState,
-                            items: CollegeData.collegeData.keys.toList().map((String item) {
-                              return DropdownMenuItem<String>(
-                                value: item,
-                                child: Text(
-                                  item,
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    color: _selectedState == item ? Color(0xFFdacfe6) : Colors.black,
-                                  ),
-                                ),
-                              );
-                            }).toList(),
-                            onChanged: (String? value) {
-                              setState(() {
-                                _selectedState = value;
-                                collegeItems = CollegeData.getCollegesByState(_selectedState!);
-                                _selectedCollege = null;
-                              });
-                            },
-                            validator: (value) {
-                              if (value == null) {
-                                addError(error: 'Please select your state');
-                              } else {
-                                removeError(error: 'Please select your state');
-                              }
-                              return null;
-                            },
+                    ),
+                    SizedBox(height: 20),
+                    MyTextField(
+                      controller: unameController,
+                      label: 'First Name',
+                      obscureText: false,
+                      keyboardType: TextInputType.name,
+                      textColor: Color(0xFFdacfe6),
+                      prefixIcon: Image.asset(
+                        'lib/images/uname.png',
+                        color: Colors.white,
+                      ),
+                      fontSize: 12,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          addError(error: 'Name is required');
+                          return 'Name is required';
+                        } else {
+                          removeError(error: 'Name is required');
+                        }
+                        // Capitalize the first letter of the name
+                        final capitalizedValue = _capitalizeFirstLetter(value);
+
+                        if (capitalizedValue.length < 5) {
+                          addError(error: 'Name should be at least 5 characters');
+                          return 'Name should be at least 5 characters';
+                        } else {
+                          removeError(error: 'Name should be at least 5 characters');
+                        }
+                        if (capitalizedValue.length > 20) {
+                          addError(error: 'Maximum characters allowed is 20');
+                          return 'Maximum characters allowed is 20';
+                        } else {
+                          removeError(error: 'Maximum characters allowed is 20');
+                        }
+                        if (RegExp(r'[0-9]').hasMatch(capitalizedValue)) {
+                          addError(error: 'Name should not contain numbers');
+                          return 'Name should not contain numbers';
+                        } else {
+                          removeError(error: 'Name should not contain numbers');
+                        }
+                        return null;
+                      },
+                    ),
+
+
+                    SizedBox(height: 15),
+                    //phone number controller or text field
+                    // MyTextField(
+                    //   controller: phonenoController,
+                    //   label: 'Phone Number',
+                    //   obscureText: false,
+                    //   keyboardType: TextInputType.number,
+                    //   textColor: Color(0xFFdacfe6),
+                    //   prefixIcon: Center(
+                    //     child: Text(
+                    //       '+91',
+                    //       style: TextStyle(fontSize: 12, color: Colors.white),
+                    //     ),
+                    //   ),
+                    //   fontSize: 12,
+                    //   validator: (value) {
+                    //     if (value == null || value.isEmpty) {
+                    //       addError(error: 'Phone Number is required');
+                    //       return 'Phone Number is required';
+                    //     } else {
+                    //       removeError(error: 'Phone Number is required');
+                    //     }
+                    //     if (value != null && value.length < 10) {
+                    //       addError(error: 'Enter full 10 digit number');
+                    //       return 'Enter full 10 digit number';
+                    //     } else {
+                    //       removeError(error: 'Enter full 10 digit number');
+                    //     }
+                    //     if (value != null && value.length > 10) {
+                    //       addError(error: 'Maximum Numbers allowed is 10');
+                    //       return 'Maximum Numbers allowed is 10';
+                    //     } else {
+                    //       removeError(error: 'Maximum Numbers allowed is 10');
+                    //     }
+                    //     return null;
+                    //   },
+                    // ),
+                    //*****************************************
+
+                    MyTextField(
+                      controller: ulastnameController,
+                      label: 'Last Name',
+                      obscureText: false,
+                      keyboardType: TextInputType.name,
+                      textColor: Color(0xFFdacfe6),
+                      prefixIcon: Image.asset(
+                        'lib/images/uname.png',
+                        color: Colors.white,
+                      ),
+                      fontSize: 12,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          addError(error: 'Last Name is required');
+                          return 'Last Name is required';
+                        } else {
+                          removeError(error: 'Last Name is required');
+                        }
+
+
+                        // Capitalize the first letter of the name
+                        final capitalizedValue = _capitalizeFirstLetter(value);
+
+                        if (capitalizedValue.length < 5) {
+                          addError(error: 'Last Name should be at least 5 characters');
+                          return 'Last Name should be at least 5 characters';
+                        } else {
+                          removeError(error: 'Last Name should be at least 5 characters');
+                        }
+
+                        // Check for leading spaces
+                        if (capitalizedValue != null && capitalizedValue.startsWith(' ')) {
+                        addError(error: 'Leading spaces at the beginning are not allowed');
+                        return 'Leading spaces at the beginning are not allowed';
+                        } else {
+                          removeError(
+                              error: 'Leading spaces at the beginning are not allowed');
+                        }
+
+                        // Check for trailing spaces
+                        if (capitalizedValue != null && capitalizedValue.endsWith(' ')) {
+                          addError(error: 'Spaces at the end are not allowed');
+                          return 'Spaces at the end are not allowed';
+                        } else {
+                          removeError(error: 'Spaces at the end are not allowed');
+                        }
+
+                        // Check for consecutive spaces
+                        if (capitalizedValue != null && capitalizedValue.contains(RegExp(r'\s{2,}'))) {
+                          addError(error: 'Consecutive spaces are not allowed');
+                          return 'Consecutive spaces within the text are not allowed';
+                        } else {
+                          removeError(error: 'Consecutive spaces are not allowed');
+                        }
+
+
+                        if (capitalizedValue.length > 27) {
+                          addError(error: 'Maximum characters allowed is 27');
+                          return 'Maximum characters allowed is 27';
+                        } else {
+                          removeError(error: 'Maximum characters allowed is 30');
+                        }
+                        if (RegExp(r'[0-9]').hasMatch(capitalizedValue)) {
+                          addError(error: 'Last Name should not contain numbers');
+                          return 'Last Name should not contain numbers';
+                        } else {
+                          removeError(error: 'Last Name should not contain numbers');
+                        }
+                        return null;
+                      },
+                    ),
+
+                    SizedBox(height: 10),
+
+
+                    // DropdownButton2 for state
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.only(left: 15, bottom: 7),
+                          child: WhiteText(
+                            'Current State',
+                            fontSize: 10,
                           ),
                         ),
-                      ),
-                    ],
-                  ),
-
-                  SizedBox(height: 10),
-
-                  // DropdownButton2 for college
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.only(left: 15, bottom: 7),
-                        child: WhiteText(
-                          'College',
-                          fontSize: 10,
-                        ),
-                      ),
-                      Container(
-                        width: 310,
-                        height: 51,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(15),
-                          color: Color(0xFF39304D), // Adjust the color as needed
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            Theme(
-                              data: Theme.of(context).copyWith(
-                                canvasColor: Colors.white,
+                        Container(
+                          width: 310,
+                          height: 51,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(15),
+                            color: Color(0xFF39304D), // Adjust the color as needed
+                          ),
+                          child: Theme(
+                            data: Theme.of(context).copyWith(
+                              canvasColor: Colors.white,
+                            ),
+                            child: DropdownButtonFormField<String>(
+                              isExpanded: true,
+                              decoration: InputDecoration(
+                                border: InputBorder.none,
+                                contentPadding: EdgeInsets.symmetric(horizontal: 15),
                               ),
-                              child: DropdownButtonFormField<String>(
-                                isExpanded: true,
-                                hint: Row(
-                                  children: [
-                                    Icon(
-                                      Icons.school_rounded,
-                                      size: 25,
-                                      color: Colors.white,
-                                    ),
-                                    SizedBox(width: 10),
-                                    Text(
-                                      'Select Your College',
-                                      style: TextStyle(fontSize: 12, color: Colors.white),
-                                    ),
-                                  ],
-                                ),
-                                value: _selectedCollege,
-                                items: collegeItems
-                                    .map((String item) => DropdownMenuItem<String>(
+                              hint: Row(
+                                children: [
+                                  Icon(
+                                    Icons.location_on_rounded,
+                                    size: 25,
+                                    color: Colors.white,
+                                  ),
+                                  SizedBox(width: 10),
+                                  Text(
+                                    _selectedState != null ? _selectedState! : 'Select Your State',
+                                    style: TextStyle(fontSize: 12, color: Colors.white),
+                                  ),
+                                ],
+                              ),
+                              value: _selectedState,
+                              items: CollegeData.collegeData.keys.toList().map((String item) {
+                                return DropdownMenuItem<String>(
                                   value: item,
                                   child: Text(
                                     item,
                                     style: TextStyle(
                                       fontSize: 12,
-                                      color: _selectedCollege == item ? Color(0xFFdacfe6) : Colors.black,
+                                      color: _selectedState == item ? Color(0xFFdacfe6) : Colors.black,
                                     ),
                                   ),
-                                ))
-                                    .toList(),
-                                onChanged: (String? value) {
-                                  setState(() {
-                                    _selectedCollege = value;
-                                  });
-                                },
-                                style: TextStyle(color: Colors.white),
-                                decoration: InputDecoration(
-                                  border: InputBorder.none,
-                                  contentPadding: EdgeInsets.symmetric(horizontal: 15),
-                                ),
-                                validator: (value) {
-                                  if (value == null) {
-                                    addError(error: 'Please select your college');
-                                  }else {
-                                    removeError(error: 'Please select your college');
-                                  }
-                                  return null;
-                                },
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-
-                  SizedBox(height: 10),
-
-                  // DropdownButton2 for course
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.only(left: 15, bottom: 7),
-                        child: WhiteText(
-                          'Course',
-                          fontSize: 10,
-                        ),
-                      ),
-                      Container(
-                        width: 310,
-                        height: 51,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(15),
-                          color: Color(0xFF39304D), // Adjust the color as needed
-                        ),
-                        child: Theme(
-                          data: Theme.of(context).copyWith(
-                            canvasColor: Colors.white,
-                          ),
-                          child: DropdownButtonFormField<String>(
-                            isExpanded: true,
-                            hint: Row(
-                              children: [
-                                Icon(
-                                  Icons.book,
-                                  size: 25,
-                                  color: Colors.white,
-                                ),
-                                SizedBox(width: 10),
-                                Text(
-                                  'Select Your Course',
-                                  style: TextStyle(fontSize: 12, color: Colors.white),
-                                ),
-                              ],
-                            ),
-                            value: _selectedCourse,
-                            items: [
-                              'Bachelor of Arts (BA)',
-                              'Bachelor of Science (BSc)',
-                              'Bachelor of Commerce (BCom)',
-                              'Bachelor of Technology (BTech)',
-                              'Bachelor of Business Administration (BBA)',
-                              'Bachelor of Computer Applications (BCA)',
-                              'Bachelor of Education (BEd)',
-                              'Bachelor of Medicine, Bachelor of Surgery (MBBS)',
-                              'Bachelor of Dental Surgery (BDS)',
-                              'Bachelor of Pharmacy (BPharm)',
-                              'Bachelor of Law (LLB)',
-                              'Master of Arts (MA)',
-                              'Master of Science (MSc)',
-                              'Master of Commerce (MCom)',
-                              'Master of Technology (MTech)',
-                              'Master of Business Administration (MBA)',
-                              'Master of Computer Applications (MCA)',
-                              'Master of Social Work (MSW)',
-                              'Master of Education (MEd)',
-                              'Doctor of Philosophy (PhD)',
-                              'Chartered Accountancy (CA)',
-                              'Company Secretary (CS)',
-                              'Cost and Management Accountancy (CMA)',
-                            ].map((String item) {
-                              return DropdownMenuItem<String>(
-                                value: item,
-                                child: Text(
-                                  item,
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    color: _selectedCourse == item ? Color(0xFFdacfe6) : Colors.black,
-                                  ),
-                                ),
-                              );
-                            }).toList(),
-                            onChanged: (String? value) {
-                              setState(() {
-                                _selectedCourse = value;
-                              });
-                            },
-                            style: TextStyle(color: Colors.white),
-                            decoration: InputDecoration(
-                              border: InputBorder.none,
-                              contentPadding: EdgeInsets.symmetric(horizontal: 15),
-                            ),
-                            validator: (value) {
-                              if (value == null) {
-                                addError(error: 'Please select your course');
-                              }else {
-                                removeError(error: 'Please select your course');
-                              }
-                              return null;
-                            },
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-
-                  SizedBox(height: 20),
-
-                  YearSelector(
-                    controller: userYearController,
-                    label: 'When did your course begin?',
-                    suffixIcon: Icon(
-                      Icons.calendar_month_rounded,
-                      color: Colors.white,
-                    ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        addError(error: 'Please select your course begin date');
-                      }else {
-                        removeError(error: 'Please select your course begin date');
-                      }
-                      return null;
-                    },
-                  ),
-
-                  SizedBox(height: 35),
-
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 30),
-                      child: Container(
-                        width: 308,
-                        height: 51,
-                        child: ElevatedButton(
-                          onPressed: () async {
-                            if (_formKey.currentState!.validate()) {
-                              _formKey.currentState!.save();
-
-                              bool isValid = _validateInputs();
-
-                              if (isValid) {
-                                try {
-                                  final user = FirebaseAuth.instance.currentUser;
-                                  if (user != null) {
-                                    final firestore = FirebaseFirestore.instance;
-                                    final email = user.email!;
-                                    final docRef = firestore.collection('usersDetails').doc(email);
-
-                                    await firestore.runTransaction((transaction) async {
-                                      final docSnapshot = await transaction.get(docRef);
-
-                                      if (!docSnapshot.exists) {
-                                        // Handle the case where the document does not exist
-                                      }
-
-                                      // Update the document
-                                      transaction.set(docRef, {
-                                        'id': email,
-                                        'firstname': _capitalizeFirstLetter(unameController.text),
-                                        'lastname':_capitalizeFirstLetter(ulastnameController.text),// Capitalize the first letter
-                                        // 'phoneNumber': int.tryParse(phonenoController.text) ?? 0,
-                                        'country': _selectedState,
-                                        'college': _selectedCollege,
-                                        'course': _selectedCourse,
-                                        'courseStartYear': userYearController.text,
-                                        'userDetailsfilled': true,
-                                        'lastUpdated': FieldValue.serverTimestamp(),
-                                      });
-                                      // Store the selected college locally
-                                      saveCollegeLocally(_selectedCollege!,email);
-                                    });
-
-                                    await setUserDetailsFilledLocally(email,true);
-                                    bool userDetailsFilledLocally = await getUserDetailsFilledLocally(email);
-                                    print('userDetailsFilledLocally: $userDetailsFilledLocally');
-
-                                    Get.snackbar('Success', 'Please login into your account');
-
-                                    await Navigator.push(
-                                      context,
-                                      PageTransition(
-                                        type: PageTransitionType.fade,
-                                        child: LoginPage(),
-                                      ),
-                                    );
-
-                                    setState(() {
-                                      isFinished = false;
-                                    });
-                                  }
-                                } catch (error) {
-                                  print('Error updating user details: $error');
-                                  Get.snackbar('Error', 'Failed to update user details');
+                                );
+                              }).toList(),
+                              onChanged: (String? value) {
+                                setState(() {
+                                  _selectedState = value;
+                                  collegeItems = CollegeData.getCollegesByState(_selectedState!);
+                                  _selectedCollege = null;
+                                });
+                              },
+                              validator: (value) {
+                                if (value == null) {
+                                  addError(error: 'Please select your state');
+                                } else {
+                                  removeError(error: 'Please select your state');
                                 }
-                              }
-                            }
-                          },
-
-
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Color(0xFF955AF2),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(15),
+                                return null;
+                              },
                             ),
                           ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
+                        ),
+                      ],
+                    ),
+
+                    SizedBox(height: 10),
+
+                    // DropdownButton2 for college
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.only(left: 15, bottom: 7),
+                          child: WhiteText(
+                            'College',
+                            fontSize: 10,
+                          ),
+                        ),
+                        Container(
+                          width: 310,
+                          height: 51,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(15),
+                            color: Color(0xFF39304D), // Adjust the color as needed
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
-                              Text(
-                                'Tap to Join',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 16,
+                              Theme(
+                                data: Theme.of(context).copyWith(
+                                  canvasColor: Colors.white,
+                                ),
+                                child: DropdownButtonFormField<String>(
+                                  isExpanded: true,
+                                  hint: Row(
+                                    children: [
+                                      Icon(
+                                        Icons.school_rounded,
+                                        size: 25,
+                                        color: Colors.white,
+                                      ),
+                                      SizedBox(width: 10),
+                                      Text(
+                                        'Select Your College',
+                                        style: TextStyle(fontSize: 12, color: Colors.white),
+                                      ),
+                                    ],
+                                  ),
+                                  value: _selectedCollege,
+                                  items: collegeItems
+                                      .map((String item) => DropdownMenuItem<String>(
+                                    value: item,
+                                    child: Text(
+                                      item,
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        color: _selectedCollege == item ? Color(0xFFdacfe6) : Colors.black,
+                                      ),
+                                    ),
+                                  ))
+                                      .toList(),
+                                  onChanged: (String? value) {
+                                    setState(() {
+                                      _selectedCollege = value;
+                                    });
+                                  },
+                                  style: TextStyle(color: Colors.white),
+                                  decoration: InputDecoration(
+                                    border: InputBorder.none,
+                                    contentPadding: EdgeInsets.symmetric(horizontal: 15),
+                                  ),
+                                  validator: (value) {
+                                    if (value == null) {
+                                      addError(error: 'Please select your college');
+                                    }else {
+                                      removeError(error: 'Please select your college');
+                                    }
+                                    return null;
+                                  },
                                 ),
                               ),
                             ],
                           ),
                         ),
-                      ),
+                      ],
                     ),
-                  ],
+
+                    SizedBox(height: 10),
+
+                    // DropdownButton2 for course
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.only(left: 15, bottom: 7),
+                          child: WhiteText(
+                            'Course',
+                            fontSize: 10,
+                          ),
+                        ),
+                        Container(
+                          width: 310,
+                          height: 51,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(15),
+                            color: Color(0xFF39304D), // Adjust the color as needed
+                          ),
+                          child: Theme(
+                            data: Theme.of(context).copyWith(
+                              canvasColor: Colors.white,
+                            ),
+                            child: DropdownButtonFormField<String>(
+                              isExpanded: true,
+                              hint: Row(
+                                children: [
+                                  Icon(
+                                    Icons.book,
+                                    size: 25,
+                                    color: Colors.white,
+                                  ),
+                                  SizedBox(width: 10),
+                                  Text(
+                                    'Select Your Course',
+                                    style: TextStyle(fontSize: 12, color: Colors.white),
+                                  ),
+                                ],
+                              ),
+                              value: _selectedCourse,
+                              items: [
+                                'Bachelor of Arts (BA)',
+                                'Bachelor of Science (BSc)',
+                                'Bachelor of Commerce (BCom)',
+                                'Bachelor of Technology (BTech)',
+                                'Bachelor of Business Administration (BBA)',
+                                'Bachelor of Computer Applications (BCA)',
+                                'Bachelor of Education (BEd)',
+                                'Bachelor of Medicine, Bachelor of Surgery (MBBS)',
+                                'Bachelor of Dental Surgery (BDS)',
+                                'Bachelor of Pharmacy (BPharm)',
+                                'Bachelor of Law (LLB)',
+                                'Master of Arts (MA)',
+                                'Master of Science (MSc)',
+                                'Master of Commerce (MCom)',
+                                'Master of Technology (MTech)',
+                                'Master of Business Administration (MBA)',
+                                'Master of Computer Applications (MCA)',
+                                'Master of Social Work (MSW)',
+                                'Master of Education (MEd)',
+                                'Doctor of Philosophy (PhD)',
+                                'Chartered Accountancy (CA)',
+                                'Company Secretary (CS)',
+                                'Cost and Management Accountancy (CMA)',
+                              ].map((String item) {
+                                return DropdownMenuItem<String>(
+                                  value: item,
+                                  child: Text(
+                                    item,
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: _selectedCourse == item ? Color(0xFFdacfe6) : Colors.black,
+                                    ),
+                                  ),
+                                );
+                              }).toList(),
+                              onChanged: (String? value) {
+                                setState(() {
+                                  _selectedCourse = value;
+                                });
+                              },
+                              style: TextStyle(color: Colors.white),
+                              decoration: InputDecoration(
+                                border: InputBorder.none,
+                                contentPadding: EdgeInsets.symmetric(horizontal: 15),
+                              ),
+                              validator: (value) {
+                                if (value == null) {
+                                  addError(error: 'Please select your course');
+                                }else {
+                                  removeError(error: 'Please select your course');
+                                }
+                                return null;
+                              },
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    SizedBox(height: 20),
+
+                    YearSelector(
+                      controller: userYearController,
+                      label: 'When did your course begin?',
+                      suffixIcon: Icon(
+                        Icons.calendar_month_rounded,
+                        color: Colors.white,
+                      ),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          addError(error: 'Please select your course begin date');
+                        }else {
+                          removeError(error: 'Please select your course begin date');
+                        }
+                        return null;
+                      },
+                    ),
+
+                    SizedBox(height: 35),
+
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 30),
+                        child: Container(
+                          width: 308,
+                          height: 51,
+                          child: ElevatedButton(
+                            onPressed: () async {
+                              if (_formKey.currentState!.validate()) {
+                                _formKey.currentState!.save();
+
+                                bool isValid = _validateInputs();
+
+                                if (isValid) {
+                                  try {
+                                    final user = FirebaseAuth.instance.currentUser;
+                                    if (user != null) {
+                                      final firestore = FirebaseFirestore.instance;
+                                      final email = user.email!;
+                                      final docRef = firestore.collection('usersDetails').doc(email);
+
+                                      await firestore.runTransaction((transaction) async {
+                                        final docSnapshot = await transaction.get(docRef);
+
+                                        if (!docSnapshot.exists) {
+                                          // Handle the case where the document does not exist
+                                        }
+
+                                        // Update the document
+                                        transaction.set(docRef, {
+                                          'id': email,
+                                          'firstname': _capitalizeFirstLetter(unameController.text),
+                                          'lastname':_capitalizeFirstLetter(ulastnameController.text),// Capitalize the first letter
+                                          // 'phoneNumber': int.tryParse(phonenoController.text) ?? 0,
+                                          'country': _selectedState,
+                                          'college': _selectedCollege,
+                                          'course': _selectedCourse,
+                                          'courseStartYear': userYearController.text,
+                                          'userDetailsfilled': true,
+                                          'lastUpdated': FieldValue.serverTimestamp(),
+                                        });
+                                        // Store the selected college locally
+                                        saveCollegeLocally(_selectedCollege!,email);
+                                      });
+
+                                      await setUserDetailsFilledLocally(email,true);
+                                      bool userDetailsFilledLocally = await getUserDetailsFilledLocally(email);
+                                      print('userDetailsFilledLocally: $userDetailsFilledLocally');
+
+                                      Get.snackbar('Success', 'Please login into your account');
+
+                                      await Navigator.push(
+                                        context,
+                                        PageTransition(
+                                          type: PageTransitionType.fade,
+                                          child: LoginPage(),
+                                        ),
+                                      );
+
+                                      setState(() {
+                                        isFinished = false;
+                                      });
+                                    }
+                                  } catch (error) {
+                                    print('Error updating user details: $error');
+                                    Get.snackbar('Error', 'Failed to update user details');
+                                  }
+                                }
+                              }
+                            },
+
+
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Color(0xFF955AF2),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(15),
+                              ),
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  'Tap to Join',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 16,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
-          ),
+        ),
       ),
     );
   }

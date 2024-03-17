@@ -238,11 +238,43 @@ class _RegisterPageState extends State<RegisterPage> {
   Future<void> registerWithEmailAndPassword(BuildContext context) async {
     try {
       if (passController.text == confirmController.text) {
-        // Pass email, password, and confirm password to EmailVerificationScreen
-        Get.to(() => EmailVerificationScreen(
-          userEmail: emailController.text,
-          userPassword: passController.text,
-        ));
+        // Check if the email is already registered
+        QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+            .collection('usersDetails')
+            .where('emailVerified', isEqualTo: 'yes')
+            .get();
+
+        if (querySnapshot.docs.isNotEmpty) {
+          // If email is already registered, display a message
+          Get.snackbar('Error', 'This email is already registered.');
+          return;
+        }
+
+        // If email is not registered, create a new account
+        // Create user with email and password
+        await FirebaseAuth.instance.createUserWithEmailAndPassword(
+          email: emailController.text,
+          password: passController.text,
+        );
+
+        // Get the current user
+        User? user = FirebaseAuth.instance.currentUser;
+        if (user != null) {
+          String email = user.email!;
+          // Store user details in Firestore
+          final fireStore = FirebaseFirestore.instance.collection('usersDetails');
+          await fireStore.doc(email).set({
+            'id': email,
+            'userDetailsfilled': false,
+            'emailVerified':'no'
+          });
+
+          // Redirect to EmailVerificationScreen
+          Get.to(() => EmailVerificationScreen(
+            userEmail: emailController.text,
+            userPassword: passController.text,
+          ));
+        }
       } else {
         Get.snackbar('', 'Passwords do not match...');
       }
@@ -251,6 +283,8 @@ class _RegisterPageState extends State<RegisterPage> {
       // Display an error message to the user.
     }
   }
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -368,7 +402,6 @@ class _RegisterPageState extends State<RegisterPage> {
                                     recognizer: TapGestureRecognizer()
                                       ..onTap = () {
                                         showTermsOfServiceDialog();
-                                        // Add functionality to navigate to terms of service page
                                       },
                                   ),
                                   TextSpan(
@@ -383,7 +416,6 @@ class _RegisterPageState extends State<RegisterPage> {
                                     recognizer: TapGestureRecognizer()
                                       ..onTap = () {
                                         showPrivacyPolicy();
-                                        // Add functionality to navigate to privacy policy page
                                       },
                                   ),
                                 ],

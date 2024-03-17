@@ -79,6 +79,18 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
+  Future<void> resetPassword(BuildContext context) async {
+    try {
+      await _auth.sendPasswordResetEmail(email: emailController.text);
+      Get.snackbar('Password Reset Sent', 'Check your email for the password reset link.');
+
+    } catch (error) {
+      String errorMessage = _handleFirebaseError(error);
+      Get.snackbar('Password Reset Error', 'An error occurred while resetting your password.');
+      print(errorMessage);
+    }
+  }
+
 
   Future<void> login(BuildContext context) async {
     try {
@@ -435,7 +447,7 @@ class _LoginPageState extends State<LoginPage> {
                       alignment: Alignment.topRight,
                       child: MyTextButton(
                         onPressed: () {
-                          Get.to(BottomNavigation());
+                          resetPassword(context); // Call the resetPassword method on button press
                         },
                         buttonText: 'Forgot Password?',
                         fontSize: 12,
