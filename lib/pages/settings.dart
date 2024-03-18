@@ -8,8 +8,10 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wizedo/components/cardContainerSettings.dart';
 import 'package:wizedo/components/white_text.dart';
+import 'package:wizedo/pages/contactUs.dart';
 import 'package:wizedo/pages/privacyPolicy.dart';
 import 'package:wizedo/pages/profilepage.dart';
+import 'package:wizedo/pages/refundAndCancellation.dart';
 import 'package:wizedo/pages/terms&cond.dart';
 import '../Widgets/colors.dart';
 import '../components/mPlusRoundedText.dart';
@@ -348,12 +350,18 @@ class _settingScreenState extends State<settingScreen> {
                 scrollDirection: Axis.horizontal,
                 child: Row(
                   children: [
-                    cardSettingContainer(text: 'Earnings', iconData: Icons.currency_rupee_rounded),
+                    InkWell(
+                        onTap:(){
+                          Get.to(CompletedTasksPage());
+                        },
+                      child:cardSettingContainer(text: 'History', iconData: Icons.history),
+
+                    ),
                     InkWell(
                         onTap: (){
                           // sendOTP();
                           // Get.changeTheme(ThemeData.dark());
-                          Get.to(PhoneNumberVerification());
+                          Get.to(CompletedTasksPage());
                         },
                         child: cardSettingContainer(text: 'Payment', iconData: Icons.payment)),
                     InkWell(
@@ -391,10 +399,10 @@ class _settingScreenState extends State<settingScreen> {
                     Container(
                       child: TextButton.icon(
                         onPressed: () {
-                          Get.to(CompletedTasksPage());
+                          Get.to(RefundAndCancellation());
                         },
-                        icon: Icon(Icons.history_rounded, color: Colors.white),
-                        label: Text('History', style: TextStyle(color: Colors.white, fontSize: screenHeight < 600 ? 9 : 12)),
+                        icon: Icon(Icons.currency_rupee, color: Colors.white),
+                        label: Text('Refund And Cancellation Policy', style: TextStyle(color: Colors.white, fontSize: screenHeight < 600 ? 9 : 12)),
                         style: ButtonStyle(
                           minimumSize: MaterialStateProperty.all(Size(double.infinity, getFontSize(50, screenHeight))),
                           alignment: Alignment.centerLeft,
@@ -431,6 +439,23 @@ class _settingScreenState extends State<settingScreen> {
                         },
                         icon: Icon(Icons.label_important, color: Colors.white),
                         label: Text('Terms and Conditions', style: TextStyle(color: Colors.white, fontSize: screenHeight < 600 ? 9 : 12)),
+                        style: ButtonStyle(
+                          minimumSize: MaterialStateProperty.all(Size(double.infinity, getFontSize(50, screenHeight))),
+                          alignment: Alignment.centerLeft,
+                        ),
+                      ),
+                    ),
+                    Container(
+                      child: TextButton.icon(
+                        onPressed: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (context) => ContactUs(),
+                            ),
+                          );
+                        },
+                        icon: Icon(Icons.contact_support, color: Colors.white),
+                        label: Text('Contact Us', style: TextStyle(color: Colors.white, fontSize: screenHeight < 600 ? 9 : 12)),
                         style: ButtonStyle(
                           minimumSize: MaterialStateProperty.all(Size(double.infinity, getFontSize(50, screenHeight))),
                           alignment: Alignment.centerLeft,

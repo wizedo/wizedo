@@ -14,7 +14,7 @@ class PrivacyPolicyPage extends StatelessWidget {
         backgroundColor: Colors.transparent,
         title: Text(
           'Privacy Policy',
-          style: mPlusRoundedText.copyWith(fontSize: screenHeight > 600 ? 12 : 18),
+          style: mPlusRoundedText.copyWith(fontSize: 18),
         ),
         centerTitle: true,
         leading: IconButton(
