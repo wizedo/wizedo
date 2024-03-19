@@ -15,7 +15,8 @@ import 'package:firebase_app_check/firebase_app_check.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
-  await MobileAds.instance.initialize();
+  //later should enable this for ads for now i have put the same code in homepage
+  // await MobileAds.instance.initialize();
   SharedPreferences prefs = await SharedPreferences.getInstance();
   String lastOpenedPage = prefs.getString('lastOpenedPage') ?? 'HomePage';
   print('below is lastopenpage');

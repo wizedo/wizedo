@@ -1,3 +1,4 @@
+import 'dart:ui';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -19,6 +20,7 @@ class DetailsScreen extends StatefulWidget {
   final String? postid;
   final String? finalDate;
   final String? emailid;
+  final String? googledrivelink;
 
   const DetailsScreen({
     Key? key,
@@ -29,7 +31,8 @@ class DetailsScreen extends StatefulWidget {
     this.priceRange,
     this.finalDate,
     this.postid,
-    this.emailid
+    this.emailid,
+    this.googledrivelink
   }) : super(key: key);
 
 
@@ -38,10 +41,7 @@ class DetailsScreen extends StatefulWidget {
 }
 
 class _DetailsScreenState extends State<DetailsScreen> {
-  final TextEditingController _projectName = TextEditingController();
-  final TextEditingController _descriptionText = TextEditingController();
-  final TextEditingController _datePicker = TextEditingController();
-  final TextEditingController _paymentDetails = TextEditingController();
+
 
   bool isBannerLoaded=false;
   late BannerAd bannerAd;
@@ -223,34 +223,45 @@ class _DetailsScreenState extends State<DetailsScreen> {
                 fontSize: 12,
               ),
             ),
-            // attachments
-            SizedBox(height: 15),
+            SizedBox(height: 20,),
             Align(
               alignment: Alignment.centerLeft,
-              child: Padding(
-                padding: EdgeInsets.all(5),
-                child: IntrinsicWidth(
-                  child: Container(
-                    padding: EdgeInsets.all(10),
-                    decoration: boxDecoration,
-                    child: Column(
-                      children: [
-                        Image.asset('lib/images/pdf.png',height: 30),
-                        SizedBox(height: 5), // Adjust the spacing as needed
-                        Text(
-                          'Assignment.pdf',
-                          style: TextStyle(
-                            color: Colors.white, // Set the text color
-                            fontSize: 12, // Set the text font size
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
+              child: WhiteText(
+                'Reference Material: ',
+                fontSize: 15,
+                fontWeight: FontWeight.bold,
               ),
             ),
-            SizedBox(height: 200),
+            SizedBox(height: 8),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: ImageFiltered(
+                imageFilter: ImageFilter.blur(sigmaX: 5,sigmaY: 5),
+                child: InkWell(
+                  onTap: () {
+                    final snackbar = SnackBar(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                      behavior: SnackBarBehavior.floating,
+                      backgroundColor: Colors.red.shade400,
+                      duration: Duration(seconds: 5),
+                      content: SizedBox(
+                        child: WhiteText('Access more details by applying'),
+                      ),
+                    );
+                    ScaffoldMessenger.of(context).showSnackBar(snackbar);
+                  },
+                  child: WhiteText(
+                    widget.googledrivelink ?? 'No reference material available',
+                    fontSize: 12,
+                  ),
+                ),
+
+              ),
+            ),
+            // attachments
+            SizedBox(height: 140),
             // ad
             Container(
               height: 50,

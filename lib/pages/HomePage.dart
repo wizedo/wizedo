@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_rx/src/rx_workers/utils/debouncer.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wizedo/components/CustomRichText.dart';
 import 'package:wizedo/components/white_text.dart';
@@ -102,6 +103,17 @@ class _HomePageState extends State<HomePage> {
         fetchMoreDocuments(_selectedCategory);
       }
     });
+
+    initializeMobileAds();
+  }
+
+  Future<void> initializeMobileAds() async {
+    try {
+      await MobileAds.instance.initialize();
+      print('MobileAds initialized successfully!');
+    } catch (error) {
+      print('Failed to initialize MobileAds: $error');
+    }
   }
 
   Stream<DocumentSnapshot<Map<String, dynamic>>> buildDocumentStream(String postId) {
@@ -144,6 +156,7 @@ class _HomePageState extends State<HomePage> {
                 priceRange: data['totalPayment'],
                 finalDate: data['dueDate'],
                 postid: data['postId'],
+                googledrivelink:data['googledrivelink'],
                 emailid: data['emailid'],
               ),
             ),
