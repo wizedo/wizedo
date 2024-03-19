@@ -624,7 +624,7 @@ class _UserDetailsState extends State<UserDetails> with WidgetsBindingObserver {
                                         }
 
                                         // Update the document
-                                        transaction.set(docRef, {
+                                        transaction.update(docRef, {
                                           'id': email,
                                           'firstname': _capitalizeFirstLetter(unameController.text),
                                           'lastname':_capitalizeFirstLetter(ulastnameController.text),// Capitalize the first letter

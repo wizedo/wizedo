@@ -244,7 +244,11 @@ class _RegisterPageState extends State<RegisterPage> {
             .where('emailVerified', isEqualTo: 'yes')
             .get();
 
+        print('below is querysnapshot status');
+        print(querySnapshot);
+
         if (querySnapshot.docs.isNotEmpty) {
+          print("inside query snap");
           // If email is already registered, display a message
           Get.snackbar('Error', 'This email is already registered.');
           return;
