@@ -236,7 +236,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
             Align(
               alignment: Alignment.centerLeft,
               child: ImageFiltered(
-                imageFilter: ImageFilter.blur(sigmaX: 5,sigmaY: 5),
+                imageFilter: ImageFilter.blur(sigmaX: 3.5,sigmaY: 3),
                 child: InkWell(
                   onTap: () {
                     final snackbar = SnackBar(
@@ -285,11 +285,9 @@ class _DetailsScreenState extends State<DetailsScreen> {
             child: MyElevatedButton(
               buttonText: 'Apply',
               fontWeight: FontWeight.bold,
-              onPressed: () {
-                // Check if the current user's email matches the email associated with the post
+              onPressed: () async {
                 final user = FirebaseAuth.instance.currentUser;
                 if (user != null) {
-                  // Ensure that widget.emailid is not null
                   if (widget.emailid != null) {
                     if (user.email == widget.emailid) {
                       Get.showSnackbar(
@@ -301,7 +299,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
                           margin: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                           snackPosition: SnackPosition.TOP,
                           isDismissible: true,
-                          backgroundColor: Color(0xFF955AF2), // Set your desired color here
+                          backgroundColor: Color(0xFF955AF2),
                           titleText: Row(
                             children: [
                               Icon(
@@ -324,26 +322,44 @@ class _DetailsScreenState extends State<DetailsScreen> {
                         ),
                       );
                     } else {
-                      // User's email is different, proceed to apply
-                      addToAcceptedCollection(
-                          category: widget.category,
-                          subject: widget.subject,
-                          finalDate: widget.finalDate,
-                          description: widget.description,
-                          priceRange: widget.priceRange,
-                          postid: widget.postid,
-                          emailid: widget.emailid
+                      // Show confirmation dialog before applying
+                      Get.defaultDialog(
+                        title: 'Confirmation',
+                        titlePadding: EdgeInsets.fromLTRB(20, 20, 20, 0), // Add padding above the title
+                        titleStyle: TextStyle(fontSize: 18, fontWeight: FontWeight.bold), // Set font size of the title
+                        contentPadding: EdgeInsets.all(25),
+                        middleText: "Are you sure you want to apply for this post?",
+                        confirm: TextButton(
+                          onPressed: () async {
+                            // Add your logic to apply for the post here
+                            addToAcceptedCollection(
+                              category: widget.category,
+                              subject: widget.subject,
+                              finalDate: widget.finalDate,
+                              description: widget.description,
+                              priceRange: widget.priceRange,
+                              postid: widget.postid,
+                              emailid: widget.emailid,
+                            );
+                            Get.back(); // Close the confirmation dialog
+                          },
+                          child: Text('Yes'),
+                        ),
+                        cancel: TextButton(
+                          onPressed: () {
+                            Get.back(); // Close the confirmation dialog
+                          },
+                          child: Text('No'),
+                        ),
                       );
+
                     }
                   } else {
-                    // Handle the case where widget.emailid is null
                     print('Widget emailid is null.');
-                    // You might want to show an error message or handle it according to your logic.
                   }
                 }
               },
             ),
-
           )
       ),
 

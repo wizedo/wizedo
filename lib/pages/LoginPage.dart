@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -31,6 +33,7 @@ class _LoginPageState extends State<LoginPage> {
   final emailController = TextEditingController();
   final passController = TextEditingController();
   final AuthService _authService = AuthService();
+  bool loading = false;
 
   Future<void> storeUserCollegeLocally(String userEmail) async {
     try {
@@ -94,6 +97,11 @@ class _LoginPageState extends State<LoginPage> {
 
   Future<void> login(BuildContext context) async {
     try {
+      // Set loading to true to show circular progress indicator
+      setState(() {
+        loading = true;
+      });
+
       UserCredential userCredential = await _auth.signInWithEmailAndPassword(
         email: emailController.text,
         password: passController.text,
@@ -200,6 +208,10 @@ class _LoginPageState extends State<LoginPage> {
       if (error is FirebaseAuthException && error.code == 'account-exists-with-different-credential') {
         Get.snackbar('Error', 'Account exists with a different credential.');
       }
+    }finally{
+      setState(() {
+        loading = false;
+      });
     }
   }
 
@@ -383,168 +395,179 @@ class _LoginPageState extends State<LoginPage> {
         child: Center(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 25),
-            child: SingleChildScrollView(
-              child: Container(
-                width: 310,
-                child: Column(
+            child: Stack(
+              alignment: Alignment.center,
+              children:[
+                SingleChildScrollView(
+                  child: Container(
+                    width: 310,
+                    child: Column(
 
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    SizedBox(height: 50),
-                    Image.asset(
-                      'lib/images/login_animation.png',
-                      width: 400,
-                      height: 160,
-                    ),
-                    Align(
-                      alignment: Alignment.topLeft,
-                      child: WhiteText(
-                        'Login',
-                        fontSize: 36,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    Align(
-                      alignment: Alignment.topLeft,
-                      child: WhiteText('Please login to continue', fontSize: 16),
-                    ),
-                    SizedBox(height: 25),
-                    MyTextField(
-                      controller: emailController,
-                      label: 'Email',
-                      obscureText: false,
-                      keyboardType: TextInputType.emailAddress,
-                      prefixIcon: Icon(
-                        Icons.mail,
-                        color: Colors.white,
-                      ),
-                      fontSize: 11.5,
-                    ),
-                    SizedBox(height: 25),
-                    MyTextField(
-                      controller: passController,
-                      label: 'Password',
-                      obscureText: !passwordVisibility,
-                      prefixIcon: Icon(
-                        Icons.password,
-                        color: Colors.white,
-                      ),
-                      suffixIcon: GestureDetector(
-                        onTap: () {
-                          setState(() {
-                            passwordVisibility = !passwordVisibility;
-                          });
-                        },
-                        child: Icon(
-                          passwordVisibility ? Icons.visibility_off : Icons.visibility,
-                          color: Colors.white,
-                          size: 20,
-                        ),
-                      ),
-                      fontSize: 11.5,
-                    ),
-                    Align(
-                      alignment: Alignment.topRight,
-                      child: MyTextButton(
-                        onPressed: () {
-                          resetPassword(context); // Call the resetPassword method on button press
-                        },
-                        buttonText: 'Forgot Password?',
-                        fontSize: 12,
-                      ),
-                    ),
-                    SizedBox(height: 15),
-                    MyElevatedButton(
-                      onPressed: () {
-                        login(context);
-                      },
-                      buttonText: 'Login',
-                      fontWeight: FontWeight.bold,
-                    ),
-                    SizedBox(height: 19),
-                    Row(
-                      children: [
-                        Expanded(
-                          flex: 3,
-                          child: Container(
-                            height: 1.5,
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                begin: Alignment.centerLeft,
-                                end: Alignment.centerRight,
-                                stops: [0.0, 0.5, 1.0, 1.0],
-                                colors: [
-                                  Colors.transparent,
-                                  Color(0xFF955AF2),
-                                  Color(0xFF955AF2),
-                                  Colors.transparent,
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                        Expanded(
-                          flex: 5,
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 8),
-                            child: PurpleText(
-                              'Or Continue with',
-                              fontSize: 12,
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
-                        ),
-                        Expanded(
-                          flex: 3,
-                          child: Container(
-                            height: 1.5,
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                begin: Alignment.centerLeft,
-                                end: Alignment.centerRight,
-                                stops: [0.0, 0.0, 0.5, 1.0],
-                                colors: [
-                                  Colors.transparent,
-                                  Color(0xFF955AF2),
-                                  Color(0xFF955AF2),
-                                  Colors.transparent,
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 25),
-                  GestureDetector(
-                    onTap: () {
-                      signInWithGoogle();
-                    },
-                    child: Image.asset(
-                      'lib/images/google.png',
-                      width: 45,
-                      height: 45,
-                    ),
-                  ),
-
-                    SizedBox(height: 15),
-                    Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        WhiteText('Not a member?', fontSize: 12),
-                        MyTextButton(
-                          onPressed: () {
-                            Get.to(() => RegisterPage());
-                          },
-                          buttonText: 'Register Now',
-                          fontSize: 12,
+                        SizedBox(height: 50),
+                        Image.asset(
+                          'lib/images/login_animation.png',
+                          width: 400,
+                          height: 160,
                         ),
+                        Align(
+                          alignment: Alignment.topLeft,
+                          child: WhiteText(
+                            'Login',
+                            fontSize: 36,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Align(
+                          alignment: Alignment.topLeft,
+                          child: WhiteText('Please login to continue', fontSize: 16),
+                        ),
+                        SizedBox(height: 25),
+                        MyTextField(
+                          controller: emailController,
+                          label: 'Email',
+                          obscureText: false,
+                          keyboardType: TextInputType.emailAddress,
+                          prefixIcon: Icon(
+                            Icons.mail,
+                            color: Colors.white,
+                          ),
+                          fontSize: 11.5,
+                        ),
+                        SizedBox(height: 25),
+                        MyTextField(
+                          controller: passController,
+                          label: 'Password',
+                          obscureText: !passwordVisibility,
+                          prefixIcon: Icon(
+                            Icons.password,
+                            color: Colors.white,
+                          ),
+                          suffixIcon: GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                passwordVisibility = !passwordVisibility;
+                              });
+                            },
+                            child: Icon(
+                              passwordVisibility ? Icons.visibility_off : Icons.visibility,
+                              color: Colors.white,
+                              size: 20,
+                            ),
+                          ),
+                          fontSize: 11.5,
+                        ),
+                        Align(
+                          alignment: Alignment.topRight,
+                          child: MyTextButton(
+                            onPressed: () {
+                              resetPassword(context); // Call the resetPassword method on button press
+                            },
+                            buttonText: 'Forgot Password?',
+                            fontSize: 12,
+                          ),
+                        ),
+                        SizedBox(height: 15),
+                        MyElevatedButton(
+                          onPressed: () {
+                            login(context);
+                          },
+                          buttonText: 'Login',
+                          fontWeight: FontWeight.bold,
+                        ),
+                        SizedBox(height: 19),
+                        Row(
+                          children: [
+                            Expanded(
+                              flex: 3,
+                              child: Container(
+                                height: 1.5,
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    begin: Alignment.centerLeft,
+                                    end: Alignment.centerRight,
+                                    stops: [0.0, 0.5, 1.0, 1.0],
+                                    colors: [
+                                      Colors.transparent,
+                                      Color(0xFF955AF2),
+                                      Color(0xFF955AF2),
+                                      Colors.transparent,
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                            Expanded(
+                              flex: 5,
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 8),
+                                child: PurpleText(
+                                  'Or Continue with',
+                                  fontSize: 12,
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
+                            ),
+                            Expanded(
+                              flex: 3,
+                              child: Container(
+                                height: 1.5,
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    begin: Alignment.centerLeft,
+                                    end: Alignment.centerRight,
+                                    stops: [0.0, 0.0, 0.5, 1.0],
+                                    colors: [
+                                      Colors.transparent,
+                                      Color(0xFF955AF2),
+                                      Color(0xFF955AF2),
+                                      Colors.transparent,
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: 25),
+                        GestureDetector(
+                          onTap: () {
+                            signInWithGoogle();
+                          },
+                          child: Image.asset(
+                            'lib/images/google.png',
+                            width: 45,
+                            height: 45,
+                          ),
+                        ),
+
+                        SizedBox(height: 15),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            WhiteText('Not a member?', fontSize: 12),
+                            MyTextButton(
+                              onPressed: () {
+                                Get.to(() => RegisterPage());
+                              },
+                              buttonText: 'Register Now',
+                              fontSize: 12,
+                            ),
+                          ],
+                        ),
+                        // SizedBox(height: MediaQuery.of(context).viewInsets.bottom + 150),
                       ],
                     ),
-                    // SizedBox(height: MediaQuery.of(context).viewInsets.bottom + 150),
-                  ],
+                  ),
                 ),
-              ),
+
+                if (loading)
+                  CircularProgressIndicator(
+                    color: Color(0xFF955AF2), // Set your desired loading indicator color
+                  ),
+              ]
+
             ),
           ),
         ),
