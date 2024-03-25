@@ -4,8 +4,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:wizedo/Widgets/colors.dart';
+import 'package:wizedo/components/BlackText.dart';
 import 'package:wizedo/components/my_elevatedbutton.dart';
 import 'package:wizedo/components/white_text.dart';
 import '../components/boxDecoration.dart';
@@ -42,30 +44,31 @@ class DetailsScreen extends StatefulWidget {
 
 class _DetailsScreenState extends State<DetailsScreen> {
 
-
-  bool isBannerLoaded=false;
-  late BannerAd bannerAd;
-
-  inilizeBannerAd() async{
-    bannerAd = BannerAd(
-        size: AdSize.banner,
-        adUnitId: 'ca-app-pub-3940256099942544/9214589741',
-        listener: BannerAdListener(
-          onAdLoaded: (ad){
-            setState(() {
-              isBannerLoaded=true;
-            });
-          },
-          onAdFailedToLoad: (ad, error){
-            ad.dispose();
-            isBannerLoaded=false;
-            print('add failed to load below is error');
-            print(error);
-          }
-        ),
-        request: AdRequest());
-        bannerAd.load();
-  }
+  // this is for banner
+  // bool isBannerLoaded=false;
+  // late BannerAd bannerAd;
+  //
+  // inilizeBannerAd() async{
+  //   bannerAd = BannerAd(
+  //       size: AdSize.banner,
+  //       adUnitId: 'ca-app-pub-3940256099942544/9214589741',
+  //       listener: BannerAdListener(
+  //         onAdLoaded: (ad){
+  //           setState(() {
+  //             isBannerLoaded=true;
+  //           });
+  //         },
+  //         onAdFailedToLoad: (ad, error){
+  //           ad.dispose();
+  //           isBannerLoaded=false;
+  //           print('add failed to load below is error');
+  //           print(error);
+  //         }
+  //       ),
+  //       request: AdRequest());
+  //       bannerAd.load();
+  // }
+  //***
 
 
   String _selectedCategory = '';
@@ -75,7 +78,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
 
   void initState() {
     super.initState();
-    inilizeBannerAd();
+    // inilizeBannerAd();
     // Print out values in the initState method
     print('Category: ${widget.category}');
     print('Subject: ${widget.subject}');
@@ -115,7 +118,122 @@ class _DetailsScreenState extends State<DetailsScreen> {
           style: mPlusRoundedText,
         ),
         centerTitle: true,
+        actions: [
+          IconButton(
+            icon: Icon(Icons.report, color: Colors.white, size: 24,),
+            onPressed: () {
+              String? selectedReason;
+              Get.defaultDialog(
+                title: 'Report Post',
+                titlePadding: EdgeInsets.fromLTRB(20, 20, 20, 0),
+                titleStyle: GoogleFonts.mPlusRounded1c(
+                  textStyle: TextStyle(
+                    color: Color(0xFF000000),
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                contentPadding: EdgeInsets.only(top: 25,bottom: 25),
+                content: Column(
+                  children: [
+                    ListTile(
+                      title: Transform.translate(
+                        offset: Offset(-17, 0),
+                        child: BlackText('Inappropriate Content'),
+                      ),
+                      leading: Radio<String>(
+                        value: 'Inappropriate Content',
+                        groupValue: selectedReason,
+                        onChanged: (value) {
+                          selectedReason = value;
+                          // Handle selection of reason here
+                        },
+                      ),
+                    ),
+                    ListTile(
+                      title: Transform.translate(
+                        offset: Offset(-17, 0),
+                        child: BlackText('Spam or Advertisement'),
+                      ),
+                      leading: Radio<String>(
+                        value: 'Spam or Advertisement',
+                        groupValue: selectedReason,
+                        onChanged: (value) {
+                          selectedReason = value;
+                          // Handle selection of reason here
+                        },
+                      ),
+                    ),
+                    ListTile(
+                      title: Transform.translate(
+                        offset: Offset(-17, 0),
+                        child: BlackText('Harassment or Bullying'),
+                      ),
+                      leading: Radio<String>(
+                        value: 'Harassment or Bullying',
+                        groupValue: selectedReason,
+                        onChanged: (value) {
+                          selectedReason = value;
+                          // Handle selection of reason here
+                        },
+                      ),
+                    ),
+                    ListTile(
+                      title: Transform.translate(
+                        offset: Offset(-17, 0),
+                        child: BlackText('Other'),
+                      ),
+                      leading: Radio<String>(
+                        value: 'Other',
+                        groupValue: selectedReason,
+                        onChanged: (value) {
+                          selectedReason = value;
+                          // Handle selection of reason here
+                        },
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(left: 25),
+                      child: Align(child: BlackText('Note:',fontWeight: FontWeight.bold,fontSize: 18,),alignment: Alignment.centerLeft,),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(left: 25,top: 5,right: 25),
+                      child: RichText(
+                        text: TextSpan(
+                          style: TextStyle(color: Colors.black,fontSize: 12),
+                          children: [
+                            TextSpan(
+                              text: "Please ensure the accuracy of the content before submitting a report. In situations where someone's safety is at risk, promptly notify local emergency services ASAP.",
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                confirm: TextButton(
+                  onPressed: () async {
+                    // Add your logic to handle reporting
+                    Get.back(); // Close the dialog
+                  },
+                  child: Text('Report'),
+                ),
+                cancel: TextButton(
+                  onPressed: () {
+                    Get.back(); // Close the dialog
+                  },
+                  child: Text('Cancel'),
+                ),
+              );
+            },
+          ),
+        ],
+
+
+
+
       ),
+
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(25),
         child: Column(
@@ -270,9 +388,9 @@ class _DetailsScreenState extends State<DetailsScreen> {
                 color: boxDecorationColor,
                 borderRadius: BorderRadius.zero,
               ),
-              child: isBannerLoaded == true
-                  ? AdWidget(ad: bannerAd)  // Display the ad if isBannerLoaded is true
-                  : Container(),  // Otherwise, display an empty container
+              // child: isBannerLoaded == true
+              //     ? AdWidget(ad: bannerAd)  // Display the ad if isBannerLoaded is true
+              //     : Container(),  // Otherwise, display an empty container
             )
 
           ],
