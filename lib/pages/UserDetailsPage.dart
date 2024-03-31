@@ -644,7 +644,7 @@ class _UserDetailsState extends State<UserDetails> with WidgetsBindingObserver {
                                         'courseStartYear': userYearController.text,
                                         'userDetailsfilled': true,
                                         'lastUpdated': FieldValue.serverTimestamp(),
-                                        'emailVerified': 'yes'
+                                        'emailVerified': 'yes',
                                       });
                                       // Store the selected college locally
                                       saveCollegeLocally(_selectedCollege!, email);

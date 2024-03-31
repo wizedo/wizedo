@@ -591,7 +591,8 @@ class _RegisterScreenState extends State<RegisterScreen> with WidgetsBindingObse
                           'totalPayment': int.tryParse(_paymentDetails.text) ?? 0,
                           'status': 'active', // active or rejected or applied
                           'createdAt': FieldValue.serverTimestamp(),
-                          'college':userCollegee
+                          'college':userCollegee,
+                          'report':0
                         });
                       });
 

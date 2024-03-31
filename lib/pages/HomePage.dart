@@ -158,6 +158,7 @@ class _HomePageState extends State<HomePage> {
                 postid: data['postId'],
                 googledrivelink:data['googledrivelink'],
                 emailid: data['emailid'],
+                college: data['college']
               ),
             ),
           );

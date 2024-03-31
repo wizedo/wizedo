@@ -22,6 +22,7 @@ class DetailsScreen extends StatefulWidget {
   final String? postid;
   final String? finalDate;
   final String? emailid;
+  final String? college;
   final String? googledrivelink;
 
   const DetailsScreen({
@@ -34,6 +35,7 @@ class DetailsScreen extends StatefulWidget {
     this.finalDate,
     this.postid,
     this.emailid,
+    this.college,
     this.googledrivelink
   }) : super(key: key);
 
@@ -71,10 +73,8 @@ class _DetailsScreenState extends State<DetailsScreen> {
   //***
 
 
-  String _selectedCategory = '';
-  bool _isNumberOfPagesVisible = false;
-
   DateTime _selectedDate = DateTime.now();
+  RxInt selectedRadio = 0.obs; // Initialize to 0 to indicate no selection
 
   void initState() {
     super.initState();
@@ -87,20 +87,77 @@ class _DetailsScreenState extends State<DetailsScreen> {
     print('Price Range: ${widget.priceRange}');
     print('Post ID: ${widget.postid}');
     print('Final Date: ${widget.finalDate}');
+    selectedRadio.value=0;
   }
-  Future<void> _selectDate(BuildContext context) async {
-    final DateTime? picked = await showDatePicker(
-      context: context,
-      initialDate: _selectedDate,
-      firstDate: DateTime(2000),
-      lastDate: DateTime(2101),
+
+  setSelectedRadio(int val) {
+      selectedRadio.value = val;
+  }
+
+  Widget _buildRadioListTile(String text, int value) {
+    return GestureDetector(
+      onTap: () {
+        setSelectedRadio(value);
+      },
+      child: ListTile(
+        title: Transform.translate(
+          offset: Offset(-17, 0),
+          child: BlackText(text),
+        ),
+        leading: Obx(
+              () => Radio<int>(
+            value: value,
+            groupValue: selectedRadio.value,
+            activeColor: Color(0xFF955AF2),
+            onChanged: (val) {
+              print(val);
+              setSelectedRadio(val!);
+            },
+          ),
+        ),
+      ),
     );
-    if (picked != null && picked != _selectedDate) {
-      setState(() {
-        _selectedDate = picked;
+  }
+
+
+  Future<void> reportPost(String userCollegee, String postId) async {
+    try {
+      final firestore = FirebaseFirestore.instance;
+      final collegePostRef = firestore
+          .collection('colleges')
+          .doc(userCollegee)
+          .collection('collegePosts')
+          .doc(postId);
+
+      await firestore.runTransaction((transaction) async {
+        final snapshot = await transaction.get(collegePostRef);
+
+        if (snapshot.exists) {
+          // Get the current value of the 'report' field
+          final currentReports = snapshot.get('report') ?? 0;
+
+          // Increment the 'report' field by one
+          transaction.update(collegePostRef, {
+            'report': currentReports + 1,
+          });
+        } else {
+          print('Document does not exist!');
+          // Handle case where the document does not exist
+        }
       });
+
+      // Report updated successfully
+    } catch (error) {
+      print('Error updating report: $error');
+      // Handle error
     }
   }
+
+
+
+
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -122,7 +179,6 @@ class _DetailsScreenState extends State<DetailsScreen> {
           IconButton(
             icon: Icon(Icons.report, color: Colors.white, size: 24,),
             onPressed: () {
-              String? selectedReason;
               Get.defaultDialog(
                 title: 'Report Post',
                 titlePadding: EdgeInsets.fromLTRB(20, 20, 20, 0),
@@ -136,74 +192,30 @@ class _DetailsScreenState extends State<DetailsScreen> {
                 contentPadding: EdgeInsets.only(top: 25,bottom: 25),
                 content: Column(
                   children: [
-                    ListTile(
-                      title: Transform.translate(
-                        offset: Offset(-17, 0),
-                        child: BlackText('Inappropriate Content'),
-                      ),
-                      leading: Radio<String>(
-                        value: 'Inappropriate Content',
-                        groupValue: selectedReason,
-                        onChanged: (value) {
-                          selectedReason = value;
-                          // Handle selection of reason here
-                        },
-                      ),
-                    ),
-                    ListTile(
-                      title: Transform.translate(
-                        offset: Offset(-17, 0),
-                        child: BlackText('Spam or Advertisement'),
-                      ),
-                      leading: Radio<String>(
-                        value: 'Spam or Advertisement',
-                        groupValue: selectedReason,
-                        onChanged: (value) {
-                          selectedReason = value;
-                          // Handle selection of reason here
-                        },
-                      ),
-                    ),
-                    ListTile(
-                      title: Transform.translate(
-                        offset: Offset(-17, 0),
-                        child: BlackText('Harassment or Bullying'),
-                      ),
-                      leading: Radio<String>(
-                        value: 'Harassment or Bullying',
-                        groupValue: selectedReason,
-                        onChanged: (value) {
-                          selectedReason = value;
-                          // Handle selection of reason here
-                        },
-                      ),
-                    ),
-                    ListTile(
-                      title: Transform.translate(
-                        offset: Offset(-17, 0),
-                        child: BlackText('Other'),
-                      ),
-                      leading: Radio<String>(
-                        value: 'Other',
-                        groupValue: selectedReason,
-                        onChanged: (value) {
-                          selectedReason = value;
-                          // Handle selection of reason here
-                        },
-                      ),
-                    ),
+                    _buildRadioListTile('Inappropriate Content', 1),
+                    _buildRadioListTile('Spam or Advertisement', 2),
+                    _buildRadioListTile('Harassment or Bullying', 3),
+                    _buildRadioListTile('Other', 4),
                     Padding(
                       padding: const EdgeInsets.only(left: 25),
-                      child: Align(child: BlackText('Note:',fontWeight: FontWeight.bold,fontSize: 18,),alignment: Alignment.centerLeft,),
+                      child: Align(
+                        child: BlackText(
+                          'Note:',
+                          fontWeight: FontWeight.bold,
+                          fontSize: 18,
+                        ),
+                        alignment: Alignment.centerLeft,
+                      ),
                     ),
                     Padding(
-                      padding: const EdgeInsets.only(left: 25,top: 5,right: 25),
+                      padding: const EdgeInsets.only(left: 25, top: 5, right: 25),
                       child: RichText(
                         text: TextSpan(
-                          style: TextStyle(color: Colors.black,fontSize: 12),
+                          style: TextStyle(color: Colors.black, fontSize: 12),
                           children: [
                             TextSpan(
-                              text: "Please ensure the accuracy of the content before submitting a report. In situations where someone's safety is at risk, promptly notify local emergency services ASAP.",
+                              text:
+                              "Please ensure the accuracy of the content before submitting a report. In situations where someone's safety is at risk, promptly notify local emergency services ASAP.",
                             ),
                           ],
                         ),
@@ -211,12 +223,22 @@ class _DetailsScreenState extends State<DetailsScreen> {
                     ),
                   ],
                 ),
+
                 confirm: TextButton(
                   onPressed: () async {
-
-
-
+                    Get.dialog(
+                      Center(
+                        child: CircularProgressIndicator(),
+                      ),
+                      barrierDismissible: false, // Prevent user from dismissing the dialog
+                    );
+                    // Call reportPost function to increment report value by one
+                    await reportPost('${widget.college}', '${widget.postid}');
+                    // Optionally, you can show a confirmation message or perform other actions here
+                    // For example:
+                    Get.back(); // Close the report dialog
                   },
+
                   child: Text('Report'),
                 ),
                 cancel: TextButton(
@@ -229,8 +251,6 @@ class _DetailsScreenState extends State<DetailsScreen> {
             },
           ),
         ],
-
-
 
 
       ),
