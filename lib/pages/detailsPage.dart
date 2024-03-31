@@ -213,8 +213,9 @@ class _DetailsScreenState extends State<DetailsScreen> {
                 ),
                 confirm: TextButton(
                   onPressed: () async {
-                    // Add your logic to handle reporting
-                    Get.back(); // Close the dialog
+
+
+
                   },
                   child: Text('Report'),
                 ),

@@ -5,7 +5,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart'; // Import Firestore
 import 'package:get/get.dart';
 import '../pages/LoginPage.dart';
-import '../pages/RegisterPage.dart';
 import '../pages/UserDetailsPage.dart';
 
 class EmailVerificationScreen extends StatefulWidget {

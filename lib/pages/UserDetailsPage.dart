@@ -30,6 +30,7 @@ class _UserDetailsState extends State<UserDetails> with WidgetsBindingObserver {
   String? _selectedCollege;
   String? _selectedCourse;
   bool isFinished = false;
+  bool _isLoading = false;
   final TextEditingController _searchController = TextEditingController();
   final TextEditingController _universityNameController = TextEditingController();
   final TextEditingController unameController = TextEditingController();
@@ -596,99 +597,114 @@ class _UserDetailsState extends State<UserDetails> with WidgetsBindingObserver {
 
                     SizedBox(height: 35),
 
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 30),
-                        child: Container(
-                          width: 308,
-                          height: 51,
-                          child: ElevatedButton(
-                            onPressed: () async {
-                              if (_formKey.currentState!.validate()) {
-                                _formKey.currentState!.save();
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 30),
+                      child: Container(
+                        width: 308,
+                        height: 51,
+                        child: ElevatedButton(
+                          onPressed: _isLoading
+                              ? null
+                              : () async {
+                            setState(() {
+                              _isLoading = true; // Set loading to true when button is pressed
+                            });
+                            if (_formKey.currentState!.validate()) {
+                              _formKey.currentState!.save();
 
-                                bool isValid = _validateInputs();
+                              bool isValid = _validateInputs();
 
-                                if (isValid) {
-                                  try {
-                                    final user = FirebaseAuth.instance.currentUser;
-                                    if (user != null) {
-                                      final firestore = FirebaseFirestore.instance;
-                                      final email = user.email!;
-                                      final docRef = firestore.collection('usersDetails').doc(email);
+                              if (isValid) {
+                                try {
+                                  final user = FirebaseAuth.instance.currentUser;
+                                  if (user != null) {
+                                    final firestore = FirebaseFirestore.instance;
+                                    final email = user.email!;
+                                    final docRef =
+                                    firestore.collection('usersDetails').doc(email);
 
-                                      await firestore.runTransaction((transaction) async {
-                                        final docSnapshot = await transaction.get(docRef);
+                                    await firestore.runTransaction((transaction) async {
+                                      final docSnapshot = await transaction.get(docRef);
 
-                                        if (!docSnapshot.exists) {
-                                          // Handle the case where the document does not exist
-                                        }
+                                      if (!docSnapshot.exists) {
+                                        // Handle the case where the document does not exist
+                                      }
 
-                                        // Update the document
-                                        transaction.update(docRef, {
-                                          'id': email,
-                                          'firstname': _capitalizeFirstLetter(unameController.text),
-                                          'lastname':_capitalizeFirstLetter(ulastnameController.text),// Capitalize the first letter
-                                          // 'phoneNumber': int.tryParse(phonenoController.text) ?? 0,
-                                          'country': _selectedState,
-                                          'college': _selectedCollege,
-                                          'course': _selectedCourse,
-                                          'courseStartYear': userYearController.text,
-                                          'userDetailsfilled': true,
-                                          'lastUpdated': FieldValue.serverTimestamp(),
-                                        });
-                                        // Store the selected college locally
-                                        saveCollegeLocally(_selectedCollege!,email);
+                                      // Update the document
+                                      transaction.set(docRef, {
+                                        'id': email,
+                                        'firstname':
+                                        _capitalizeFirstLetter(unameController.text),
+                                        'lastname':
+                                        _capitalizeFirstLetter(ulastnameController.text),
+                                        // 'phoneNumber': int.tryParse(phonenoController.text) ?? 0,
+                                        'country': _selectedState,
+                                        'college': _selectedCollege,
+                                        'course': _selectedCourse,
+                                        'courseStartYear': userYearController.text,
+                                        'userDetailsfilled': true,
+                                        'lastUpdated': FieldValue.serverTimestamp(),
+                                        'emailVerified': 'yes'
                                       });
+                                      // Store the selected college locally
+                                      saveCollegeLocally(_selectedCollege!, email);
+                                    });
 
-                                      await setUserDetailsFilledLocally(email,true);
-                                      bool userDetailsFilledLocally = await getUserDetailsFilledLocally(email);
-                                      print('userDetailsFilledLocally: $userDetailsFilledLocally');
+                                    await setUserDetailsFilledLocally(email, true);
+                                    bool userDetailsFilledLocally =
+                                    await getUserDetailsFilledLocally(email);
+                                    print(
+                                        'userDetailsFilledLocally: $userDetailsFilledLocally');
 
-                                      Get.snackbar('Success', 'Please login into your account');
+                                    Get.snackbar('Success', 'Please login into your account');
 
-                                      await Navigator.push(
-                                        context,
-                                        PageTransition(
-                                          type: PageTransitionType.fade,
-                                          child: LoginPage(),
-                                        ),
-                                      );
+                                    await Navigator.push(
+                                      context,
+                                      PageTransition(
+                                        type: PageTransitionType.fade,
+                                        child: LoginPage(),
+                                      ),
+                                    );
 
-                                      setState(() {
-                                        isFinished = false;
-                                      });
-                                    }
-                                  } catch (error) {
-                                    print('Error updating user details: $error');
-                                    Get.snackbar('Error', 'Failed to update user details');
+                                    setState(() {
+                                      _isLoading = false; // Set loading to false when operation is complete
+                                    });
                                   }
+                                } catch (error) {
+                                  print('Error updating user details: $error');
+                                  Get.snackbar('Error', 'Failed to update user details');
+                                  setState(() {
+                                    _isLoading = false; // Set loading to false when operation fails
+                                  });
                                 }
                               }
-                            },
-
-
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Color(0xFF955AF2),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(15),
-                              ),
+                            }
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Color(0xFF955AF2),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(15),
                             ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text(
-                                  'Tap to Join',
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 16,
-                                  ),
+                          ),
+                          child: _isLoading
+                              ? CircularProgressIndicator() // Show loading indicator
+                              : Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                'Tap to Join',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 16,
                                 ),
-                              ],
-                            ),
+                              ),
+                            ],
                           ),
                         ),
                       ),
-                    ],
+                    ),
+
+                  ],
                   ),
                 ),
               ),

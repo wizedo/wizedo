@@ -14,6 +14,7 @@ import '../components/my_textbutton.dart';
 import '../components/white_text.dart';
 import '../components/purple_text.dart';
 import '../services/AuthService.dart';
+import '../services/email_verification_page.dart';
 import 'BottomNavigation.dart';
 import 'HomePage.dart';
 import 'RegisterPage.dart';
@@ -38,22 +39,22 @@ class _LoginPageState extends State<LoginPage> {
   Future<void> storeUserCollegeLocally(String userEmail) async {
     try {
       print("in try block of storeusercollegelocally");
-        final docSnapshot = await _firestore.collection('usersDetails').doc(userEmail).get();
-        if (docSnapshot.exists) {
-          final userData = docSnapshot.data() as Map<String, dynamic>;
-          final userCollege = userData['college'];
-          print('User College stored locally: $userCollege');
+      final docSnapshot =
+          await _firestore.collection('usersDetails').doc(userEmail).get();
+      if (docSnapshot.exists) {
+        final userData = docSnapshot.data() as Map<String, dynamic>;
+        final userCollege = userData['college'];
+        print('User College stored locally: $userCollege');
 
-          // Store the user's college name locally
-          await saveCollegeLocally(userCollege, userEmail);
-        } else {
-          print('User details document does not exist');
-        }
+        // Store the user's college name locally
+        await saveCollegeLocally(userCollege, userEmail);
+      } else {
+        print('User details document does not exist');
+      }
     } catch (error) {
       print('Error fetching user details: $error');
     }
   }
-
 
   Future<void> saveCollegeLocally(String collegeName, String userEmail) async {
     try {
@@ -85,15 +86,15 @@ class _LoginPageState extends State<LoginPage> {
   Future<void> resetPassword(BuildContext context) async {
     try {
       await _auth.sendPasswordResetEmail(email: emailController.text);
-      Get.snackbar('Password Reset Sent', 'Check your email for the password reset link.');
-
+      Get.snackbar('Password Reset Sent',
+          'Check your email for the password reset link.');
     } catch (error) {
       String errorMessage = _handleFirebaseError(error);
-      Get.snackbar('Password Reset Error', 'An error occurred while resetting your password.');
+      Get.snackbar('Password Reset Error',
+          'An error occurred while resetting your password.');
       print(errorMessage);
     }
   }
-
 
   Future<void> login(BuildContext context) async {
     try {
@@ -107,12 +108,31 @@ class _LoginPageState extends State<LoginPage> {
         password: passController.text,
       );
 
-      if (userCredential.user != null &&
-          userCredential.user!.providerData.any(
-                (userInfo) => userInfo.providerId == 'google.com',
-          )) {
-        Get.snackbar('Error', 'This email is associated with a Google account. Please sign in with Google.');
-        return;
+      User? user = userCredential.user;
+
+      if (user != null) {
+        // Retrieve user document from Firestore
+        DocumentSnapshot userDocSnapshot = await FirebaseFirestore.instance
+            .collection('usersDetails').doc(user.email).get();
+        if (userDocSnapshot.exists) {
+          // Check if email is verified
+          bool emailVerified = userDocSnapshot['emailVerified'] == 'yes';
+          if (!emailVerified) {
+            // User's email is not verified, navigate to verification screen
+            Get.to(() =>
+                EmailVerificationScreen(
+                  userEmail: emailController.text,
+                  userPassword: passController.text,
+                ));
+            return;
+          } else {
+            // User document does not exist
+            // Get.snackbar('Error', 'User data not found.');
+          }
+        } else {
+          // Handle the case where user is null
+          Get.snackbar('Error', 'Unable to log in. Please try again.');
+        }
       }
 
       Get.showSnackbar(
@@ -124,7 +144,8 @@ class _LoginPageState extends State<LoginPage> {
           margin: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
           snackPosition: SnackPosition.TOP,
           isDismissible: true,
-          backgroundColor: Color(0xFF955AF2), // Set your desired color here
+          backgroundColor: Color(0xFF955AF2),
+          // Set your desired color here
           titleText: Row(
             children: [
               Icon(
@@ -150,18 +171,16 @@ class _LoginPageState extends State<LoginPage> {
       // Save user Gmail ID locally using shared preferences
       await saveUserEmailLocally(emailController.text);
 
-
       bool userDetailsfilled = await getUserDetailsFilled(emailController.text);
-      await setUserDetailsFilledLocally(emailController.text,userDetailsfilled);
+      await setUserDetailsFilledLocally(
+          emailController.text, userDetailsfilled);
       print('belwo is useeemail');
       print(emailController.text);
 
-      String userName=await getUserName(emailController.text);
+      String userName = await getUserName(emailController.text);
       await setUserNameLocally(emailController.text, userName);
       print('below is username');
       print(userName);
-
-
 
       if (userDetailsfilled == true) {
         await storeUserCollegeLocally(emailController.text);
@@ -181,7 +200,8 @@ class _LoginPageState extends State<LoginPage> {
           margin: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
           snackPosition: SnackPosition.TOP,
           isDismissible: true,
-          backgroundColor: Color(0xFF955AF2), // Set your desired color here
+          backgroundColor: Color(0xFF955AF2),
+          // Set your desired color here
           titleText: Row(
             children: [
               Icon(
@@ -205,16 +225,16 @@ class _LoginPageState extends State<LoginPage> {
       );
 
       // Handle the specific FirebaseAuthException
-      if (error is FirebaseAuthException && error.code == 'account-exists-with-different-credential') {
+      if (error is FirebaseAuthException &&
+          error.code == 'account-exists-with-different-credential') {
         Get.snackbar('Error', 'Account exists with a different credential.');
       }
-    }finally{
+    } finally {
       setState(() {
         loading = false;
       });
     }
   }
-
 
   Future<dynamic> signInWithGoogle() async {
     try {
@@ -226,8 +246,12 @@ class _LoginPageState extends State<LoginPage> {
         return null;
       }
 
+
+
+
+
       final GoogleSignInAuthentication? googleAuth =
-      await googleUser.authentication;
+          await googleUser.authentication;
 
       final credential = GoogleAuthProvider.credential(
         accessToken: googleAuth?.accessToken,
@@ -243,7 +267,8 @@ class _LoginPageState extends State<LoginPage> {
           margin: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
           snackPosition: SnackPosition.TOP,
           isDismissible: true,
-          backgroundColor: Color(0xFF955AF2), // Set your desired color here
+          backgroundColor: Color(0xFF955AF2),
+          // Set your desired color here
           titleText: Row(
             children: [
               Icon(
@@ -274,7 +299,7 @@ class _LoginPageState extends State<LoginPage> {
 
       // Now, check userDetailsfilled and redirect the user
       bool userDetailsfilled = await getUserDetailsFilled(userEmail);
-      String userName=await getUserName(userEmail);
+      String userName = await getUserName(userEmail);
       print(userDetailsfilled);
       print('Below is username');
       print(userName);
@@ -296,8 +321,6 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
-
-
   String _handleFirebaseError(dynamic error) {
     if (error is FirebaseAuthException) {
       print(error.code);
@@ -318,7 +341,7 @@ class _LoginPageState extends State<LoginPage> {
           return 'Network error. Please check your internet connection and try again.';
         case 'DEVICE_NOT_SUPPORTED':
           return 'Your device is not supported. Please try again on a different device.';
-      // Add more cases for specific PlatformException errors
+        // Add more cases for specific PlatformException errors
 
         default:
           return 'An unexpected error occurred. Please try again later.';
@@ -339,12 +362,12 @@ class _LoginPageState extends State<LoginPage> {
 
   Future<bool> getUserDetailsFilled(String userEmail) async {
     try {
-
       if (userEmail.isEmpty) {
         print('Error: Empty email passed to getUserDetailsFilled');
         return false;
       }
-      DocumentReference userDocRef = _firestore.collection('usersDetails').doc(userEmail);
+      DocumentReference userDocRef =
+          _firestore.collection('usersDetails').doc(userEmail);
       DocumentSnapshot userDocSnapshot = await userDocRef.get();
       if (userDocSnapshot.exists) {
         bool userDetailsfilled = userDocSnapshot['userDetailsfilled'];
@@ -360,14 +383,14 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
-
   Future<String> getUserName(String userEmail) async {
     try {
       if (userEmail.isEmpty) {
         print('Error: Empty email passed to getUserName');
         return ''; // Return an empty string or handle the error case accordingly
       }
-      DocumentReference userDocRef = _firestore.collection('usersDetails').doc(userEmail);
+      DocumentReference userDocRef =
+          _firestore.collection('usersDetails').doc(userEmail);
       DocumentSnapshot userDocSnapshot = await userDocRef.get();
 
       if (userDocSnapshot.exists) {
@@ -384,7 +407,6 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
-
   @override
   Widget build(BuildContext context) {
     Color backgroundColor = ColorUtil.hexToColor('#211b2e');
@@ -395,180 +417,180 @@ class _LoginPageState extends State<LoginPage> {
         child: Center(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 25),
-            child: Stack(
-              alignment: Alignment.center,
-              children:[
-                SingleChildScrollView(
-                  child: Container(
-                    width: 310,
-                    child: Column(
-
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        SizedBox(height: 50),
-                        Image.asset(
-                          'lib/images/login_animation.png',
-                          width: 400,
-                          height: 160,
-                        ),
-                        Align(
-                          alignment: Alignment.topLeft,
-                          child: WhiteText(
-                            'Login',
-                            fontSize: 36,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        Align(
-                          alignment: Alignment.topLeft,
-                          child: WhiteText('Please login to continue', fontSize: 16),
-                        ),
-                        SizedBox(height: 25),
-                        MyTextField(
-                          controller: emailController,
-                          label: 'Email',
-                          obscureText: false,
-                          keyboardType: TextInputType.emailAddress,
-                          prefixIcon: Icon(
-                            Icons.mail,
-                            color: Colors.white,
-                          ),
-                          fontSize: 11.5,
-                        ),
-                        SizedBox(height: 25),
-                        MyTextField(
-                          controller: passController,
-                          label: 'Password',
-                          obscureText: !passwordVisibility,
-                          prefixIcon: Icon(
-                            Icons.password,
-                            color: Colors.white,
-                          ),
-                          suffixIcon: GestureDetector(
-                            onTap: () {
-                              setState(() {
-                                passwordVisibility = !passwordVisibility;
-                              });
-                            },
-                            child: Icon(
-                              passwordVisibility ? Icons.visibility_off : Icons.visibility,
-                              color: Colors.white,
-                              size: 20,
-                            ),
-                          ),
-                          fontSize: 11.5,
-                        ),
-                        Align(
-                          alignment: Alignment.topRight,
-                          child: MyTextButton(
-                            onPressed: () {
-                              resetPassword(context); // Call the resetPassword method on button press
-                            },
-                            buttonText: 'Forgot Password?',
-                            fontSize: 12,
-                          ),
-                        ),
-                        SizedBox(height: 15),
-                        MyElevatedButton(
-                          onPressed: () {
-                            login(context);
-                          },
-                          buttonText: 'Login',
+            child: Stack(alignment: Alignment.center, children: [
+              SingleChildScrollView(
+                child: Container(
+                  width: 310,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      SizedBox(height: 50),
+                      Image.asset(
+                        'lib/images/login_animation.png',
+                        width: 400,
+                        height: 160,
+                      ),
+                      Align(
+                        alignment: Alignment.topLeft,
+                        child: WhiteText(
+                          'Login',
+                          fontSize: 36,
                           fontWeight: FontWeight.bold,
                         ),
-                        SizedBox(height: 19),
-                        Row(
-                          children: [
-                            Expanded(
-                              flex: 3,
-                              child: Container(
-                                height: 1.5,
-                                decoration: BoxDecoration(
-                                  gradient: LinearGradient(
-                                    begin: Alignment.centerLeft,
-                                    end: Alignment.centerRight,
-                                    stops: [0.0, 0.5, 1.0, 1.0],
-                                    colors: [
-                                      Colors.transparent,
-                                      Color(0xFF955AF2),
-                                      Color(0xFF955AF2),
-                                      Colors.transparent,
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ),
-                            Expanded(
-                              flex: 5,
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 8),
-                                child: PurpleText(
-                                  'Or Continue with',
-                                  fontSize: 12,
-                                  textAlign: TextAlign.center,
-                                ),
-                              ),
-                            ),
-                            Expanded(
-                              flex: 3,
-                              child: Container(
-                                height: 1.5,
-                                decoration: BoxDecoration(
-                                  gradient: LinearGradient(
-                                    begin: Alignment.centerLeft,
-                                    end: Alignment.centerRight,
-                                    stops: [0.0, 0.0, 0.5, 1.0],
-                                    colors: [
-                                      Colors.transparent,
-                                      Color(0xFF955AF2),
-                                      Color(0xFF955AF2),
-                                      Colors.transparent,
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
+                      ),
+                      Align(
+                        alignment: Alignment.topLeft,
+                        child:
+                            WhiteText('Please login to continue', fontSize: 16),
+                      ),
+                      SizedBox(height: 25),
+                      MyTextField(
+                        controller: emailController,
+                        label: 'Email',
+                        obscureText: false,
+                        keyboardType: TextInputType.emailAddress,
+                        prefixIcon: Icon(
+                          Icons.mail,
+                          color: Colors.white,
                         ),
-                        SizedBox(height: 25),
-                        GestureDetector(
+                        fontSize: 11.5,
+                      ),
+                      SizedBox(height: 25),
+                      MyTextField(
+                        controller: passController,
+                        label: 'Password',
+                        obscureText: !passwordVisibility,
+                        prefixIcon: Icon(
+                          Icons.password,
+                          color: Colors.white,
+                        ),
+                        suffixIcon: GestureDetector(
                           onTap: () {
-                            signInWithGoogle();
+                            setState(() {
+                              passwordVisibility = !passwordVisibility;
+                            });
                           },
-                          child: Image.asset(
-                            'lib/images/google.png',
-                            width: 45,
-                            height: 45,
+                          child: Icon(
+                            passwordVisibility
+                                ? Icons.visibility_off
+                                : Icons.visibility,
+                            color: Colors.white,
+                            size: 20,
                           ),
                         ),
-
-                        SizedBox(height: 15),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            WhiteText('Not a member?', fontSize: 12),
-                            MyTextButton(
-                              onPressed: () {
-                                Get.to(() => RegisterPage());
-                              },
-                              buttonText: 'Register Now',
-                              fontSize: 12,
-                            ),
-                          ],
+                        fontSize: 11.5,
+                      ),
+                      Align(
+                        alignment: Alignment.topRight,
+                        child: MyTextButton(
+                          onPressed: () {
+                            resetPassword(
+                                context); // Call the resetPassword method on button press
+                          },
+                          buttonText: 'Forgot Password?',
+                          fontSize: 12,
                         ),
-                        // SizedBox(height: MediaQuery.of(context).viewInsets.bottom + 150),
-                      ],
-                    ),
+                      ),
+                      SizedBox(height: 15),
+                      MyElevatedButton(
+                        onPressed: () {
+                          login(context);
+                        },
+                        buttonText: 'Login',
+                        fontWeight: FontWeight.bold,
+                      ),
+                      SizedBox(height: 19),
+                      Row(
+                        children: [
+                          Expanded(
+                            flex: 3,
+                            child: Container(
+                              height: 1.5,
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  begin: Alignment.centerLeft,
+                                  end: Alignment.centerRight,
+                                  stops: [0.0, 0.5, 1.0, 1.0],
+                                  colors: [
+                                    Colors.transparent,
+                                    Color(0xFF955AF2),
+                                    Color(0xFF955AF2),
+                                    Colors.transparent,
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                          Expanded(
+                            flex: 5,
+                            child: Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 8),
+                              child: PurpleText(
+                                'Or Continue with',
+                                fontSize: 12,
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                          ),
+                          Expanded(
+                            flex: 3,
+                            child: Container(
+                              height: 1.5,
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  begin: Alignment.centerLeft,
+                                  end: Alignment.centerRight,
+                                  stops: [0.0, 0.0, 0.5, 1.0],
+                                  colors: [
+                                    Colors.transparent,
+                                    Color(0xFF955AF2),
+                                    Color(0xFF955AF2),
+                                    Colors.transparent,
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 25),
+                      GestureDetector(
+                        onTap: () {
+                          signInWithGoogle();
+                        },
+                        child: Image.asset(
+                          'lib/images/google.png',
+                          width: 45,
+                          height: 45,
+                        ),
+                      ),
+
+                      SizedBox(height: 15),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          WhiteText('Not a member?', fontSize: 12),
+                          MyTextButton(
+                            onPressed: () {
+                              Get.to(() => RegisterPage());
+                            },
+                            buttonText: 'Register Now',
+                            fontSize: 12,
+                          ),
+                        ],
+                      ),
+                      // SizedBox(height: MediaQuery.of(context).viewInsets.bottom + 150),
+                    ],
                   ),
                 ),
-
-                if (loading)
-                  CircularProgressIndicator(
-                    color: Color(0xFF955AF2), // Set your desired loading indicator color
-                  ),
-              ]
-
-            ),
+              ),
+              if (loading)
+                CircularProgressIndicator(
+                  color: Color(
+                      0xFF955AF2), // Set your desired loading indicator color
+                ),
+            ]),
           ),
         ),
       ),
