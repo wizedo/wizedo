@@ -136,6 +136,21 @@ class _RegisterScreenState extends State<RegisterScreen> with WidgetsBindingObse
     }
   }
 
+  void _showLoadingDialog() {
+    Get.dialog(
+      Center(
+        child: CircularProgressIndicator(),
+      ),
+      barrierDismissible: false,
+    );
+  }
+
+  void hideLoadingDialog() {
+    if (Get.isDialogOpen!) {
+      Get.back();
+    }
+  }
+
   @override
   void dispose() {
     print("controllers diposed");
@@ -530,6 +545,7 @@ class _RegisterScreenState extends State<RegisterScreen> with WidgetsBindingObse
                 bool isValid = _validateInputs();
                 if (isValid) {
                   try {
+                    _showLoadingDialog();
                     final user = FirebaseAuth.instance.currentUser;
                     if (user != null) {
                       final firestore = FirebaseFirestore.instance;
@@ -595,7 +611,6 @@ class _RegisterScreenState extends State<RegisterScreen> with WidgetsBindingObse
                           'report':0
                         });
                       });
-
                       Get.showSnackbar(
                         GetSnackBar(
                           borderRadius: 8,
@@ -646,6 +661,9 @@ class _RegisterScreenState extends State<RegisterScreen> with WidgetsBindingObse
                   } catch (error) {
                     print('Error creating post: $error');
                     Get.snackbar('Error', 'Failed to create post');
+                    hideLoadingDialog();
+                  }finally{
+                    hideLoadingDialog();
                   }
 
                 }

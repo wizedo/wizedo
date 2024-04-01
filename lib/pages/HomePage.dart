@@ -12,6 +12,7 @@ import 'package:wizedo/components/CustomRichText.dart';
 import 'package:wizedo/components/white_text.dart';
 import '../components/FliterChip.dart';
 import '../components/JobCard.dart';
+import '../components/my_elevatedbutton.dart';
 import 'detailsPage.dart';
 
 class HomePage extends StatefulWidget {
@@ -33,8 +34,8 @@ class _HomePageState extends State<HomePage> {
   final ScrollController _scrollController = ScrollController();
   bool isFirstRun = true;
   final RxBool isLoading = true.obs;
-  bool alldocumentsfetched=false;
-  bool isLoadingMore = false;
+  final RxBool alldocumentsfetched = false.obs;
+  final RxBool isLoadingMore = false.obs;
   final FocusNode _searchFocusNode = FocusNode();
   int searchResultsCount = 0;
   List<String> searchedPostIds = [];
@@ -99,7 +100,7 @@ class _HomePageState extends State<HomePage> {
 
     _scrollController.addListener(() {
       if (_scrollController.position.pixels == _scrollController.position.maxScrollExtent) {
-        isLoadingMore = true;
+        isLoadingMore.value = true;
         fetchMoreDocuments(_selectedCategory);
       }
     });
@@ -222,7 +223,7 @@ class _HomePageState extends State<HomePage> {
       print('Error fetching documents by search: $error');
     } finally {
       // Set isLoadingMore to false to prevent fetching more documents
-      isLoadingMore = false;
+      isLoadingMore.value = false;
     }
   }
 
@@ -296,7 +297,7 @@ class _HomePageState extends State<HomePage> {
         print('below is new snapshot fetched');
         print(newSnapshot.docs);
       } else {
-        alldocumentsfetched=true;
+        alldocumentsfetched.value = true;
         print('No more documents');
       }
     } catch (error) {
@@ -332,26 +333,38 @@ class _HomePageState extends State<HomePage> {
       return Center(child: WhiteText('No data available'));
     } else {
       return Obx(() => ListView.builder(
-        // controller: _scrollController,
-        itemCount: _categoryDocuments[category]!.length + (isLoadingMore ? 1 : 0),
+        itemCount: alldocumentsfetched.value ? _categoryDocuments[category]!.length : _categoryDocuments[category]!.length + 1, // Plus one for the "Load More" button
         itemBuilder: (BuildContext context, int index) {
-          if (index == _categoryDocuments[category]!.length) {
-            // If the index is equal to the number of existing items,
-            // show the loading indicator
-            return !alldocumentsfetched ? Center(child: CircularProgressIndicator()) : Container();
-          } else {
+          if (index < _categoryDocuments[category]!.length) {
             var data = _categoryDocuments[category]![index].data() as Map<String, dynamic>;
-            // print(' i am in catedcouments else buldlisviewfor category statement');
-            // print('below is data for postid');
-            // print(index);
-            // print(_categoryDocuments[category]!.length);
             return buildStreamBuilder(data['postId']);
-            // }
+          } else {
+            // Render the "Load More" button using MyElevatedButton
+            return Padding(
+              padding: const EdgeInsets.only(right: 15,top: 10,bottom: 20),
+              child: Align(
+                alignment: Alignment.bottomRight,
+                child: !alldocumentsfetched.value ? MyElevatedButton(
+                  width: 120,
+                  height: 35,
+                  mfontsize: 12,
+                  borderRadius: 10,
+                  melevation: 100,
+                  onPressed: () {
+                    // Load more documents when clicked
+                    isLoadingMore.value = true;
+                    fetchMoreDocuments(_selectedCategory);
+                  },
+                  buttonText: isLoadingMore.value && alldocumentsfetched.value ? 'Loading...'.obs.value : 'Load More'.obs.value,
+                ) : Container(),
+              ),
+            );
           }
         },
       ));
     }
   }
+
 
   StreamBuilder<QuerySnapshot<Map<String, dynamic>>> buildStreamBuilderForCategory(String category) {
     print('Building stream for category: $category');
