@@ -65,6 +65,22 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
+  void _showLoadingDialog() {
+    Get.dialog(
+      Center(
+        child: CircularProgressIndicator(),
+      ),
+      barrierDismissible: false,
+    );
+  }
+
+  void hideLoadingDialog() {
+    if (Get.isDialogOpen!) {
+      Get.back();
+    }
+  }
+
+
   Future<void> setUserDetailsFilledLocally(String email, bool value) async {
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -101,6 +117,7 @@ class _LoginPageState extends State<LoginPage> {
       // Set loading to true to show circular progress indicator
       setState(() {
         loading = true;
+        _showLoadingDialog();
       });
 
       UserCredential userCredential = await _auth.signInWithEmailAndPassword(
@@ -190,13 +207,17 @@ class _LoginPageState extends State<LoginPage> {
         Get.to(() => UserDetails(userEmail: emailController.text));
       }
     } catch (error) {
-      String errorMessage = _handleFirebaseError(error);
+      setState(() {
+        loading = false;
+        hideLoadingDialog();
+      });
+
       Get.showSnackbar(
         GetSnackBar(
           borderRadius: 8,
           padding: EdgeInsets.symmetric(horizontal: 20, vertical: 15),
           animationDuration: Duration(milliseconds: 800),
-          duration: Duration(milliseconds: 3000),
+          duration: Duration(milliseconds: 2000),
           margin: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
           snackPosition: SnackPosition.TOP,
           isDismissible: true,
@@ -232,6 +253,7 @@ class _LoginPageState extends State<LoginPage> {
     } finally {
       setState(() {
         loading = false;
+        hideLoadingDialog();
       });
     }
   }
@@ -245,10 +267,6 @@ class _LoginPageState extends State<LoginPage> {
         print('user has clicked out of google sign in pop up');
         return null;
       }
-
-
-
-
 
       final GoogleSignInAuthentication? googleAuth =
           await googleUser.authentication;
@@ -585,11 +603,6 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                 ),
               ),
-              if (loading)
-                CircularProgressIndicator(
-                  color: Color(
-                      0xFF955AF2), // Set your desired loading indicator color
-                ),
             ]),
           ),
         ),

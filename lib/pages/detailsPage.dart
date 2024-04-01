@@ -234,8 +234,8 @@ class _DetailsScreenState extends State<DetailsScreen> {
                     );
                     // Call reportPost function to increment report value by one
                     await reportPost('${widget.college}', '${widget.postid}');
-                    // Optionally, you can show a confirmation message or perform other actions here
-                    // For example:
+
+                    Get.back(); // Close the report dialog
                     Get.back(); // Close the report dialog
                   },
 
