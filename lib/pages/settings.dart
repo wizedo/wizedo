@@ -20,6 +20,7 @@ import 'LoginPage.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'PhoneNumberVerification.dart';
 import 'completedtaskspage.dart';
+import 'faq.dart';
 
 class settingScreen extends StatefulWidget {
   final CollectionReference fireStore;
@@ -366,6 +367,7 @@ class _settingScreenState extends State<settingScreen> {
                         child: cardSettingContainer(text: 'Payment', iconData: Icons.payment)),
                     InkWell(
                       onTap: () {
+                        Get.to(FAQPage());
                       },
                       child: cardSettingContainer(text: 'Help', iconData: Icons.help),
                     ),

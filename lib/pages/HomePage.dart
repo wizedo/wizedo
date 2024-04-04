@@ -150,16 +150,16 @@ class _HomePageState extends State<HomePage> {
             context,
             MaterialPageRoute(
               builder: (context) => DetailsScreen(
-                category: data['category'],
-                subject: data['subCategory'],
-                date: data['createdAt'],
-                description: data['description'],
-                priceRange: data['totalPayment'],
-                finalDate: data['dueDate'],
-                postid: data['postId'],
-                googledrivelink:data['googledrivelink'],
-                emailid: data['emailid'],
-                college: data['college']
+                  category: data['category'],
+                  subject: data['subCategory'],
+                  date: data['createdAt'],
+                  description: data['description'],
+                  priceRange: data['totalPayment'],
+                  finalDate: data['dueDate'],
+                  postid: data['postId'],
+                  googledrivelink:data['googledrivelink'],
+                  emailid: data['emailid'],
+                  college: data['college']
               ),
             ),
           );
@@ -271,6 +271,15 @@ class _HomePageState extends State<HomePage> {
     super.dispose();
   }
 
+  // Map to store whether all documents are fetched for each category
+  final RxMap<String, bool> alldocumentsfetchedMap = {
+    'College Project': false,
+    'Personal Development': false,
+    'Assignment': false,
+  }.obs;
+
+
+  // Function to fetch more documents for a specific category
   Future<void> fetchMoreDocuments(String category) async {
     try {
       QuerySnapshot<Map<String, dynamic>> newSnapshot = await FirebaseFirestore.instance
@@ -279,13 +288,13 @@ class _HomePageState extends State<HomePage> {
           .collection('collegePosts')
           .where('category', isEqualTo: category)
           .where('status', isEqualTo: 'active')
-          .limit(4)
+          .limit(3)
           .startAfterDocument((_categoryDocuments[category]?.last ?? _lastDocument) as DocumentSnapshot<Object?>)
           .get();
 
       if (newSnapshot.docs.isNotEmpty) {
-        int numberOfNewDocuments = newSnapshot.docs.length;
-        print('$numberOfNewDocuments new documents fetched');
+        // Update alldocumentsfetchedMap value
+        alldocumentsfetchedMap[category] = false;
 
         // Use RxList method to update the observable list
         _categoryDocuments[category]?.addAll(newSnapshot.docs);
@@ -294,19 +303,64 @@ class _HomePageState extends State<HomePage> {
         // Notify the UI that data has changed
         _categoryDocuments.refresh();
         print(_categoryDocuments[category]);
-        print('below is new snapshot fetched');
-        print(newSnapshot.docs);
       } else {
-        alldocumentsfetched.value = true;
-        print('No more documents');
+        // If no more documents are fetched, set alldocumentsfetched flag to true for the respective category
+        alldocumentsfetchedMap[category] = true;
+        print('No more documents for category: $category');
+
+        Get.showSnackbar(
+          GetSnackBar(
+            borderRadius: 8,
+            padding: EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+            animationDuration: Duration(milliseconds: 800),
+            duration: Duration(milliseconds: 4000),
+            margin: EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+            snackPosition: SnackPosition.BOTTOM,
+            isDismissible: true,
+            backgroundColor: Colors.red.shade400,
+            // Set your desired color here
+            messageText: WhiteText(
+              'Bottom reached. No more posts.',
+              fontSize: 12,
+            ),
+          ),
+        );
+
+
       }
     } catch (error) {
-      print('Error fetching more documents: $error');
+      print('Error fetching more documents for category $category: $error');
     } finally {
       // Notify the UI that loading has finished
       isLoading.value = false;
     }
   }
+
+
+
+  // Widget to build the "Load More" button for each category
+  Widget buildLoadMoreButton(String category) {
+    return Padding(
+      padding: const EdgeInsets.only(right: 15, top: 10, bottom: 20),
+      child: Align(
+        alignment: Alignment.bottomRight,
+        child: !alldocumentsfetchedMap[category]! ? MyElevatedButton(
+          width: 120,
+          height: 35,
+          mfontsize: 12,
+          borderRadius: 10,
+          melevation: 100,
+          onPressed: () {
+            // Load more documents when clicked
+            isLoadingMore.value = true;
+            fetchMoreDocuments(category);
+          },
+          buttonText: isLoadingMore.value && alldocumentsfetchedMap[category]! ? 'Loading...'.obs.value : 'Load More'.obs.value,
+        ) : Container(),
+      ),
+    );
+  }
+
 
   StreamBuilder<DocumentSnapshot<Map<String, dynamic>>> buildStreamBuilder(String postId) {
     print('Building stream for post ID but not fetching or creating stream: $postId');
@@ -327,43 +381,40 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  // Update buildListViewForCategory to include the "Load More" button for each category
   Widget buildListViewForCategory(String category) {
     print('building list view category for $category');
     if (_categoryDocuments[category] == null || _categoryDocuments[category]!.isEmpty) {
       return Center(child: WhiteText('No data available'));
     } else {
-      return Obx(() => ListView.builder(
-        itemCount: alldocumentsfetched.value ? _categoryDocuments[category]!.length : _categoryDocuments[category]!.length + 1, // Plus one for the "Load More" button
-        itemBuilder: (BuildContext context, int index) {
-          if (index < _categoryDocuments[category]!.length) {
+      // Check if the initially fetched posts are less than or equal to 4
+      if (_categoryDocuments[category]!.length <= 4) {
+        // If so, don't show the "Load More" button
+        return Obx(() => ListView.builder(
+          itemCount: _categoryDocuments[category]!.length,
+          itemBuilder: (BuildContext context, int index) {
             var data = _categoryDocuments[category]![index].data() as Map<String, dynamic>;
             return buildStreamBuilder(data['postId']);
-          } else {
-            // Render the "Load More" button using MyElevatedButton
-            return Padding(
-              padding: const EdgeInsets.only(right: 15,top: 10,bottom: 20),
-              child: Align(
-                alignment: Alignment.bottomRight,
-                child: !alldocumentsfetched.value ? MyElevatedButton(
-                  width: 120,
-                  height: 35,
-                  mfontsize: 12,
-                  borderRadius: 10,
-                  melevation: 100,
-                  onPressed: () {
-                    // Load more documents when clicked
-                    isLoadingMore.value = true;
-                    fetchMoreDocuments(_selectedCategory);
-                  },
-                  buttonText: isLoadingMore.value && alldocumentsfetched.value ? 'Loading...'.obs.value : 'Load More'.obs.value,
-                ) : Container(),
-              ),
-            );
-          }
-        },
-      ));
+          },
+        ));
+      } else {
+        // If there are more than 4 initially fetched posts, show the "Load More" button
+        return Obx(() => ListView.builder(
+          itemCount: alldocumentsfetchedMap[category]! ? _categoryDocuments[category]!.length : _categoryDocuments[category]!.length + 1,
+          itemBuilder: (BuildContext context, int index) {
+            if (index < _categoryDocuments[category]!.length) {
+              var data = _categoryDocuments[category]![index].data() as Map<String, dynamic>;
+              return buildStreamBuilder(data['postId']);
+            } else {
+              // Render the "Load More" button
+              return buildLoadMoreButton(category);
+            }
+          },
+        ));
+      }
     }
   }
+
 
 
   StreamBuilder<QuerySnapshot<Map<String, dynamic>>> buildStreamBuilderForCategory(String category) {
@@ -376,7 +427,7 @@ class _HomePageState extends State<HomePage> {
           .where('category', isEqualTo: category)
           .where('status', isEqualTo: 'active')
       // .orderBy('createdAt', descending: false)
-          .limit(7)
+          .limit(5)
           .snapshots(),
       builder: (context, AsyncSnapshot<QuerySnapshot<Map<String, dynamic>>> snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
