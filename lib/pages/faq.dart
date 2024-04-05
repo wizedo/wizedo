@@ -1,52 +1,34 @@
 import 'package:flutter/material.dart';
-
 import '../components/BlackText.dart';
 
-
 class FAQPage extends StatelessWidget {
-  // Define a list of questions, answers, and corresponding icons
   final List<Map<String, dynamic>> faqData = [
     {
       'question': 'What is the purpose of this app?',
-      'answer': 'The purpose of this app is to facilitate peer-to-peer learning '
-          'among college students. It allows students to post what they want to learn '
-          'or collaborate with others on specific topics in exchange for money.',
+      'answer': 'This app fosters peer-to-peer learning among college students. It enables users to share knowledge and collaborate on various topics.'
     },
     {
       'question': 'Who can use this app?',
-      'answer': 'This app is designed for college students who are seeking '
-          'opportunities to learn from their peers or collaborate on projects '
-          'in exchange for compensation. Users must have a college email address '
-          'to register and access the platform.',
+      'answer': 'This app is exclusively for college students looking to learn from peers or collaborate on projects from their specific college.'
     },
     {
       'question': 'How does the app work?',
-      'answer': 'The app allows users to create posts detailing what they want '
-          'to learn or collaborate on. Other users can browse these posts and '
-          'offer their expertise or assistance in exchange for money. Once a '
-          'collaboration is agreed upon, users can communicate and work together '
-          'through the app to achieve their learning or project goals.',
+      'answer': 'Users can create posts in specific categories about what they want to learn or collaborate on, specifying the amount they are willing to pay. When another user applies to collaborate, the user who posted the learning request needs to pay the specified amount upfront. This payment is held by the app until the collaboration is successfully concluded and verified by the user who posted the request. Once verified, the payment is released to the user offering the service.'
     },
     {
-      'question': 'Is it safe to use this app?',
-      'answer': 'Yes, the app implements various safety measures to ensure '
-          'a secure and trustworthy environment for users. All users must '
-          'verify their college email addresses during registration, and '
-          'communications between users are monitored to prevent misuse '
-          'or inappropriate behavior. Additionally, users have the option '
-          'to report any suspicious or abusive activity.',
+      'question': 'How can I earn through this app?',
+      'answer': 'You can earn by offering your expertise to help others learn or collaborate on projects. Simply browse the posts and apply for opportunities that match your skills.'
     },
     {
-      'question': 'How can I get started?',
-      'answer': 'To get started, simply download the app from the app store '
-          'and register with your college email address. Once registered, '
-          'you can create posts or browse existing posts to find opportunities '
-          'for learning or collaboration. Make sure to read the app guidelines '
-          'and community rules to ensure a positive experience for yourself '
-          'and others.',
+      'question': 'How can I learn through this app?',
+      'answer': 'You can learn by posting requests for assistance or collaboration in areas where you need help. Specify the topic and the amount you\'re willing to pay, and peers with expertise in that area can apply to assist you.'
     },
-    // Add more questions, answers, and icons as needed
-  ];
+    {
+    'question':'What actions can lead to an account suspension?',
+    'answer':"Actions that can lead to an account suspension include but are not limited to:\n\n1. Violating the app's community guidelines or terms of service.\n2. Engaging in abusive or inappropriate behavior towards other users.\n3. Posting misleading or fraudulent content.\n4. Attempting to manipulate or exploit the app\'s features for personal gain.\n\nAccount suspensions are implemented to maintain a safe and respectful environment for all users."
+    }
+
+];
 
   @override
   Widget build(BuildContext context) {
@@ -84,7 +66,7 @@ class FAQPage extends StatelessWidget {
                       padding: EdgeInsets.only(left: 25, bottom: 30, right: 20),
                       child: BlackText(
                         faqData[index]['answer']!,
-                        fontSize: 14,
+                        fontSize: 9,
                         fontWeight: FontWeight.normal,
                       ),
                     ),

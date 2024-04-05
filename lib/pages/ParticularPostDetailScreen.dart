@@ -197,33 +197,6 @@ class _ParticularPostDetailScreenState extends State<ParticularPostDetailScreen>
               ),
             ),
             // attachments
-            SizedBox(height: 15),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Padding(
-                padding: EdgeInsets.all(5),
-                child: IntrinsicWidth(
-                  child: Container(
-                    padding: EdgeInsets.all(10),
-                    decoration: boxDecoration,
-                    child: Column(
-                      children: [
-                        Image.asset('lib/images/pdf.png',height: 30),
-                        SizedBox(height: 5), // Adjust the spacing as needed
-                        Text(
-                          'Assignment.pdf',
-                          style: TextStyle(
-                            color: Colors.white, // Set the text color
-                            fontSize: 12, // Set the text font size
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            SizedBox(height: 15),
             // ad
             Container(
               height: 50,

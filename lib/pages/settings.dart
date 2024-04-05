@@ -369,7 +369,7 @@ class _settingScreenState extends State<settingScreen> {
                       onTap: () {
                         Get.to(FAQPage());
                       },
-                      child: cardSettingContainer(text: 'Help', iconData: Icons.help),
+                      child: cardSettingContainer(text: 'FAQ', iconData: Icons.question_answer_sharp),
                     ),
                   ],
                 ),

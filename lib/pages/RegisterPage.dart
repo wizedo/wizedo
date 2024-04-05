@@ -241,6 +241,7 @@ class _RegisterPageState extends State<RegisterPage> {
         // Check if the email is already registered
         QuerySnapshot querySnapshot = await FirebaseFirestore.instance
             .collection('usersDetails')
+            .where('id', isEqualTo: emailController.text)
             .where('emailVerified', isEqualTo: 'yes')
             .get();
 
