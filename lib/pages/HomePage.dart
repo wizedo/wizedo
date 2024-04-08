@@ -191,7 +191,6 @@ class _HomePageState extends State<HomePage> {
           .where('description', isLessThanOrEqualTo: searchTerm + '\uf8ff')
           .get();
 
-      if (snapshot.docs.isNotEmpty) {
         // Create a new list and add elements from _categoryDocuments[category]
         _tempDocuments[category] = List.from(_categoryDocuments[category]!);
         print('below is temp documents');
@@ -217,8 +216,6 @@ class _HomePageState extends State<HomePage> {
         print('below is again end temp documents');
         print(_tempDocuments[category]);
 
-        // Notify the UI that data has changed
-      }
     } catch (error) {
       print('Error fetching documents by search: $error');
     } finally {
