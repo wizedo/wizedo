@@ -340,7 +340,8 @@ class _HomePageState extends State<HomePage> {
 
   // Widget to build the "Load More" button for each category
   Widget buildLoadMoreButton(String category) {
-    return Padding(
+    return searchFilter.text.isEmpty ? // Check if the search filter is empty
+    Padding(
       padding: const EdgeInsets.only(right: 15, top: 10, bottom: 20),
       child: Align(
         alignment: Alignment.bottomRight,
@@ -358,8 +359,10 @@ class _HomePageState extends State<HomePage> {
           buttonText: isLoadingMore.value && alldocumentsfetchedMap[category]! ? 'Loading...'.obs.value : 'Load More'.obs.value,
         ) : Container(),
       ),
-    );
+    )
+        : Container(); // Return an empty container if the search filter is not empty
   }
+
 
 
   StreamBuilder<DocumentSnapshot<Map<String, dynamic>>> buildStreamBuilder(String postId) {

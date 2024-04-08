@@ -464,19 +464,20 @@ class _settingScreenState extends State<settingScreen> {
                         ),
                       ),
                     ),
-                    Container(
-                      child: TextButton.icon(
-                        onPressed: () {
-                          Get.to(PhoneNumberVerification());
-                        },
-                        icon: Icon(Icons.phone, color: Colors.white),
-                        label: Text('Phone Number Verification', style: TextStyle(color: Colors.white, fontSize: screenHeight < 600 ? 9 : 12)),
-                        style: ButtonStyle(
-                          minimumSize: MaterialStateProperty.all(Size(double.infinity, getFontSize(50, screenHeight))),
-                          alignment: Alignment.centerLeft,
-                        ),
-                      ),
-                    ),
+                    //important snippet
+                    // Container(
+                    //   child: TextButton.icon(
+                    //     onPressed: () {
+                    //       Get.to(PhoneNumberVerification());
+                    //     },
+                    //     icon: Icon(Icons.phone, color: Colors.white),
+                    //     label: Text('Phone Number Verification', style: TextStyle(color: Colors.white, fontSize: screenHeight < 600 ? 9 : 12)),
+                    //     style: ButtonStyle(
+                    //       minimumSize: MaterialStateProperty.all(Size(double.infinity, getFontSize(50, screenHeight))),
+                    //       alignment: Alignment.centerLeft,
+                    //     ),
+                    //   ),
+                    // ),
                     // Divider(height: 0.2, color: Colors.grey),
                     Container(
                       child: TextButton.icon(
