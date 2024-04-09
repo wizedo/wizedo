@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wizedo/Widgets/colors.dart';
@@ -39,6 +40,7 @@ class _RegisterScreenState extends State<RegisterScreen> with WidgetsBindingObse
     super.initState();
     WidgetsBinding.instance!.addObserver(this);
     loadSavedValues();
+    adloaded();
   }
 
 
@@ -151,6 +153,29 @@ class _RegisterScreenState extends State<RegisterScreen> with WidgetsBindingObse
     }
   }
 
+  bool isIntersitalLoaded=false;
+  late InterstitialAd interstitialAd;
+
+  adloaded() async{
+    InterstitialAd.load(
+        adUnitId: 'ca-app-pub-3940256099942544/1033173712',
+        request: AdRequest(),
+        adLoadCallback: InterstitialAdLoadCallback(
+            onAdLoaded: (ad){
+              setState(() {
+                interstitialAd=ad;
+                isIntersitalLoaded=true;
+              });
+            },
+            onAdFailedToLoad: (error){
+              print(error);
+              interstitialAd.dispose();
+              isIntersitalLoaded=false;
+            }
+        )
+    );
+  }
+
   @override
   void dispose() {
     print("controllers diposed");
@@ -164,6 +189,8 @@ class _RegisterScreenState extends State<RegisterScreen> with WidgetsBindingObse
     WidgetsBinding.instance!.removeObserver(this);
     super.dispose();
   }
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -643,6 +670,9 @@ class _RegisterScreenState extends State<RegisterScreen> with WidgetsBindingObse
                         ),
                       );
 
+                      if(isIntersitalLoaded==true){
+                        interstitialAd.show();
+                      }
 
                       // Redirect to the desired screen, e.g., BottomNavigation
                       await Navigator.push(

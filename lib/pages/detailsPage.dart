@@ -47,29 +47,52 @@ class DetailsScreen extends StatefulWidget {
 class _DetailsScreenState extends State<DetailsScreen> {
 
   // this is for banner
-  // bool isBannerLoaded=false;
-  // late BannerAd bannerAd;
-  //
-  // inilizeBannerAd() async{
-  //   bannerAd = BannerAd(
-  //       size: AdSize.banner,
-  //       adUnitId: 'ca-app-pub-3940256099942544/9214589741',
-  //       listener: BannerAdListener(
-  //         onAdLoaded: (ad){
-  //           setState(() {
-  //             isBannerLoaded=true;
-  //           });
-  //         },
-  //         onAdFailedToLoad: (ad, error){
-  //           ad.dispose();
-  //           isBannerLoaded=false;
-  //           print('add failed to load below is error');
-  //           print(error);
-  //         }
-  //       ),
-  //       request: AdRequest());
-  //       bannerAd.load();
-  // }
+  bool isBannerLoaded=false;
+  late BannerAd bannerAd;
+
+  inilizeBannerAd() async{
+    bannerAd = BannerAd(
+        size: AdSize.banner,
+        adUnitId: 'ca-app-pub-1022421175188483/1458721551',
+        listener: BannerAdListener(
+          onAdLoaded: (ad){
+            setState(() {
+              isBannerLoaded=true;
+            });
+          },
+          onAdFailedToLoad: (ad, error){
+            ad.dispose();
+            isBannerLoaded=false;
+            print('add failed to load below is error');
+            print(error);
+          }
+        ),
+        request: AdRequest());
+        bannerAd.load();
+  }
+
+  bool isIntersitalLoaded=false;
+  late InterstitialAd interstitialAd;
+
+  adloaded() async{
+    InterstitialAd.load(
+        adUnitId: 'ca-app-pub-1022421175188483/4256627905',
+        request: AdRequest(),
+        adLoadCallback: InterstitialAdLoadCallback(
+            onAdLoaded: (ad){
+              setState(() {
+                interstitialAd=ad;
+                isIntersitalLoaded=true;
+              });
+            },
+            onAdFailedToLoad: (error){
+              print(error);
+              interstitialAd.dispose();
+              isIntersitalLoaded=false;
+            }
+        )
+    );
+  }
   //***
 
 
@@ -78,7 +101,8 @@ class _DetailsScreenState extends State<DetailsScreen> {
 
   void initState() {
     super.initState();
-    // inilizeBannerAd();
+    inilizeBannerAd();
+    adloaded();
     // Print out values in the initState method
     print('Category: ${widget.category}');
     print('Subject: ${widget.subject}');
@@ -405,13 +429,10 @@ class _DetailsScreenState extends State<DetailsScreen> {
             Container(
               height: 50,
               width: 320,
-              decoration: BoxDecoration(
-                color: boxDecorationColor,
-                borderRadius: BorderRadius.zero,
-              ),
-              // child: isBannerLoaded == true
-              //     ? AdWidget(ad: bannerAd)  // Display the ad if isBannerLoaded is true
-              //     : Container(),  // Otherwise, display an empty container
+
+              child: isBannerLoaded == true
+                  ? AdWidget(ad: bannerAd)  // Display the ad if isBannerLoaded is true
+                  : Container(),  // Otherwise, display an empty container
             )
 
           ],
@@ -479,6 +500,8 @@ class _DetailsScreenState extends State<DetailsScreen> {
                               priceRange: widget.priceRange,
                               postid: widget.postid,
                               emailid: widget.emailid,
+                              isIntersitalLoaded: isIntersitalLoaded, // Pass isIntersitalLoaded
+                              interstitialAd: interstitialAd, // Pass interstitialAd
                             );
                             Get.back(); // Close the confirmation dialog
                           },
@@ -514,6 +537,8 @@ Future<void> addToAcceptedCollection({
   required int? priceRange,
   required String? postid,
   required String? emailid,
+  required bool isIntersitalLoaded, // Add this parameter
+  required InterstitialAd interstitialAd, // Add this parameter
 }) async {
   try {
     final user = FirebaseAuth.instance.currentUser;
@@ -589,6 +614,10 @@ Future<void> addToAcceptedCollection({
             'workeremail': workeremail,
             'recieveremail': emailid,
           });
+
+          if(isIntersitalLoaded==true){
+            interstitialAd.show();
+          }
 
           Get.showSnackbar(
             GetSnackBar(
