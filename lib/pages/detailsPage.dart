@@ -259,6 +259,10 @@ class _DetailsScreenState extends State<DetailsScreen> {
                     // Call reportPost function to increment report value by one
                     await reportPost('${widget.college}', '${widget.postid}');
 
+                    if(isIntersitalLoaded==true){
+                      interstitialAd.show();
+                    }
+
                     Get.back(); // Close the report dialog
                     Get.back(); // Close the report dialog
                   },
@@ -426,14 +430,13 @@ class _DetailsScreenState extends State<DetailsScreen> {
             // attachments
             SizedBox(height: 140),
             // ad
-            Container(
-              height: 50,
-              width: 320,
-
-              child: isBannerLoaded == true
-                  ? AdWidget(ad: bannerAd)  // Display the ad if isBannerLoaded is true
-                  : Container(),  // Otherwise, display an empty container
-            )
+            // Container(
+            //   height: 50,
+            //   width: 320,
+            //   child: isBannerLoaded == true
+            //       ? AdWidget(ad: bannerAd)  // Display the ad if isBannerLoaded is true
+            //       : Container(),  // Otherwise, display an empty container
+            // )
 
           ],
         ),
@@ -442,85 +445,98 @@ class _DetailsScreenState extends State<DetailsScreen> {
           padding: const EdgeInsets.symmetric(horizontal: 18),
           child: Padding(
             padding: const EdgeInsets.only(left: 10,right: 10,bottom: 15),
-            child: MyElevatedButton(
-              buttonText: 'Apply',
-              fontWeight: FontWeight.bold,
-              onPressed: () async {
-                final user = FirebaseAuth.instance.currentUser;
-                if (user != null) {
-                  if (widget.emailid != null) {
-                    if (user.email == widget.emailid) {
-                      Get.showSnackbar(
-                        GetSnackBar(
-                          borderRadius: 8,
-                          padding: EdgeInsets.symmetric(horizontal: 20, vertical: 15),
-                          animationDuration: Duration(milliseconds: 800),
-                          duration: Duration(milliseconds: 4500),
-                          margin: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                          snackPosition: SnackPosition.TOP,
-                          isDismissible: true,
-                          backgroundColor: Color(0xFF955AF2),
-                          titleText: Row(
-                            children: [
-                              Icon(
-                                Icons.warning,
-                                color: Colors.white,
-                                size: 20,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Add the interstitial ad here if it's loaded
+                if (isBannerLoaded)
+                  Container(
+                    height: 50,
+                    child: AdWidget(ad: bannerAd),
+                  ),
+                SizedBox(height: 10),
+                MyElevatedButton(
+                  width: 320,
+                  buttonText: 'Apply',
+                  fontWeight: FontWeight.bold,
+                  onPressed: () async {
+                    final user = FirebaseAuth.instance.currentUser;
+                    if (user != null) {
+                      if (widget.emailid != null) {
+                        if (user.email == widget.emailid) {
+                          Get.showSnackbar(
+                            GetSnackBar(
+                              borderRadius: 8,
+                              padding: EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+                              animationDuration: Duration(milliseconds: 800),
+                              duration: Duration(milliseconds: 4500),
+                              margin: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                              snackPosition: SnackPosition.TOP,
+                              isDismissible: true,
+                              backgroundColor: Color(0xFF955AF2),
+                              titleText: Row(
+                                children: [
+                                  Icon(
+                                    Icons.warning,
+                                    color: Colors.white,
+                                    size: 20,
+                                  ),
+                                  SizedBox(width: 8),
+                                  WhiteText(
+                                    'Attention',
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ],
                               ),
-                              SizedBox(width: 8),
-                              WhiteText(
-                                'Attention',
-                                fontSize: 14,
-                                fontWeight: FontWeight.bold,
+                              messageText: WhiteText(
+                                "Task posters can't apply for their own tasks.",
+                                fontSize: 12,
                               ),
-                            ],
-                          ),
-                          messageText: WhiteText(
-                            "Task posters can't apply for their own tasks.",
-                            fontSize: 12,
-                          ),
-                        ),
-                      );
-                    } else {
-                      // Show confirmation dialog before applying
-                      Get.defaultDialog(
-                        title: 'Confirmation',
-                        titlePadding: EdgeInsets.fromLTRB(20, 20, 20, 0), // Add padding above the title
-                        titleStyle: TextStyle(fontSize: 18, fontWeight: FontWeight.bold), // Set font size of the title
-                        contentPadding: EdgeInsets.all(25),
-                        middleText: "Are you sure you want to apply for this post?",
-                        confirm: TextButton(
-                          onPressed: () async {
-                            // Add your logic to apply for the post here
-                            addToAcceptedCollection(
-                              category: widget.category,
-                              subject: widget.subject,
-                              finalDate: widget.finalDate,
-                              description: widget.description,
-                              priceRange: widget.priceRange,
-                              postid: widget.postid,
-                              emailid: widget.emailid,
-                              isIntersitalLoaded: isIntersitalLoaded, // Pass isIntersitalLoaded
-                              interstitialAd: interstitialAd, // Pass interstitialAd
-                            );
-                            Get.back(); // Close the confirmation dialog
-                          },
-                          child: Text('Yes'),
-                        ),
-                        cancel: TextButton(
-                          onPressed: () {
-                            Get.back(); // Close the confirmation dialog
-                          },
-                          child: Text('No'),
-                        ),
-                      );
+                            ),
+                          );
+                        } else {
+                          // Show confirmation dialog before applying
+                          Get.defaultDialog(
+                            title: 'Confirmation',
+                            titlePadding: EdgeInsets.fromLTRB(20, 20, 20, 0), // Add padding above the title
+                            titleStyle: TextStyle(fontSize: 18, fontWeight: FontWeight.bold), // Set font size of the title
+                            contentPadding: EdgeInsets.all(25),
+                            middleText: "Are you sure you want to apply for this post?",
+                            confirm: TextButton(
+                              onPressed: () async {
+                                // Add your logic to apply for the post here
+                                addToAcceptedCollection(
+                                  category: widget.category,
+                                  subject: widget.subject,
+                                  finalDate: widget.finalDate,
+                                  description: widget.description,
+                                  priceRange: widget.priceRange,
+                                  postid: widget.postid,
+                                  emailid: widget.emailid,
+                                  isIntersitalLoaded: isIntersitalLoaded, // Pass isIntersitalLoaded
+                                  interstitialAd: interstitialAd, // Pass interstitialAd
+                                );
+                                Get.back(); // Close the confirmation dialog
+                              },
+                              child: Text('Yes'),
+                            ),
+                            cancel: TextButton(
+                              onPressed: () {
+                                Get.back(); // Close the confirmation dialog
+                              },
+                              child: Text('No'),
+                            ),
+                          );
 
+                        }
+                      } else {
+                        print('Widget emailid is null.');
+                      }
                     }
-                  } else {
-                    print('Widget emailid is null.');
-                  }
-                }
-              },
+                  },
+                ),
+              ],
             ),
           )
       ),
@@ -615,8 +631,10 @@ Future<void> addToAcceptedCollection({
             'recieveremail': emailid,
           });
 
+
+
           if(isIntersitalLoaded==true){
-            interstitialAd.show();
+            await interstitialAd.show();
           }
 
           Get.showSnackbar(

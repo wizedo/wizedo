@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:wizedo/Widgets/colors.dart';
 import 'package:wizedo/components/my_elevatedbutton.dart';
 import 'package:wizedo/components/white_text.dart';
@@ -45,10 +46,36 @@ class _ParticularPostDetailScreenState extends State<ParticularPostDetailScreen>
   String _selectedCategory = '';
   bool _isNumberOfPagesVisible = false;
 
+  // this is for banner
+  bool isBannerLoaded=false;
+  late BannerAd specificpagebannerAd;
+
+  inilizeBannerspecificAd() async{
+    specificpagebannerAd = BannerAd(
+        size: AdSize.banner,
+        adUnitId: 'ca-app-pub-1022421175188483/7719599887',
+        listener: BannerAdListener(
+            onAdLoaded: (ad){
+              setState(() {
+                isBannerLoaded=true;
+              });
+            },
+            onAdFailedToLoad: (ad, error){
+              ad.dispose();
+              isBannerLoaded=false;
+              print('add failed to load below is error');
+              print(error);
+            }
+        ),
+        request: AdRequest());
+    specificpagebannerAd.load();
+  }
+
   DateTime _selectedDate = DateTime.now();
 
   void initState() {
     super.initState();
+    inilizeBannerspecificAd();
     // Print out values in the initState method
     print('Category: ${widget.category}');
     print('Subject: ${widget.subject}');
@@ -196,15 +223,7 @@ class _ParticularPostDetailScreenState extends State<ParticularPostDetailScreen>
                 fontSize: 12,
               ),
             ),
-            // attachments
-            // ad
-            Container(
-              height: 50,
-              decoration: BoxDecoration(
-                color: boxDecorationColor,
-                borderRadius: BorderRadius.zero,
-              ),
-            ),
+
           ],
         ),
       ),
@@ -212,19 +231,32 @@ class _ParticularPostDetailScreenState extends State<ParticularPostDetailScreen>
           padding: const EdgeInsets.symmetric(horizontal: 18),
           child: Padding(
             padding: const EdgeInsets.only(left: 10,right: 10,bottom: 15),
-            child: MyElevatedButton(
-              buttonText: 'Check Status',
-              fontWeight: FontWeight.bold,
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => statusPage(
-                      postid: widget.postid,
-                    ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Add the interstitial ad here if it's loaded
+                if (isBannerLoaded)
+                  Container(
+                    height: 50,
+                    child: AdWidget(ad: specificpagebannerAd),
                   ),
-                );
-              },
+                SizedBox(height: 10),
+                MyElevatedButton(
+                  width: 320,
+                  buttonText: 'Check Status',
+                  fontWeight: FontWeight.bold,
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => statusPage(
+                          postid: widget.postid,
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ],
             ),
 
           )
