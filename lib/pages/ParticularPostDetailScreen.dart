@@ -19,6 +19,8 @@ class ParticularPostDetailScreen extends StatefulWidget {
   final String? postid;
   final String? finalDate;
   final String? emailid;
+  final String? googledrivelink;
+
 
   const ParticularPostDetailScreen({
     Key? key,
@@ -29,7 +31,8 @@ class ParticularPostDetailScreen extends StatefulWidget {
     this.priceRange,
     this.finalDate,
     this.postid,
-    this.emailid
+    this.emailid,
+    this.googledrivelink
   }) : super(key: key);
 
 
@@ -223,6 +226,25 @@ class _ParticularPostDetailScreenState extends State<ParticularPostDetailScreen>
                 fontSize: 12,
               ),
             ),
+            SizedBox(height: 20,),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: WhiteText(
+                'Reference Material: ',
+                fontSize: 15,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            SizedBox(height: 8),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: WhiteText(
+                widget.googledrivelink ?? 'No reference material available',
+                fontSize: 12,
+              ),
+            ),
+
+
 
           ],
         ),

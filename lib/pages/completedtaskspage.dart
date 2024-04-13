@@ -157,6 +157,7 @@ class _CompletedTasksPageState extends State<CompletedTasksPage> {
                                           finalDate: data['dueDate'],
                                           postid: data['postId'],
                                           emailid: data['emailid'],
+                                          googledrivelink:data['googledrivelink'],
                                         ),
                                       ),
                                     );
