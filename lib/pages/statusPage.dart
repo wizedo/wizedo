@@ -253,7 +253,7 @@ class _statusPageState extends State<statusPage> {
                           MyTimeLineTile(
                             isFirst: false,
                             isLast: false,
-                            isPast: pstatus >= 4,
+                            isPast: pstatus >= 3,
                             eventCard: Align(
                               alignment: Alignment.topLeft,
                               child: Column(

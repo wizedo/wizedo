@@ -39,6 +39,9 @@ class _HomePageState extends State<HomePage> {
   final FocusNode _searchFocusNode = FocusNode();
   int searchResultsCount = 0;
   List<String> searchedPostIds = [];
+  RxInt postsOpenedCount = 0.obs;
+  late Timer _adTimer;
+
 
 
 
@@ -95,8 +98,21 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     getUserCollege();
+    adloaded();
     print('below is height we got using getx');
     print(Get.height);
+
+    // Start the timer to show the interstitial ad every 2 minutes
+    _adTimer = Timer.periodic(Duration(seconds: 120), (timer) {
+      if (isIntersitalLoaded.value) {
+        // Show the interstitial ad
+        interstitialAd.show();
+        // Dispose the interstitial ad after showing
+        interstitialAd.dispose();
+        // Load a new interstitial ad for the next cycle
+        adloaded();
+      }
+    });
 
     _scrollController.addListener(() {
       if (_scrollController.position.pixels == _scrollController.position.maxScrollExtent) {
@@ -105,16 +121,6 @@ class _HomePageState extends State<HomePage> {
       }
     });
 
-    initializeMobileAds();
-  }
-
-  Future<void> initializeMobileAds() async {
-    try {
-      await MobileAds.instance.initialize();
-      print('MobileAds initialized successfully!');
-    } catch (error) {
-      print('Failed to initialize MobileAds: $error');
-    }
   }
 
   Stream<DocumentSnapshot<Map<String, dynamic>>> buildDocumentStream(String postId) {
@@ -127,7 +133,33 @@ class _HomePageState extends State<HomePage> {
         .snapshots();
   }
 
+  final RxBool isIntersitalLoaded = false.obs;
+  late InterstitialAd interstitialAd;
+
+  adloaded() async{
+    InterstitialAd.load(
+        adUnitId: 'ca-app-pub-1022421175188483/4256627905',
+        request: AdRequest(),
+        adLoadCallback: InterstitialAdLoadCallback(
+            onAdLoaded: (ad){
+              setState(() {
+                interstitialAd=ad;
+                isIntersitalLoaded.value=true;
+              });
+            },
+            onAdFailedToLoad: (error){
+              print(error);
+              interstitialAd.dispose();
+              isIntersitalLoaded.value=false;
+            }
+        )
+    );
+  }
+
+
+
   Widget buildPostWidget(DocumentSnapshot<Map<String, dynamic>> documentSnapshot) {
+
     var data = documentSnapshot.data() as Map<String, dynamic>;
 
     // Check if the post's status is not equal to "active"
@@ -145,6 +177,24 @@ class _HomePageState extends State<HomePage> {
     if (containsSearchTerm) {
       return GestureDetector(
         onTap: () {
+          if (postsOpenedCount.value > 4) {
+            // Check if the interstitial ad is loaded
+            if (isIntersitalLoaded.value==true) {
+              // postsOpenedCount.refresh();
+              // isIntersitalLoaded.refresh();
+
+
+              // print('should show intersital ad');
+              // Show the interstitial ad
+              interstitialAd.show();
+              postsOpenedCount.value=0;
+              interstitialAd.dispose();
+              adloaded();
+            }else{
+              print('not show intersital ad');
+            }
+          }
+          postsOpenedCount.value++;
           print(data);
           Navigator.push(
             context,
@@ -260,6 +310,7 @@ class _HomePageState extends State<HomePage> {
 
   @override
   void dispose() {
+    _adTimer.cancel();
     print('widget and streams disposed');
     // Dispose all the subscriptions when the widget is disposed
     _postSubscriptions.values.forEach((subscription) {
@@ -470,8 +521,9 @@ class _HomePageState extends State<HomePage> {
                           InkWell(
                             onTap: () async {
                               print('Fetch more tapped');
-                              isLoading.value = true;
-                              await fetchMoreDocuments(_selectedCategory);
+                              print(postsOpenedCount);
+                              // isLoading.value = true;
+                              // await fetchMoreDocuments(_selectedCategory);
                             },
                             child: CustomRichText(
                               firstText: 'Peer',
