@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:wizedo/components/BlackText.dart';
 import '../Widgets/colors.dart';
 import '../services/chatservices/chatpage.dart';
 import '../services/chatservices/chatservice.dart';
@@ -167,7 +168,8 @@ class _ChatHomePageState extends State<ChatHomePage> {
                     ),
                     child: ListTile(
                       dense: true,
-                      title: Text(displayName,style: TextStyle(fontSize: 15,color: backgroundColor),),
+                      title: BlackText(displayName),
+                      // subtitle: BlackText(userData['subCategory'] ?? '',fontWeight: FontWeight.normal,fontSize: 9,),
                     ),
                   ),
                 ),
@@ -186,6 +188,7 @@ class _ChatHomePageState extends State<ChatHomePage> {
 
   Future<List<Map<String, dynamic>>> _fetchUserList() async {
     List<Map<String, dynamic>> userList = [];
+    Set<String> existingChatRoomIds = {}; // Set to store existing chat room IDs
 
     QuerySnapshot snapshot1 = await FirebaseFirestore.instance
         .collection('colleges')
@@ -220,23 +223,33 @@ class _ChatHomePageState extends State<ChatHomePage> {
       }
 
       if (userEmail != otherUseId) {
-        QuerySnapshot latestSnapshot =
-        await _chatService.getMessages(userEmail, otherUseId,data['chatRoomId']).first;
-
-        String latestMessage = '';
-        if (latestSnapshot.docs.isNotEmpty) {
-          latestMessage = latestSnapshot.docs.last['message'];
-          print(latestMessage);
+        String? chatRoomId = data['chatRoomId'];
+        if (chatRoomId != null) {
+          // If chat room ID exists, check if it's encountered for the first time
+          if (!existingChatRoomIds.contains(chatRoomId)) {
+            // If it's encountered for the first time, add data to userList
+            userList.add(data);
+            existingChatRoomIds.add(chatRoomId);
+          }
+        } else {
+          // If chat room ID doesn't exist, generate a new one
+          chatRoomId = FirebaseFirestore.instance.collection('chatRooms').doc().id;
+          // Assign the new chat room ID to the document
+          await FirebaseFirestore.instance
+              .collection('colleges')
+              .doc(userCollegee)
+              .collection('collegePosts')
+              .doc(doc.id)
+              .update({'chatRoomId': chatRoomId});
+          // Add data to userList
+          userList.add(data);
+          existingChatRoomIds.add(chatRoomId);
         }
-
-        latestMessages[otherUseId] = latestMessage;
-        userList.add(data);
       }
     }
 
     return userList;
   }
-
 
 
 

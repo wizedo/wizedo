@@ -40,7 +40,6 @@ class _HomePageState extends State<HomePage> {
   int searchResultsCount = 0;
   List<String> searchedPostIds = [];
   RxInt postsOpenedCount = 0.obs;
-  late Timer _adTimer;
 
 
 
@@ -102,17 +101,7 @@ class _HomePageState extends State<HomePage> {
     print('below is height we got using getx');
     print(Get.height);
 
-    // Start the timer to show the interstitial ad every 2 minutes
-    _adTimer = Timer.periodic(Duration(seconds: 120), (timer) {
-      if (isIntersitalLoaded.value) {
-        // Show the interstitial ad
-        interstitialAd.show();
-        // Dispose the interstitial ad after showing
-        interstitialAd.dispose();
-        // Load a new interstitial ad for the next cycle
-        adloaded();
-      }
-    });
+
 
     _scrollController.addListener(() {
       if (_scrollController.position.pixels == _scrollController.position.maxScrollExtent) {
@@ -310,7 +299,6 @@ class _HomePageState extends State<HomePage> {
 
   @override
   void dispose() {
-    _adTimer.cancel();
     print('widget and streams disposed');
     // Dispose all the subscriptions when the widget is disposed
     _postSubscriptions.values.forEach((subscription) {

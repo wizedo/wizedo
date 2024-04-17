@@ -565,55 +565,8 @@ Future<void> addToAcceptedCollection({
       // Fetch user college from Firestore
       final userDoc = await firestore.collection('usersDetails').doc(workeremail).get();
       String userCollege = userDoc['college'] ?? 'Unknown College';
-      print(userCollege);
 
-      // Check if emailid and currentuserid are already associated with any post
-      final sameUserQuery = await firestore
-          .collection('colleges')
-          .doc(userCollege)
-          .collection('collegePosts')
-          .where('status', isEqualTo: 'Applied') // Change 'Applied' to the status representing 'working'
-          .where('workeremail', whereIn: [workeremail, emailid])
-          .get();
 
-      print('this is sameuserquery $sameUserQuery');
-
-      if (sameUserQuery.docs.isNotEmpty) {
-        Get.showSnackbar(
-          GetSnackBar(
-            borderRadius: 8,
-            padding: EdgeInsets.symmetric(horizontal: 20, vertical: 15),
-            animationDuration: Duration(milliseconds: 800),
-            duration: Duration(milliseconds: 4500),
-            margin: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-            snackPosition: SnackPosition.TOP,
-            isDismissible: true,
-            backgroundColor: Color(0xFF955AF2), // Set your desired color here
-            titleText: Row(
-              children: [
-                Icon(
-                  Icons.warning,
-                  color: Colors.white,
-                  size: 20,
-                ),
-                SizedBox(width: 8),
-                WhiteText(
-                  'Attention',
-                  fontWeight: FontWeight.bold,
-                  fontSize: 14,
-                ),
-              ],
-            ),
-            messageText: WhiteText(
-              'You are already working on one project. Please complete that to apply for new projects.',
-              fontSize: 12,
-            ),
-          ),
-        );
-
-        // Users are already working together on some project, show a message
-        // Get.snackbar('Cannot Apply', 'You are already working with this user on another project.');
-      } else {
         // Add the details to the accepted collection
         await firestore.runTransaction((transaction) async {
           // Optionally, add the post to a subcollection under the college document
@@ -634,7 +587,7 @@ Future<void> addToAcceptedCollection({
 
 
           if(isIntersitalLoaded==true){
-            await interstitialAd.show();
+            interstitialAd.show();
           }
 
           Get.showSnackbar(
@@ -669,7 +622,6 @@ Future<void> addToAcceptedCollection({
             ),
           );
         });
-      }
 
 
     }

@@ -223,7 +223,7 @@ class _statusPageState extends State<statusPage> {
                                           List<String> ids = [
                                             documentData['workeremail'] ?? '',
                                             documentData['emailid'] ?? '',
-                                            documentData['postId'] ?? '',
+                                            // documentData['postId'] ?? '',
                                           ];
 
                                           String chatRoomId = ids.join("_");
