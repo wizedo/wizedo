@@ -215,6 +215,34 @@ class _statusPageState extends State<statusPage> {
                                     child: MyElevatedButton(
                                       onPressed: () async {
                                         final firestore = FirebaseFirestore.instance;
+                                        String chatRoomId;
+
+                                        List<String> ids = [
+                                          documentData?['workeremail'] ?? '',
+                                          documentData?['emailid'] ?? '',
+                                        ];
+
+                                        chatRoomId = ids.join("_unisepx_");
+
+                                        // Check if the reversed form of chatRoomId is already present in Firestore
+                                        String reversedChatRoomId = ids.reversed.join("_unisepx_");
+                                        print(reversedChatRoomId);
+                                        final reversedChatRoomSnapshot = await firestore
+                                            .collection('chat_rooms')
+                                            .doc(reversedChatRoomId)
+                                            .get();
+
+                                        print(reversedChatRoomSnapshot);
+
+                                        if (reversedChatRoomSnapshot!= null) {
+                                          print('reverse chatroom found');
+                                          // Use the reversed form if it exists
+                                          chatRoomId = reversedChatRoomId;
+                                        }else{
+                                          print('patha nahi kya huwa');
+                                        }
+
+                                        // Update the document with the chatRoomId
                                         await firestore.runTransaction((transaction) async {
                                           final collegePostRef = firestore
                                               .collection('colleges')
@@ -222,18 +250,10 @@ class _statusPageState extends State<statusPage> {
                                               .collection('collegePosts')
                                               .doc(widget.postid);
 
-                                          List<String> ids = [
-                                            documentData['workeremail'] ?? '',
-                                            documentData['emailid'] ?? '',
-                                            // documentData['postId'] ?? '',
-                                          ];
-
-                                          String chatRoomId = ids.join("_");
-
                                           transaction.update(collegePostRef, {
-                                            'pstatus':3,
+                                            'pstatus': 3,
                                             'amountpaid': 'yes',
-                                            'chatRoomId': chatRoomId, // Add chatRoomId to the data
+                                            'chatRoomId': chatRoomId,
                                           });
                                         });
 
@@ -244,6 +264,7 @@ class _statusPageState extends State<statusPage> {
                                       borderRadius: 20,
                                       buttonText: 'Pay',
                                     ),
+
                                   ),
                                 ],
                               ),
