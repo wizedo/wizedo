@@ -197,6 +197,7 @@ class _acceptedPageState extends State<acceptedPage> {
                                           finalDate: data['dueDate'],
                                           postid: data['postId'],
                                           emailid: data['emailid'],
+                                          googledrivelink: data['googledrivelink'],
                                         ),
                                       ),
                                     );

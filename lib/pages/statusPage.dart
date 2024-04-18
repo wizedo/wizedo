@@ -15,10 +15,12 @@ import 'ParticularPostDetailScreen.dart';
 
 class statusPage extends StatefulWidget {
   final String? postid;
+  final int? priceRange;
 
   const statusPage({
     Key? key,
     this.postid,
+    this.priceRange,
   }) : super(key: key);
 
   @override
@@ -91,7 +93,7 @@ class _statusPageState extends State<statusPage> {
           },
         ),
         title: Text(
-          'Post',
+          'Price: ${widget.priceRange}',
           style: mPlusRoundedText.copyWith(fontSize: 24, color: Colors.black),
         ),
         centerTitle: true,
@@ -187,7 +189,7 @@ class _statusPageState extends State<statusPage> {
                                                         .collection('collegePosts')
                                                         .doc(widget.postid);
                                                     transaction.update(collegePostRef, {
-                                                      'pstatus':0,
+                                                      'pstatus':0,//it should be 1 actually
                                                       'status':'active'
                                                     });
                                                   });

@@ -1,8 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:wizedo/Widgets/colors.dart';
 import 'package:wizedo/components/my_elevatedbutton.dart';
 import 'package:wizedo/components/white_text.dart';
@@ -238,9 +240,21 @@ class _ParticularPostDetailScreenState extends State<ParticularPostDetailScreen>
             SizedBox(height: 8),
             Align(
               alignment: Alignment.centerLeft,
-              child: WhiteText(
-                widget.googledrivelink ?? 'No reference material available',
-                fontSize: 12,
+              child: GestureDetector(
+                onTap: () async {
+                  print('new url tapped');
+                  if (widget.googledrivelink != null && widget.googledrivelink!.isNotEmpty) {
+                    String? link=widget.googledrivelink;
+                    launchUrl(
+                      Uri.parse(link!),
+                      mode: LaunchMode.inAppBrowserView
+                    );
+                  }
+                },
+                child: WhiteText(
+                  widget.googledrivelink ?? 'No reference material available',
+                  fontSize: 12,
+                ),
               ),
             ),
 
@@ -273,6 +287,7 @@ class _ParticularPostDetailScreenState extends State<ParticularPostDetailScreen>
                       MaterialPageRoute(
                         builder: (context) => statusPage(
                           postid: widget.postid,
+                          priceRange:widget.priceRange
                         ),
                       ),
                     );
