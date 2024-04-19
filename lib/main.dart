@@ -37,38 +37,47 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GetMaterialApp(
-      builder: (BuildContext context, Widget? child) {
-        final MediaQueryData data = MediaQuery.of(context);
-        return MediaQuery(
-          data: data.copyWith(textScaler: TextScaler.linear(1.2)),
-          child: child!,
-        );
-      },
-      title: 'Flutter Demo',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
+
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value:SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent, //i like transaparent :-)
+        systemNavigationBarColor: Color(0xFF14141E), // navigation bar color
+        statusBarIconBrightness: Brightness.light, // status bar icons' color
+        systemNavigationBarIconBrightness:Brightness.light, //navigation bar icons' color
       ),
-      home: StreamBuilder(
-        stream: FirebaseAuth.instance.authStateChanges(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.active) {
-            User? user = snapshot.data as User?;
-            if (user == null) {
-              // If the user is not authenticated, redirect to LoginPage
-              return LoginPage();
-            } else {
-              // If the user is authenticated, check userDetailsFilled locally
-              return checkUserDetailsFilledLocally(context, user.email);
-            }
-          } else {
-            return Scaffold(
-              body: Center(child: CircularProgressIndicator()),
-            );
-          }
+      child: GetMaterialApp(
+        builder: (BuildContext context, Widget? child) {
+          final MediaQueryData data = MediaQuery.of(context);
+          return MediaQuery(
+            data: data.copyWith(textScaler: TextScaler.linear(1.2)),
+            child: child!,
+          );
         },
+        title: 'Flutter Demo',
+        debugShowCheckedModeBanner: false,
+        theme: ThemeData(
+          colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+          useMaterial3: true,
+        ),
+        home: StreamBuilder(
+          stream: FirebaseAuth.instance.authStateChanges(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.active) {
+              User? user = snapshot.data as User?;
+              if (user == null) {
+                // If the user is not authenticated, redirect to LoginPage
+                return LoginPage();
+              } else {
+                // If the user is authenticated, check userDetailsFilled locally
+                return checkUserDetailsFilledLocally(context, user.email);
+              }
+            } else {
+              return Scaffold(
+                body: Center(child: CircularProgressIndicator()),
+              );
+            }
+          },
+        ),
       ),
     );
   }

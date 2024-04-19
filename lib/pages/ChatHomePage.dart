@@ -102,10 +102,17 @@ class _ChatHomePageState extends State<ChatHomePage> {
           title: Padding(
             padding: const EdgeInsets.all(8.0),
             child: Center(
-              child: Text(
-                'Message',
-                style: TextStyle(
-                    color: Colors.white, fontWeight: FontWeight.bold, fontSize: 17),
+              child: InkWell(
+                onTap: (){
+                  setState(() {
+
+                  });
+                },
+                child: Text(
+                  'Message',
+                  style: TextStyle(
+                      color: Colors.white, fontWeight: FontWeight.bold, fontSize: 17),
+                ),
               ),),),
           backgroundColor: backgroundColor,
           actions: [
@@ -169,6 +176,8 @@ class _ChatHomePageState extends State<ChatHomePage> {
                     child: ListTile(
                       dense: true,
                       title: BlackText(displayName),
+                      subtitle: BlackText(userData['lastMessage'] ?? '',fontSize: 9,fontWeight: FontWeight.normal,),
+
                       // subtitle: BlackText(userData['subCategory'] ?? '',fontWeight: FontWeight.normal,fontSize: 9,),
                     ),
                   ),
@@ -246,6 +255,12 @@ class _ChatHomePageState extends State<ChatHomePage> {
           existingChatRoomIds.add(chatRoomId);
         }
       }
+    }
+
+    // Fetch and append last messages for each user
+    for (var user in userList) {
+      String? lastMessage = await _chatService.fetchLastMessage(user['chatRoomId']);
+      user['lastMessage'] = lastMessage;
     }
 
     return userList;

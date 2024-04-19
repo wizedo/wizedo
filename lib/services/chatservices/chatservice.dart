@@ -74,4 +74,27 @@ class ChatService extends ChangeNotifier{
         .snapshots();//This will retrieve the messages from oldest to newest.
   }
 
+  Future<String?> fetchLastMessage(String chatRoomId) async {
+    try {
+      QuerySnapshot snapshot = await _fireStore
+          .collection('chat_rooms')
+          .doc(chatRoomId)
+          .collection('messages')
+          .orderBy('timestamp', descending: true)
+          .limit(1)
+          .get();
+
+      if (snapshot.docs.isNotEmpty) {
+        return snapshot.docs.first['message'] as String?;
+      } else {
+        return null;
+      }
+    } catch (error) {
+      print('Error fetching last message: $error');
+      return null;
+    }
+  }
+
+
 }
+
