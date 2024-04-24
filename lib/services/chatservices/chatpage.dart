@@ -174,64 +174,62 @@ class _ChatPageState extends State<ChatPage> {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Scaffold(
-        appBar: AppBar(
-          title: Center(
-            child: FutureBuilder(
-              future: initializeData(),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.done) {
-                  return Text(
-                    otherEmail.split('@').first ?? 'Default Title',
-                    style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
-                  );
-                } else {
-                  return CircularProgressIndicator(); // Or any other loading indicator
-                }
-              },
-            ),
-          ),
-          backgroundColor: backgroundColor,
-          automaticallyImplyLeading: false,
-          actions: [
-            IconButton(
-              icon: Icon(Icons.delete_rounded, size: 16,),
-              onPressed: () {
-                Get.snackbar(
-                  '', // Empty title for a transparent style
-                  'Are you sure you want to delete this chat??',
-                  snackPosition: SnackPosition.TOP,
-                  duration: Duration(seconds: 6),
-                  margin: EdgeInsets.only(top: 50, left: 10, right: 10),
-                  backgroundColor: Colors.transparent,
-                  borderRadius: 20,
-                  mainButton: TextButton(
-                    onPressed: () {
-                      _chatController.deleteChat(widget.receiverUserID); // Pass the chatId
-                      Get.back(); // Close the snackbar
-                    },
-                    child: Text(
-                      'Yes',
-                      style: TextStyle(color: Color(0xFF21215E)), // Change button text color
-                    ),
-                  ),
+    return Scaffold(
+      appBar: AppBar(
+        title: Center(
+          child: FutureBuilder(
+            future: initializeData(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.done) {
+                return Text(
+                  otherEmail.split('@').first ?? 'Default Title',
+                  style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
                 );
-              },
-            ),
+              } else {
+                return CircularProgressIndicator(); // Or any other loading indicator
+              }
+            },
+          ),
+        ),
+        backgroundColor: backgroundColor,
+        automaticallyImplyLeading: false,
+        actions: [
+          // IconButton(
+          //   icon: Icon(Icons.delete_rounded, size: 16,),
+          //   onPressed: () {
+          //     Get.snackbar(
+          //       '', // Empty title for a transparent style
+          //       'Are you sure you want to delete this chat??',
+          //       snackPosition: SnackPosition.TOP,
+          //       duration: Duration(seconds: 6),
+          //       margin: EdgeInsets.only(top: 50, left: 10, right: 10),
+          //       backgroundColor: Colors.transparent,
+          //       borderRadius: 20,
+          //       mainButton: TextButton(
+          //         onPressed: () {
+          //           _chatController.deleteChat(widget.receiverUserID); // Pass the chatId
+          //           Get.back(); // Close the snackbar
+          //         },
+          //         child: Text(
+          //           'Yes',
+          //           style: TextStyle(color: Color(0xFF21215E)), // Change button text color
+          //         ),
+          //       ),
+          //     );
+          //   },
+          // ),
+        ],
+      ),
+      body: Container(
+        child: Column(
+          children: [
+            Expanded(child: _buildMessageList()),
+            //User Input
+            _buildMessageInput(),
+            const SizedBox(height: 10)
           ],
         ),
-        body: Container(
-          child: Column(
-            children: [
-              Expanded(child: _buildMessageList()),
-              //User Input
-              _buildMessageInput(),
-              const SizedBox(height: 10)
-            ],
-          ),
 
-        ),
       ),
     );
   }
@@ -383,13 +381,17 @@ class _ChatPageState extends State<ChatPage> {
               decoration: InputDecoration(
                 labelText: 'Send Message...',
                 labelStyle: TextStyle(color: Colors.black),
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(15)),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(20)),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(20),
+                  borderSide: BorderSide(color: Color(0xFF21215E)), // Set focused border line color here
+                ),
               ),
             ),
           ),
           // Send button
           Padding(
-            padding: const EdgeInsets.all(10.0),
+            padding: const EdgeInsets.only(left: 5,right: 10),
             child: IconButton(
               onPressed: sendMessage,
               icon: Icon(Icons.send_rounded, size: 32,color: Color(0xFF21215E).withOpacity(0.7)),

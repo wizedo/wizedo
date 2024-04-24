@@ -114,7 +114,7 @@ class _BottomNavigationState extends State<BottomNavigation> {
               },
               tabs: [
                 GButton(
-                  icon: Icons.home,
+                  icon: Icons.home_rounded,
                   text: 'Home',
                   textStyle: TextStyle(fontSize: 12, color: Colors.white),
                   iconSize: 24, // Adjust the icon size if necessary
@@ -134,10 +134,10 @@ class _BottomNavigationState extends State<BottomNavigation> {
                   },
                 ),
                 GButton(
-                  icon: Icons.chat_bubble,
+                  icon: Icons.chat_bubble_rounded,
                   text: 'Chat',
                   textStyle: TextStyle(fontSize: 12, color: Colors.white),
-                  iconSize: 24, // Adjust the icon size if necessary
+                  iconSize: 23, // Adjust the icon size if necessary
                   padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4), // Adjust padding if necessary
                   onPressed: () {
                     // Add your onPressed logic here

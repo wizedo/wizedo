@@ -429,30 +429,43 @@ class _HomePageState extends State<HomePage> {
       // Check if the initially fetched posts are less than or equal to 4
       if (_categoryDocuments[category]!.length <= 4) {
         // If so, don't show the "Load More" button
-        return Obx(() => ListView.builder(
-          itemCount: _categoryDocuments[category]!.length,
-          itemBuilder: (BuildContext context, int index) {
-            var data = _categoryDocuments[category]![index].data() as Map<String, dynamic>;
-            return buildStreamBuilder(data['postId']);
-          },
+        return Obx(() => CustomScrollView(
+          slivers: [
+            SliverList(
+              delegate: SliverChildBuilderDelegate(
+                    (BuildContext context, int index) {
+                  var data = _categoryDocuments[category]![index].data() as Map<String, dynamic>;
+                  return buildStreamBuilder(data['postId']);
+                },
+                childCount: _categoryDocuments[category]!.length,
+              ),
+            ),
+          ],
         ));
       } else {
         // If there are more than 4 initially fetched posts, show the "Load More" button
-        return Obx(() => ListView.builder(
-          itemCount: alldocumentsfetchedMap[category]! ? _categoryDocuments[category]!.length : _categoryDocuments[category]!.length + 1,
-          itemBuilder: (BuildContext context, int index) {
-            if (index < _categoryDocuments[category]!.length) {
-              var data = _categoryDocuments[category]![index].data() as Map<String, dynamic>;
-              return buildStreamBuilder(data['postId']);
-            } else {
-              // Render the "Load More" button
-              return buildLoadMoreButton(category);
-            }
-          },
+        return Obx(() => CustomScrollView(
+          slivers: [
+            SliverList(
+              delegate: SliverChildBuilderDelegate(
+                    (BuildContext context, int index) {
+                  if (index < _categoryDocuments[category]!.length) {
+                    var data = _categoryDocuments[category]![index].data() as Map<String, dynamic>;
+                    return buildStreamBuilder(data['postId']);
+                  } else {
+                    // Render the "Load More" button
+                    return buildLoadMoreButton(category);
+                  }
+                },
+                childCount: _categoryDocuments[category]!.length + 1,
+              ),
+            ),
+          ],
         ));
       }
     }
   }
+
 
 
 

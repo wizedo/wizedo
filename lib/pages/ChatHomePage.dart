@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wizedo/components/BlackText.dart';
+import 'package:wizedo/components/white_text.dart';
 import '../Widgets/colors.dart';
 import '../services/chatservices/chatpage.dart';
 import '../services/chatservices/chatservice.dart';
@@ -86,6 +87,28 @@ class _ChatHomePageState extends State<ChatHomePage> {
     getUserCollege();
   }
 
+  Future<Timestamp?> _getLastMessageTimestamp(String chatRoomId) async {
+    try {
+      QuerySnapshot snapshot = await FirebaseFirestore.instance
+          .collection('chat_rooms')
+          .doc(chatRoomId)
+          .collection('messages')
+          .orderBy('timestamp', descending: true)
+          .limit(1)
+          .get();
+
+      if (snapshot.docs.isNotEmpty) {
+        return snapshot.docs.first['timestamp'] as Timestamp?;
+      } else {
+        return null;
+      }
+    } catch (error) {
+      print('Error fetching last message timestamp: $error');
+      return null;
+    }
+  }
+
+
 
 
   @override
@@ -101,19 +124,14 @@ class _ChatHomePageState extends State<ChatHomePage> {
         appBar: AppBar(
           title: Padding(
             padding: const EdgeInsets.all(8.0),
-            child: Center(
-              child: InkWell(
+            child: InkWell(
                 onTap: (){
                   setState(() {
 
                   });
                 },
-                child: Text(
-                  'Message',
-                  style: TextStyle(
-                      color: Colors.white, fontWeight: FontWeight.bold, fontSize: 17),
-                ),
-              ),),),
+                child: WhiteText('Messages',fontSize: 17,)
+            ),),
           backgroundColor: backgroundColor,
           actions: [
             // IconButton(
@@ -143,11 +161,9 @@ class _ChatHomePageState extends State<ChatHomePage> {
             return Center(child: Text('Error: ${snapshot.error}'));
           }
 
-
           List<Widget> userItems = [];
           snapshot.data!.forEach((userData) {
             String displayName;
-
             if (userData['workeremail'] == userEmail) {
               displayName = userData['recieveremail'].split('@').first;
             } else {
@@ -157,28 +173,42 @@ class _ChatHomePageState extends State<ChatHomePage> {
             userItems.add(
               GestureDetector(
                 onTap: () {
-                  //navigating to user's chat page and also giving reciveremail and uid
                   Get.to(ChatPage(
-                      receiveruserEmail: userData['emailid'],
-                      receiverUserID: userData['userId'],
-                      workeremail: userData['workeremail'],
-                      recieveremail: userData['recieveremail'],
-                      chatroomid:userData['chatRoomId']
+                    receiveruserEmail: userData['emailid'],
+                    receiverUserID: userData['userId'],
+                    workeremail: userData['workeremail'],
+                    recieveremail: userData['recieveremail'],
+                    chatroomid: userData['chatRoomId'],
                   ));
                 },
                 child: Padding(
                   padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 0),
-                  child: Card(
-                    elevation: 2, // Add elevation for 3D effect
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(15.0),
-                    ),
-                    child: ListTile(
-                      dense: true,
-                      title: BlackText(displayName),
-                      subtitle: BlackText(userData['lastMessage'] ?? '',fontSize: 9,fontWeight: FontWeight.normal,),
-
-                      // subtitle: BlackText(userData['subCategory'] ?? '',fontWeight: FontWeight.normal,fontSize: 9,),
+                  child: ListTile(
+                    dense: true,
+                    title: BlackText(displayName,fontSize: 14,),
+                    subtitle: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Expanded(
+                              child: BlackText(
+                                userData['lastMessage'] ?? '',
+                                overflow: TextOverflow.ellipsis,
+                                maxLines: 1,
+                                fontSize: 11,
+                                fontWeight: FontWeight.normal,
+                              ),
+                            ),
+                            SizedBox(width: 13),
+                            BlackText(
+                              _formatTimestamp(userData['lastMessageTimestamp']),
+                              fontSize: 11,
+                              fontWeight: FontWeight.normal,
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
                   ),
                 ),
@@ -193,6 +223,21 @@ class _ChatHomePageState extends State<ChatHomePage> {
       ),
     );
   }
+
+  String _formatTimestamp(Timestamp? timestamp) {
+    if (timestamp != null) {
+      DateTime dateTime = timestamp.toDate();
+      // Format the hour part
+      String hour = '${dateTime.hour}';
+      // Pad minute part with leading zero if less than 10
+      String minute = '${dateTime.minute}'.padLeft(2, '0');
+      return '$hour:$minute';
+    } else {
+      return '';
+    }
+  }
+
+
 
 
   Future<List<Map<String, dynamic>>> _fetchUserList() async {
@@ -260,11 +305,14 @@ class _ChatHomePageState extends State<ChatHomePage> {
     // Fetch and append last messages for each user
     for (var user in userList) {
       String? lastMessage = await _chatService.fetchLastMessage(user['chatRoomId']);
+      Timestamp? lastMessageTimestamp = await _getLastMessageTimestamp(user['chatRoomId']);
       user['lastMessage'] = lastMessage;
+      user['lastMessageTimestamp'] = lastMessageTimestamp;
     }
 
     return userList;
   }
+
 
 
 

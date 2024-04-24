@@ -7,9 +7,8 @@ class BlackText extends StatelessWidget {
   final FontWeight? fontWeight;
   final TextAlign? textAlignment;
   final Color? textColor;
-  final TextOverflow? overflow; // Add overflow parameter
-  final int? maxLines; // Add maxLines parameter
-
+  final TextOverflow? overflow;
+  final int? maxLines;
 
   const BlackText(
       this.text, {
@@ -17,8 +16,8 @@ class BlackText extends StatelessWidget {
         this.fontWeight,
         this.textAlignment,
         this.textColor,
-        this.overflow, // Include overflow parameter
-        this.maxLines, // Include maxLines parameter
+        this.overflow,
+        this.maxLines,
       });
 
   @override
@@ -28,7 +27,7 @@ class BlackText extends StatelessWidget {
       style: GoogleFonts.mPlusRounded1c(
         textStyle: TextStyle(
           color: textColor ?? Color(0xFF000000),
-          fontSize: 14,
+          fontSize: fontSize ?? 14, // Default font size is 14
           fontWeight: fontWeight ?? FontWeight.bold,
         ),
       ),
@@ -38,3 +37,4 @@ class BlackText extends StatelessWidget {
     );
   }
 }
+

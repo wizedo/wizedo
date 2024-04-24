@@ -65,6 +65,7 @@ dependencies:
   google_mobile_ads: ^4.0.0
   google_fonts: ^5.1.0
   url_launcher: ^6.2.4
+  razorpay_web: ^1.4.2
 #  google_mlkit_text_recognition: ^0.11.0
 #  permission_handler: ^11.3.0
 
