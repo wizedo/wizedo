@@ -255,6 +255,10 @@ class _statusPageState extends State<statusPage> {
                                             'amountpaid': 'yes',
                                             'chatRoomId': chatRoomId,
                                           });
+                                          setState(() {
+                                            //this for reloadin the chathomepage
+                                            // print('new state');
+                                          });
                                         });
 
                                         Get.snackbar('Success', 'Paid successfully');

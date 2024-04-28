@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -23,19 +25,9 @@ class _ChatHomePageState extends State<ChatHomePage> {
   final ChatService _chatService = ChatService(); // Add this line
   String userCollegee = 'null';
   String userEmail='null';
+  Set<String> existingChatRoomIds = {}; // Set to store existing chat room IDs
+  RxList<Map<String, dynamic>> userList = <Map<String, dynamic>>[].obs;
 
-
-
-  //Create a Map to store the latest messages for each user
-  Map<String, String> latestMessages = {
-
-  }; // Map to store latest messages
-
-
-  Future<void> _signOut() async {
-    await FirebaseAuth.instance.signOut();
-    Get.offAll(LoginPage());
-  }
 
   Future<String> getUserEmailLocally() async {
     try {
@@ -76,10 +68,17 @@ class _ChatHomePageState extends State<ChatHomePage> {
     }
   }
 
+
   @override
   void initState() {
     super.initState();
     initializeData();
+  }
+
+  @override
+  void dispose() {
+    print('disposed few stuff');
+    super.dispose();
   }
 
   Future<void> initializeData() async {
@@ -126,9 +125,7 @@ class _ChatHomePageState extends State<ChatHomePage> {
             padding: const EdgeInsets.all(8.0),
             child: InkWell(
                 onTap: (){
-                  setState(() {
-
-                  });
+                  listenForChatChanges();
                 },
                 child: WhiteText('Messages',fontSize: 17,)
             ),),
@@ -148,81 +145,81 @@ class _ChatHomePageState extends State<ChatHomePage> {
 
   Widget _buildUserList() {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 5),
-      child: FutureBuilder(
-        future: _fetchUserList(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
-          }
+        padding: const EdgeInsets.symmetric(horizontal: 5),
+        child: FutureBuilder(
+            future: _fetchUserList(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return Center(child: CircularProgressIndicator());
+              }
 
-          if (snapshot.hasError) {
-            print('Error: ${snapshot.error}');
-            return Center(child: Text('Error: ${snapshot.error}'));
-          }
+              if (snapshot.hasError) {
+                print('Error: ${snapshot.error}');
+                return Center(child: Text('Error: ${snapshot.error}'));
+              }
 
-          List<Widget> userItems = [];
-          snapshot.data!.forEach((userData) {
-            String displayName;
-            if (userData['workeremail'] == userEmail) {
-              displayName = userData['recieveremail'].split('@').first;
-            } else {
-              displayName = userData['workeremail'].split('@').first;
-            }
+              return Obx(() {
+                List<Widget> userItems = userList.map((userData) {
+                  String displayName;
+                  if (userData['workeremail'] == userEmail) {
+                    displayName = userData['recieveremail'].split('@').first;
+                  } else {
+                    displayName = userData['workeremail'].split('@').first;
+                  }
 
-            userItems.add(
-              GestureDetector(
-                onTap: () {
-                  Get.to(ChatPage(
-                    receiveruserEmail: userData['emailid'],
-                    receiverUserID: userData['userId'],
-                    workeremail: userData['workeremail'],
-                    recieveremail: userData['recieveremail'],
-                    chatroomid: userData['chatRoomId'],
-                  ));
-                },
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 0),
-                  child: ListTile(
-                    dense: true,
-                    title: BlackText(displayName,fontSize: 14,),
-                    subtitle: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
+                  return GestureDetector(
+                    onTap: () {
+                      Get.to(ChatPage(
+                        receiveruserEmail: userData['emailid'],
+                        receiverUserID: userData['userId'],
+                        workeremail: userData['workeremail'],
+                        recieveremail: userData['recieveremail'],
+                        chatroomid: userData['chatRoomId'],
+                      ));
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 0),
+                      child: ListTile(
+                        dense: true,
+                        title: BlackText(displayName, fontSize: 14,),
+                        subtitle: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Expanded(
-                              child: BlackText(
-                                userData['lastMessage'] ?? '',
-                                overflow: TextOverflow.ellipsis,
-                                maxLines: 1,
-                                fontSize: 11,
-                                fontWeight: FontWeight.normal,
-                              ),
-                            ),
-                            SizedBox(width: 13),
-                            BlackText(
-                              _formatTimestamp(userData['lastMessageTimestamp']),
-                              fontSize: 11,
-                              fontWeight: FontWeight.normal,
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: BlackText(
+                                    userData['lastMessage'].value ?? '',
+                                    overflow: TextOverflow.ellipsis,
+                                    maxLines: 1,
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.normal,
+                                  ),
+                                ),
+                                SizedBox(width: 13),
+                                BlackText(
+                                  _formatTimestamp(userData['lastMessageTimestamp'].value) ?? '',
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.normal,
+                                ),
+                              ],
                             ),
                           ],
                         ),
-                      ],
+                      ),
                     ),
-                  ),
-                ),
-              ),
-            );
-          });
+                  );
+                }).toList();
 
-          return ListView(
-            children: userItems,
-          );
-        },
-      ),
+                return ListView(
+                  children: userItems,
+                );
+              });
+            },
+        ),
     );
   }
+
 
   String _formatTimestamp(Timestamp? timestamp) {
     if (timestamp != null) {
@@ -238,11 +235,7 @@ class _ChatHomePageState extends State<ChatHomePage> {
   }
 
 
-
-
   Future<List<Map<String, dynamic>>> _fetchUserList() async {
-    List<Map<String, dynamic>> userList = [];
-    Set<String> existingChatRoomIds = {}; // Set to store existing chat room IDs
 
     QuerySnapshot snapshot1 = await FirebaseFirestore.instance
         .collection('colleges')
@@ -302,15 +295,47 @@ class _ChatHomePageState extends State<ChatHomePage> {
       }
     }
 
-    // Fetch and append last messages for each user
     for (var user in userList) {
       String? lastMessage = await _chatService.fetchLastMessage(user['chatRoomId']);
       Timestamp? lastMessageTimestamp = await _getLastMessageTimestamp(user['chatRoomId']);
-      user['lastMessage'] = lastMessage;
-      user['lastMessageTimestamp'] = lastMessageTimestamp;
+      // Make lastMessage and lastMessageTimestamp observable
+      user['lastMessage'] = lastMessage.obs;
+      user['lastMessageTimestamp'] = lastMessageTimestamp.obs;
     }
-
+    listenForChatChanges();
     return userList;
+  }
+
+  Stream<QuerySnapshot> listenForChatChanges() {
+    // Create a StreamController to manage the combined stream
+    final controller = StreamController<QuerySnapshot>();
+    print(existingChatRoomIds);
+
+    existingChatRoomIds.forEach((chatRoomId) {
+      Stream<QuerySnapshot> chatRoomStream = FirebaseFirestore.instance
+          .collection('chat_rooms')
+          .doc(chatRoomId)
+          .collection('messages')
+          .orderBy('timestamp', descending: true)
+          .snapshots();
+
+      // Listen to the chat room stream and add data to controller
+      chatRoomStream.listen((snapshot) async {
+        print('change happened');
+        controller.add(snapshot);
+        for (var user in userList) {
+          String? lastMessage = await _chatService.fetchLastMessage(user['chatRoomId']);
+          Timestamp? lastMessageTimestamp = await _getLastMessageTimestamp(user['chatRoomId']);
+          // Make lastMessage and lastMessageTimestamp observable
+          user['lastMessage'] = lastMessage.obs;
+          user['lastMessageTimestamp'] = lastMessageTimestamp.obs;
+          userList.refresh();
+        }
+
+      });
+    });
+
+    return controller.stream;
   }
 
 
