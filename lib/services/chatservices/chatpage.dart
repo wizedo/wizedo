@@ -2,12 +2,12 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../Widgets/colors.dart';
-import '../../components/my_text_field.dart';
 import 'chatcontroller.dart';
 import 'chatservice.dart';
 
@@ -49,6 +49,7 @@ class _ChatPageState extends State<ChatPage> {
 
   // for textfield focus
   FocusNode myFocusNode=FocusNode();
+  bool _messagesLoaded = false;
 
 
   @override
@@ -235,39 +236,95 @@ class _ChatPageState extends State<ChatPage> {
   }
 
   //build message list
-  Widget _buildMessageList(){
-    return StreamBuilder(//This widget helps handle real-time updates from a stream of data
-        stream: _chatService.getMessages(//This function returns a stream of messages between the current user and the receiver user.
-            widget.receiverUserID, _firebaseAuth.currentUser!.uid,widget.chatroomid!),
-        builder: (context,snapshot){//This is where the UI is built based on the state of the stream's data.
-          if(snapshot.hasError){
-            return Text('Error${snapshot.error}');
-          }
-          if(snapshot.connectionState == ConnectionState.waiting){
-            return Center(
-              child: CircularProgressIndicator(),
-            );
-          }
-          WidgetsBinding.instance!.addPostFrameCallback((_) {
-            // Scroll to the end after the ListView is built and updated
-            _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
-          });
-          return ListView(
-            controller: _scrollController, // Attach the ScrollController
-            padding: EdgeInsets.only(bottom: 10),
-            children: snapshot.data!.docs.map((document) => _buildMessageItem(document)).toList(),
+// build message list
+  Widget _buildMessageList() {
+    return StreamBuilder(
+      stream: _chatService.getMessages(
+        widget.receiverUserID,
+        _firebaseAuth.currentUser!.uid,
+        widget.chatroomid!,
+      ),
+      builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          return Text('Error${snapshot.error}');
+        }
+        if (snapshot.connectionState == ConnectionState.waiting && !_messagesLoaded) {
+          return Center(
+            child: CircularProgressIndicator(), // Show a loading indicator instead of "Loading messages..."
           );
+        }
+        if (!_messagesLoaded) {
+          _messagesLoaded = true; // Set messagesLoaded to true once messages are loaded for the first time
+        }
+        WidgetsBinding.instance!.addPostFrameCallback((_) {
+          // Scroll to the end after the ListView is built and updated
+          _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
         });
+        return ListView.separated(
+          controller: _scrollController,
+          padding: EdgeInsets.only(bottom: 10),
+          itemCount: snapshot.data!.docs.length,
+          itemBuilder: (context, index) {
+            return _buildMessageItem(
+              snapshot.data!.docs[index],
+              index,
+              snapshot.data!.docs.length,
+            );
+          },
+          separatorBuilder: (BuildContext context, int index) {
+            // Check if the current message has a different date from the previous message
+            if (index > 0) {
+              Timestamp currentTimestamp = (snapshot.data!.docs[index].data() as Map<String, dynamic>)['timestamp'];
+              Timestamp previousTimestamp = (snapshot.data!.docs[index - 1].data() as Map<String, dynamic>)['timestamp'];
+              DateTime currentDate = DateTime.fromMillisecondsSinceEpoch(currentTimestamp.seconds * 1000);
+              DateTime previousDate = DateTime.fromMillisecondsSinceEpoch(previousTimestamp.seconds * 1000);
+              if (currentDate.day != previousDate.day || currentDate.month != previousDate.month || currentDate.year != previousDate.year) {
+                // If dates are different, show a container with the date
+                String formattedDate = DateFormat('dd MMMM yyyy').format(currentDate);
+                return Padding(
+                  padding: const EdgeInsets.only(top: 10,bottom: 30),
+                  child: Center(
+                    child: Container(
+                      height: 30, // Adjust the height as needed
+                      padding: EdgeInsets.symmetric(vertical: 5, horizontal: 10), // Add internal padding
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(5),
+                        color: Color(0xFF21215E).withOpacity(0.7),
+                      ),
+                      child: Text(
+                        formattedDate,
+                        style: GoogleFonts.mPlusRounded1c(
+                          textStyle: TextStyle(
+                            color:Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 12, // Default font size is 14
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                );
+              }
+            }
+            return SizedBox(); // Otherwise, return an empty SizedBox
+          },
+
+        );
+      },
+    );
   }
 
+
+
+
   //build message item
-  Widget _buildMessageItem(DocumentSnapshot document){
-    Map<String,dynamic> data=document.data() as Map<String,dynamic>;
+  Widget _buildMessageItem(DocumentSnapshot document, int index, int totalCount) {
+    Map<String, dynamic> data = document.data() as Map<String, dynamic>;
 
-    //align msg to right if sender is user otherwise left
-    var alignment =(data['senderId']==_firebaseAuth.currentUser!.uid)?
-    Alignment.centerRight : Alignment.centerLeft;
-
+    // align msg to right if sender is user otherwise left
+    var alignment = (data['senderId'] == _firebaseAuth.currentUser!.uid)
+        ? Alignment.centerRight
+        : Alignment.centerLeft;
 
     // Determine the background color based on the sender's ID
     Color bubbleColor = (data['senderId'] == _firebaseAuth.currentUser!.uid)
@@ -277,30 +334,25 @@ class _ChatPageState extends State<ChatPage> {
     Color textColor = (data['senderId'] == _firebaseAuth.currentUser!.uid) ? Colors.white : Color(0xFF21215E);
     Color borderColor = (data['senderId'] == _firebaseAuth.currentUser!.uid) ? Colors.white : Color(0xFF21215E);
 
-    BoxShadow boxShadow = (data['senderId'] == _firebaseAuth.currentUser!.uid)
-        ? BoxShadow(color: Color(0xFF21215E).withOpacity(0.7), blurRadius: 80.0) // Transparent box shadow for sent messages
-        : BoxShadow(color: Color(0xFF21215E).withOpacity(0.7), blurRadius: 80.0); // Colored box shadow for received messages
-
-
     // Determine the border radius based on the sender's ID
     BorderRadiusGeometry borderRadius = (data['senderId'] == _firebaseAuth.currentUser!.uid)
         ? BorderRadius.only(
       topLeft: Radius.circular(15),
       topRight: Radius.circular(15),
       bottomLeft: Radius.circular(15),
-      bottomRight: Radius.circular(0.5), // Slightly different radius for user sending
+      bottomRight: Radius.circular(index == totalCount - 1 ? 0.5 : 0), // Slightly different radius for user sending
     )
         : BorderRadius.only(
       topLeft: Radius.circular(15),
       topRight: Radius.circular(15),
       bottomLeft: Radius.circular(0.5), // Slightly different radius for user receiving
-      bottomRight: Radius.circular(15),
+      bottomRight: Radius.circular(index == totalCount - 1 ? 15 : 0),
     );
 
     // Extract part of the email before '@gmail.com'
     // String senderDisplayName = (data['senderEmail'] ?? '').split('@')[0];
 
-// Determine the alignment and padding based on sender's ID
+    // Determine the alignment and padding based on sender's ID
     CrossAxisAlignment crossAlignment = (data['senderId'] == _firebaseAuth.currentUser!.uid)
         ? CrossAxisAlignment.end
         : CrossAxisAlignment.start;
@@ -326,24 +378,32 @@ class _ChatPageState extends State<ChatPage> {
       child: Padding(
         padding: padding,
         child: Padding(
-          padding: const EdgeInsets.only(top: 5,bottom: 5,left: 10,right: 10),
+          padding: const EdgeInsets.only(top: 5, bottom: 5, left: 10, right: 10),
           child: Column(
             //This determines the horizontal alignment of the column's children based on the condition.
-            crossAxisAlignment: (data['senderId']==_firebaseAuth.currentUser!.uid)?
-            CrossAxisAlignment.end : CrossAxisAlignment.start,
+            crossAxisAlignment: (data['senderId'] == _firebaseAuth.currentUser!.uid)
+                ? CrossAxisAlignment.end
+                : CrossAxisAlignment.start,
             //If the senderId matches the current user's UID, the children will be aligned to the bottom, otherwise to the top.
-            mainAxisAlignment: (data['senderId']==_firebaseAuth.currentUser!.uid)?
-            MainAxisAlignment.end : MainAxisAlignment.start,
+            mainAxisAlignment: (data['senderId'] == _firebaseAuth.currentUser!.uid)
+                ? MainAxisAlignment.end
+                : MainAxisAlignment.start,
             children: [
               // Text(senderDisplayName, style: TextStyle(fontSize: 9)),
               // const SizedBox(height: 5),
               Container(
                 padding: EdgeInsets.all(9),
                 decoration: BoxDecoration(
-                    borderRadius: borderRadius,
-                    color: bubbleColor,
-                    // border: Border.all(color: borderColor, width: 0.7),
-                    boxShadow: [boxShadow]// Set the border color
+                  borderRadius: borderRadius,
+                  color: bubbleColor,
+                  // border: Border.all(color: borderColor, width: 0.7),
+                  boxShadow: [
+                    if (index != totalCount - 1) // Apply box shadow only if it's not the last message
+                      BoxShadow(
+                        color: Color(0xFF21215E).withOpacity(0.7),
+                        blurRadius: 80.0,
+                      ),
+                  ],
                 ),
                 child: Text(
                   data['message'],
@@ -362,6 +422,7 @@ class _ChatPageState extends State<ChatPage> {
     );
   }
 
+
 // Build Message Input
   Widget _buildMessageInput() {
     return Padding(
@@ -370,7 +431,12 @@ class _ChatPageState extends State<ChatPage> {
         children: [
           Expanded(
             child: TextField(
-              style: TextStyle(color: Colors.black),
+              style: GoogleFonts.mPlusRounded1c(
+                textStyle: TextStyle(
+                color:Color(0xFF000000),
+                fontSize: 14, // Default font size is 14
+              ),
+              ),
               controller: _messageController,
               cursorHeight: 25,
               textCapitalization: TextCapitalization.sentences,
@@ -380,27 +446,44 @@ class _ChatPageState extends State<ChatPage> {
               maxLines: null, // Set to null for multiline
               decoration: InputDecoration(
                 labelText: 'Send Message...',
-                labelStyle: TextStyle(color: Colors.black),
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(20)),
+                labelStyle: GoogleFonts.mPlusRounded1c(
+                  textStyle: TextStyle(
+                    color:Color(0xFF000000),
+                    fontSize: 14, // Default font size is
+                  ),
+                ),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(15)),
                 focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(20),
+                  borderRadius: BorderRadius.circular(15),
                   borderSide: BorderSide(color: Color(0xFF21215E)), // Set focused border line color here
                 ),
+                contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 15), // Adjust height here
               ),
             ),
           ),
-          // Send button
+          // Circular container with send icon
           Padding(
-            padding: const EdgeInsets.only(left: 5,right: 10),
-            child: IconButton(
-              onPressed: sendMessage,
-              icon: Icon(Icons.send_rounded, size: 32,color: Color(0xFF21215E).withOpacity(0.7)),
+            padding: const EdgeInsets.only(left: 5, right: 10),
+            child: Container(
+              width: 45,
+              height: 45,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10),
+                color: Color(0xFF21215E).withOpacity(0.7),
+              ),
+              child: IconButton(
+                onPressed: sendMessage,
+                icon: Icon(Icons.send_rounded, size: 23, color: Colors.white),
+              ),
             ),
           ),
         ],
       ),
     );
   }
+
+
+
 
 
 }
