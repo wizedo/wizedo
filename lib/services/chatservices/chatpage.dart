@@ -10,7 +10,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../Widgets/colors.dart';
 import 'chatcontroller.dart';
 import 'chatservice.dart';
-
+import 'package:crypto/crypto.dart';
 
 class ChatPage extends StatefulWidget {
   final String receiveruserEmail;
@@ -464,16 +464,16 @@ class _ChatPageState extends State<ChatPage> {
           // Circular container with send icon
           Padding(
             padding: const EdgeInsets.only(left: 5, right: 10),
-            child: Container(
-              width: 45,
-              height: 45,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10),
-                color: Color(0xFF21215E).withOpacity(0.7),
-              ),
-              child: IconButton(
-                onPressed: sendMessage,
-                icon: Icon(Icons.send_rounded, size: 23, color: Colors.white),
+            child: InkWell(
+              onTap: sendMessage,
+              child: Container(
+                width: 45,
+                height: 45,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(10),
+                  color: Color(0xFF21215E).withOpacity(0.7),
+                ),
+                child: Icon(Icons.send_rounded, size: 23, color: Colors.white),
               ),
             ),
           ),

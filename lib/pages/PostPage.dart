@@ -29,7 +29,7 @@ class _RegisterScreenState extends State<RegisterScreen> with WidgetsBindingObse
   final TextEditingController _datePicker = TextEditingController();
   final TextEditingController _paymentDetails = TextEditingController();
   final TextEditingController _googledrivefilelink=TextEditingController();
-  String _selectedCategory = 'College Project';
+  RxString _selectedCategory = 'College Project'.obs;
   bool _isNumberOfPagesVisible = false;
   final _formKey = GlobalKey<FormState>();
   List<String> errors = [];
@@ -71,11 +71,7 @@ class _RegisterScreenState extends State<RegisterScreen> with WidgetsBindingObse
     }
   }
 
-  bool isGoogleDriveLink(String link) {
-    // Updated Google Drive link format
-    RegExp regex = RegExp(r'^https:\/\/drive\.google\.com\/(file\/d\/|open\?id=)([a-zA-Z0-9_-]+)\/?.*');
-    return regex.hasMatch(link);
-  }
+
 
   Future<void> loadSavedValues() async {
     print('getting field values from locally');
@@ -87,7 +83,7 @@ class _RegisterScreenState extends State<RegisterScreen> with WidgetsBindingObse
       _datePicker.text = prefs.getString('datePicker') ?? '';
       _paymentDetails.text = prefs.getString('paymentDetails') ?? '';
       _googledrivefilelink.text = prefs.getString('googledrivefilelink') ?? '';
-      _selectedCategory = prefs.getString('selectedCategory') ?? 'College Project';
+      _selectedCategory.value = prefs.getString('selectedCategory') ?? 'College Project';
 
     });
   }
@@ -104,7 +100,7 @@ class _RegisterScreenState extends State<RegisterScreen> with WidgetsBindingObse
       prefs.setString('datePicker', _datePicker.text);
       prefs.setString('paymentDetails', _paymentDetails.text);
       prefs.setString('googledrivefilelink', _googledrivefilelink.text);
-      prefs.setString('selectedCategory', _selectedCategory);
+      prefs.setString('selectedCategory', _selectedCategory.value);
 
   }
 
@@ -240,12 +236,12 @@ class _RegisterScreenState extends State<RegisterScreen> with WidgetsBindingObse
                       hint: Row(
                         children: [
                           Text(
-                            _selectedCategory != null ? _selectedCategory! : 'Select Your Category',
+                            _selectedCategory.value != null ? _selectedCategory.value! : 'Select Your Category',
                             style: TextStyle(fontSize: 12, color: Colors.white),
                           ),
                         ],
                       ),
-                      value: _selectedCategory,
+                      value: _selectedCategory.value,
                       items: ['Assignment', 'Personal Development', 'College Project']
                           .map((String item) {
                         return DropdownMenuItem<String>(
@@ -253,7 +249,7 @@ class _RegisterScreenState extends State<RegisterScreen> with WidgetsBindingObse
                           child: Text(
                             item,
                             style: TextStyle(
-                                color: _selectedCategory == item ? Color(0xFFdacfe6) : Colors.black,
+                                color: _selectedCategory.value == item ? Color(0xFFdacfe6) : Colors.black,
                                 fontSize: 12
                             ),
                           ),
@@ -262,9 +258,9 @@ class _RegisterScreenState extends State<RegisterScreen> with WidgetsBindingObse
                           .toList(),
                       onChanged: (String? value) {
                         setState(() {
-                          _selectedCategory = value!;
+                          _selectedCategory.value = value! as String;
                           _isNumberOfPagesVisible =
-                              _selectedCategory == 'Assignment';
+                              _selectedCategory.value == 'Assignment';
                         });
                         print('Selected item: $value');
                       },
@@ -496,31 +492,19 @@ class _RegisterScreenState extends State<RegisterScreen> with WidgetsBindingObse
                       obscureText: false,
                       hint: 'Google Drive Link',
                       validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          addError(error: 'Google Drive link is required');
-                          return 'Google Drive link is required';
-                        } else {
-                          removeError(error: 'Google Drive link is required');
+                        _selectedCategory.refresh();
+                        if (_selectedCategory.value == 'Assignment') {
+                          // Validate the Google Drive link only if the selected category is "Assignment"
+                          if (value == null || value.isEmpty) {
+                            addError(error: 'Google Drive link is required for assignments');
+                            return 'Google Drive link is required for assignments';
+                          } else {
+                            removeError(error: 'Google Drive link is required for assignments');
+                          }
                         }
-
-                        // Check if the entered link is a valid Google Drive link
-                        if (!isGoogleDriveLink(value)) {
-                          addError(error: 'Invalid Google Drive link');
-                          return 'Invalid Google Drive link';
-                        } else {
-                          removeError(error: 'Invalid Google Drive link');
-                        }
-
-                        // Check if the link is too long
-                        if (value.length > 200) {
-                          addError(error: 'Google Drive link is too long');
-                          return 'Google Drive link is too long';
-                        } else {
-                          removeError(error: 'Google Drive link is too long');
-                        }
-
                         return null;
                       },
+
                     ),
                   ),
 
@@ -622,7 +606,7 @@ class _RegisterScreenState extends State<RegisterScreen> with WidgetsBindingObse
                           'userId': user.uid,
                           'emailid': email,
                           'collegeName': userCollegee, // Add the college name to the post
-                          'category': _selectedCategory,
+                          'category': _selectedCategory.value,
                           'subCategory': _projectName.text.isNotEmpty
                               ? _projectName.text[0].toUpperCase() + _projectName.text.substring(1)
                               : _projectName.text,

@@ -95,7 +95,7 @@ class _JobCardState extends State<JobCard> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             WhiteText(
-                              'Price: ${widget.priceRange}', // Assuming price is in dollars
+                              'Rs. ${widget.priceRange}', // Assuming price is in dollars
                               fontSize: sizingInformation.screenSize.width > 600 ? 14.0 : 10.0,
                               fontWeight: FontWeight.bold,
                             ),

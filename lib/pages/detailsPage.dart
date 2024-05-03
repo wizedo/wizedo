@@ -55,20 +55,20 @@ class _DetailsScreenState extends State<DetailsScreen> {
         size: AdSize.banner,
         adUnitId: 'ca-app-pub-1022421175188483/1458721551',
         listener: BannerAdListener(
-          onAdLoaded: (ad){
-            setState(() {
-              isBannerLoaded=true;
-            });
-          },
-          onAdFailedToLoad: (ad, error){
-            ad.dispose();
-            isBannerLoaded=false;
-            print('add failed to load below is error');
-            print(error);
-          }
+            onAdLoaded: (ad){
+              setState(() {
+                isBannerLoaded=true;
+              });
+            },
+            onAdFailedToLoad: (ad, error){
+              ad.dispose();
+              isBannerLoaded=false;
+              print('add failed to load below is error');
+              print(error);
+            }
         ),
         request: AdRequest());
-        bannerAd.load();
+    bannerAd.load();
   }
 
   bool isIntersitalLoaded=false;
@@ -115,7 +115,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
   }
 
   setSelectedRadio(int val) {
-      selectedRadio.value = val;
+    selectedRadio.value = val;
   }
 
   Widget _buildRadioListTile(String text, int value) {
@@ -420,7 +420,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
                     ScaffoldMessenger.of(context).showSnackBar(snackbar);
                   },
                   child: WhiteText(
-                    widget.googledrivelink ?? 'No reference material available',
+                    widget.googledrivelink != null && widget.googledrivelink != '' ? widget.googledrivelink! : 'No reference material available',
                     fontSize: 12,
                   ),
                 ),
@@ -429,15 +429,6 @@ class _DetailsScreenState extends State<DetailsScreen> {
             ),
             // attachments
             SizedBox(height: 140),
-            // ad
-            // Container(
-            //   height: 50,
-            //   width: 320,
-            //   child: isBannerLoaded == true
-            //       ? AdWidget(ad: bannerAd)  // Display the ad if isBannerLoaded is true
-            //       : Container(),  // Otherwise, display an empty container
-            // )
-
           ],
         ),
       ),
@@ -463,6 +454,10 @@ class _DetailsScreenState extends State<DetailsScreen> {
                     final user = FirebaseAuth.instance.currentUser;
                     if (user != null) {
                       if (widget.emailid != null) {
+                        final userEmail = user.email!;
+                        final userDocRef = FirebaseFirestore.instance.collection('usersDetails').doc(userEmail);
+                        final userDocSnapshot = await userDocRef.get();
+                        final totalApplied = userDocSnapshot.data()?['totalapplied'] ?? 0;
                         if (user.email == widget.emailid) {
                           Get.showSnackbar(
                             GetSnackBar(
@@ -491,6 +486,38 @@ class _DetailsScreenState extends State<DetailsScreen> {
                               ),
                               messageText: WhiteText(
                                 "Task posters can't apply for their own tasks.",
+                                fontSize: 12,
+                              ),
+                            ),
+                          );
+                        }else if(userDocSnapshot.exists && totalApplied >= 5){
+                          Get.showSnackbar(
+                            GetSnackBar(
+                              borderRadius: 8,
+                              padding: EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+                              animationDuration: Duration(milliseconds: 800),
+                              duration: Duration(milliseconds: 4500),
+                              margin: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                              snackPosition: SnackPosition.TOP,
+                              isDismissible: true,
+                              backgroundColor: Color(0xFF955AF2),
+                              titleText: Row(
+                                children: [
+                                  Icon(
+                                    Icons.warning,
+                                    color: Colors.white,
+                                    size: 20,
+                                  ),
+                                  SizedBox(width: 8),
+                                  WhiteText(
+                                    'Attention',
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ],
+                              ),
+                              messageText: WhiteText(
+                                "A user can apply for a maximum of 5 projects or tasks.",
                                 fontSize: 12,
                               ),
                             ),
@@ -567,61 +594,75 @@ Future<void> addToAcceptedCollection({
       String userCollege = userDoc['college'] ?? 'Unknown College';
 
 
-        // Add the details to the accepted collection
-        await firestore.runTransaction((transaction) async {
-          // Optionally, add the post to a subcollection under the college document
-          final collegePostRef = firestore
-              .collection('colleges')
-              .doc(userCollege)
-              .collection('collegePosts')
-              .doc(postid);
+      // Add the details to the accepted collection
+      await firestore.runTransaction((transaction) async {
+        // Optionally, add the post to a subcollection under the college document
+        final collegePostRef = firestore
+            .collection('colleges')
+            .doc(userCollege)
+            .collection('collegePosts')
+            .doc(postid);
 
-          // Update the status of the post in the 'collegePosts' collection
-          transaction.update(collegePostRef, {
-            'status': 'Applied',
-            'pstatus': 2,
-            'workeremail': workeremail,
-            'recieveremail': emailid,
-          });
-
-
-
-          if(isIntersitalLoaded==true){
-            interstitialAd.show();
-          }
-
-          Get.showSnackbar(
-            GetSnackBar(
-              borderRadius: 8,
-              padding: EdgeInsets.symmetric(horizontal: 20, vertical: 15),
-              animationDuration: Duration(milliseconds: 800),
-              duration: Duration(milliseconds: 4500),
-              margin: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-              snackPosition: SnackPosition.TOP,
-              isDismissible: true,
-              backgroundColor: Color(0xFF955AF2), // Set your desired color here
-              titleText: Row(
-                children: [
-                  Icon(
-                    Icons.done_rounded,
-                    color: Colors.white,
-                    size: 20,
-                  ),
-                  SizedBox(width: 8),
-                  WhiteText(
-                    'Success',
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ],
-              ),
-              messageText: WhiteText(
-                'You have successfully applied for the task.',
-                fontSize: 12,
-              ),
-            ),
-          );
+        // Update the status of the post in the 'collegePosts' collection
+        transaction.update(collegePostRef, {
+          'status': 'Applied',
+          'pstatus': 2,
+          'workeremail': workeremail,
+          'recieveremail': emailid,
         });
+
+        final applycheckemail = user?.email!;
+
+        final docRef = FirebaseFirestore.instance.collection('usersDetails').doc(applycheckemail);
+        // Use a transaction to update totalapplied
+        FirebaseFirestore.instance.runTransaction((transaction) async {
+          final totalapplied = await transaction.get(docRef);
+          if (totalapplied.exists) {
+            // Increment totalapplied by one
+            int newTotalApplied = (totalapplied.data()?['totalapplied'] ?? 0) + 1;
+            print('new toatal appllied posts are $newTotalApplied');
+            transaction.update(docRef, {'totalapplied': newTotalApplied});
+          }
+        });
+
+
+
+        if(isIntersitalLoaded==true){
+          interstitialAd.show();
+        }
+
+        Get.showSnackbar(
+          GetSnackBar(
+            borderRadius: 8,
+            padding: EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+            animationDuration: Duration(milliseconds: 800),
+            duration: Duration(milliseconds: 4500),
+            margin: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+            snackPosition: SnackPosition.TOP,
+            isDismissible: true,
+            backgroundColor: Color(0xFF955AF2), // Set your desired color here
+            titleText: Row(
+              children: [
+                Icon(
+                  Icons.done_rounded,
+                  color: Colors.white,
+                  size: 20,
+                ),
+                SizedBox(width: 8),
+                WhiteText(
+                  'Success',
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                ),
+              ],
+            ),
+            messageText: WhiteText(
+              'You have successfully applied for the task.',
+              fontSize: 12,
+            ),
+          ),
+        );
+      });
 
 
     }

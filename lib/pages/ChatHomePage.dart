@@ -181,7 +181,10 @@ class _ChatHomePageState extends State<ChatHomePage> {
                       padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 0),
                       child: ListTile(
                         dense: true,
-                        title: BlackText(displayName, fontSize: 14,),
+                        title: Padding(
+                          padding: const EdgeInsets.only(bottom: 2),
+                          child: BlackText(displayName, fontSize: 14,),
+                        ),
                         subtitle: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [

@@ -1,6 +1,7 @@
 import 'dart:ffi';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -340,6 +341,19 @@ class _statusPageState extends State<statusPage> {
                                                         'pstatus':5,
                                                         'status':'Completed'
                                                       });
+                                                    });
+
+
+                                                    final docRef = FirebaseFirestore.instance.collection('usersDetails').doc(documentData['workeremail']);
+                                                    // Use a transaction to update totalapplied
+                                                    FirebaseFirestore.instance.runTransaction((transaction) async {
+                                                      final totalapplied = await transaction.get(docRef);
+                                                      if (totalapplied.exists) {
+                                                        // Increment totalapplied by one
+                                                        int newTotalApplied = (totalapplied.data()?['totalapplied'] ?? 0) - 1;
+                                                        print('new toatal appllied posts are $newTotalApplied');
+                                                        transaction.update(docRef, {'totalapplied': newTotalApplied});
+                                                      }
                                                     });
                                                     Get.back(); // Going back using getx
                                                     Get.back(); // Going back using getx
