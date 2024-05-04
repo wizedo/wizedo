@@ -1,23 +1,20 @@
 import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:wizedo/components/my_elevatedbutton.dart';
-import 'package:wizedo/components/white_text.dart';
-import 'package:wizedo/pages/HomePage.dart';
-
 import '../Widgets/colors.dart';
 import '../components/mPlusRoundedText.dart';
+import '../components/my_elevatedbutton.dart';
 import '../components/my_textbutton.dart';
-import 'RegisterPage.dart';
+import '../components/white_text.dart';
+import 'PhoneNumberVerification.dart';
 
 class OtpScreen extends StatefulWidget {
-  final String email;
+  final String phoneNumber;
   final String otp;
-  final String phonenumber;
+  final Function(bool)? onOtpVerified;
 
-  const OtpScreen({Key? key, required this.email, required this.otp,required this.phonenumber}) : super(key: key);
+  const OtpScreen({Key? key, required this.phoneNumber, required this.otp, this.onOtpVerified}) : super(key: key);
 
   @override
   State<OtpScreen> createState() => _OtpScreenState();
@@ -34,67 +31,41 @@ class _OtpScreenState extends State<OtpScreen> {
     super.initState();
     focusNodes = List.generate(4, (index) => FocusNode());
     controllers = List.generate(4, (index) => TextEditingController());
-    Get.snackbar('error', widget.otp);
-    print('below is user stored otp ');
-    printUserOtp(widget.email);
     startTimer();
-
-    // Add listeners to controllers to check for auto-verification
-    for (int i = 0; i < controllers.length; i++) {
-      controllers[i].addListener(() {
-        if (areAllControllersFilled()) {
-          verifyOtp();
-        }
-      });
-    }
   }
 
-  Future<String?> getUserOtpLocally(String email) async {
+  Future<String?> getUserOtpLocally(String phoneNumber) async {
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
-      return prefs.getString('userOtp_$email');
+      return prefs.getString('userOtp_$phoneNumber');
     } catch (error) {
       print('Error getting user OTP locally: $error');
-      return null; // Handle the error appropriately in your application
+      return null;
     }
   }
 
-  Future<void> printUserOtp(String email) async {
+  Future<void> printUserOtp(String phoneNumber) async {
     try {
-      String? storedOtp = await getUserOtpLocally(email);
-
+      String? storedOtp = await getUserOtpLocally(phoneNumber);
       if (storedOtp != null) {
-        print('Stored OTP for $email: $storedOtp');
+        print('Stored OTP for $phoneNumber: $storedOtp');
       } else {
-        print('No stored OTP found for $email');
+        print('No stored OTP found for $phoneNumber');
       }
     } catch (error) {
       print('Error printing user OTP: $error');
     }
   }
 
-  bool areAllControllersFilled() {
-    for (TextEditingController controller in controllers) {
-      if (controller.text.isEmpty) {
-        return false;
-      }
-    }
-    return true;
-  }
-
   void verifyOtp() async {
-    String enteredOtp = '';
-    for (TextEditingController controller in controllers) {
-      enteredOtp += controller.text;
-    }
+    String enteredOtp = controllers.map((controller) => controller.text).join();
 
-    String? storedOtp = await getUserOtpLocally(widget.email);
-
-    if (enteredOtp == storedOtp) {
-      print('OTP Verified. Navigating to Settings page.');
-      Get.to(() => HomePage());
+    if (enteredOtp == widget.otp) {
+      print('OTP Verified. Navigating to next page.');
+      widget.onOtpVerified?.call(true);
     } else {
       Get.snackbar('Error', 'Invalid OTP. Please try again.');
+      widget.onOtpVerified?.call(false);
     }
   }
 
@@ -114,7 +85,6 @@ class _OtpScreenState extends State<OtpScreen> {
         if (_timerSeconds > 0) {
           _timerSeconds--;
         } else {
-          // Stop the timer when it reaches 0
           _timer.cancel();
         }
       });
@@ -123,7 +93,7 @@ class _OtpScreenState extends State<OtpScreen> {
 
   @override
   void dispose() {
-    _timer.cancel(); // Cancel the timer when the widget is disposed
+    _timer.cancel();
     super.dispose();
   }
 
@@ -157,47 +127,41 @@ class _OtpScreenState extends State<OtpScreen> {
                     children: [
                       WhiteText('Enter the OTP sent to +91 '),
                       WhiteText(
-                        widget.phonenumber,
+                        widget.phoneNumber,
                         fontWeight: FontWeight.bold,
                       ),
                     ],
                   ),
                 ),
-                Center(
-                  child: Image.asset(
-                    'lib/images/password.png',
-                    width: Get.width * 0.9,
-                    height: 160,
-                  ),
-                ),
+                SizedBox(height: 20),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    OtpEditText(focusNode: focusNodes[0], controller: controllers[0]),
-                    SizedBox(width: 10),
-                    OtpEditText(focusNode: focusNodes[1], controller: controllers[1]),
-                    SizedBox(width: 10),
-                    OtpEditText(focusNode: focusNodes[2], controller: controllers[2]),
-                    SizedBox(width: 10),
-                    OtpEditText(focusNode: focusNodes[3], controller: controllers[3]),
-                  ],
+                  children: List.generate(
+                    4,
+                        (index) => OtpEditText(
+                      focusNode: focusNodes[index],
+                      controller: controllers[index],
+                      nextFocusNode: index < 3 ? focusNodes[index + 1] : null,
+                    ),
+                  ),
                 ),
+                SizedBox(height: 20),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     WhiteText("Didn't receive OTP?", fontSize: 12),
                     MyTextButton(
                       onPressed: () {
-                        Get.to(() => RegisterPage());
+                        Get.back();
                       },
                       buttonText: 'Resend',
                       fontSize: 12,
                     ),
                   ],
                 ),
-                SizedBox(width: 8),
+                SizedBox(height: 8),
                 WhiteText('${getFormattedTime(_timerSeconds)}', fontSize: 12),
-                SizedBox(height: 100),
+                SizedBox(height: 50),
               ],
             ),
           ),
@@ -209,7 +173,7 @@ class _OtpScreenState extends State<OtpScreen> {
           padding: const EdgeInsets.only(left: 10, right: 10, bottom: 5),
           child: MyElevatedButton(
             onPressed: () async {
-              verifyOtp(); // Call verification directly when the button is pressed
+              verifyOtp();
             },
             buttonText: 'Verify',
           ),
@@ -219,62 +183,12 @@ class _OtpScreenState extends State<OtpScreen> {
   }
 }
 
-class OtpEditText extends StatefulWidget {
-  const OtpEditText({Key? key, required this.focusNode, required this.controller}) : super(key: key);
+class OtpEditText extends StatelessWidget {
+  final FocusNode? focusNode;
+  final TextEditingController? controller;
+  final FocusNode? nextFocusNode;
 
-  final FocusNode focusNode;
-  final TextEditingController controller;
-
-  @override
-  _OtpEditTextState createState() => _OtpEditTextState();
-}
-
-class _OtpEditTextState extends State<OtpEditText> {
-  late TextEditingController _internalController;
-
-  @override
-  void initState() {
-    super.initState();
-    _internalController = TextEditingController();
-    _internalController.addListener(_onTextChanged);
-  }
-
-  _onTextChanged() {
-    if (_internalController.text.isNotEmpty && !RegExp(r'^[0-9]*$').hasMatch(_internalController.text)) {
-      // If the entered value is not a number, show a snackbar
-      Get.snackbar('Error', 'Please enter a valid number');
-      // Clear the invalid input
-      _internalController.clear();
-      return;
-    }
-
-    if (_internalController.text.isNotEmpty && _internalController.selection.start == 0) {
-      widget.focusNode.previousFocus();
-    } else if (_internalController.text.length >= 1) {
-      // Move focus to the next widget when a digit is entered
-      widget.focusNode.nextFocus();
-    }
-
-    // Set the controller text after handling focus changes
-    widget.controller.text = _internalController.text;
-
-    // Verify OTP if all controllers are filled
-    if (_internalController.text.isNotEmpty && areAllControllersFilled()) {
-      (context as Element).reassemble();
-    }
-  }
-
-  bool areAllControllersFilled() {
-    for (TextEditingController controller in [
-      _internalController,
-      widget.controller,
-    ]) {
-      if (controller.text.isEmpty) {
-        return false;
-      }
-    }
-    return true;
-  }
+  const OtpEditText({Key? key, this.focusNode, this.controller, this.nextFocusNode}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -283,8 +197,8 @@ class _OtpEditTextState extends State<OtpEditText> {
       height: 60,
       child: TextFormField(
         maxLength: 1,
-        controller: _internalController,
-        focusNode: widget.focusNode,
+        controller: controller,
+        focusNode: focusNode,
         textAlign: TextAlign.center,
         keyboardType: TextInputType.number,
         decoration: InputDecoration(
@@ -298,6 +212,11 @@ class _OtpEditTextState extends State<OtpEditText> {
           filled: true,
           fillColor: Colors.grey.shade200,
         ),
+        onChanged: (value) {
+          if (value.isNotEmpty && nextFocusNode != null) {
+            FocusScope.of(context).requestFocus(nextFocusNode);
+          }
+        },
       ),
     );
   }
