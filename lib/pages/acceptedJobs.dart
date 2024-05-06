@@ -198,6 +198,7 @@ class _acceptedPageState extends State<acceptedPage> {
                                           postid: data['postId'],
                                           emailid: data['emailid'],
                                           googledrivelink: data['googledrivelink'],
+                                          chatroomid: data['chatRoomId']
                                         ),
                                       ),
                                     );

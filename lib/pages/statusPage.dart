@@ -11,17 +11,20 @@ import 'package:wizedo/pages/HomePage.dart';
 import '../components/mPlusRoundedText.dart';
 import '../components/myCustomAppliedCard.dart';
 import '../components/my_elevatedbutton.dart';
+import '../services/chatservices/chatcontroller.dart';
 import 'BottomNavigation.dart';
 import 'ParticularPostDetailScreen.dart';
 
 class statusPage extends StatefulWidget {
   final String? postid;
   final int? priceRange;
+  final String? chatroomid;
 
   const statusPage({
     Key? key,
     this.postid,
     this.priceRange,
+    this.chatroomid
   }) : super(key: key);
 
   @override
@@ -31,6 +34,8 @@ class statusPage extends StatefulWidget {
 class _statusPageState extends State<statusPage> {
   String userCollegee = 'null';
   String userEmail = 'null';
+  final ChatController _chatController = Get.put(ChatController());
+
 
   Future<String> getUserEmailLocally() async {
     try {
@@ -81,6 +86,33 @@ class _statusPageState extends State<statusPage> {
     userEmail = await getUserEmailLocally();
     getUserCollege();
   }
+
+  Future<void> checkAppliedStatus() async {
+    try {
+      final QuerySnapshot<Map<String, dynamic>> querySnapshot = await FirebaseFirestore.instance
+          .collection('colleges')
+          .doc(userCollegee)
+          .collection('collegePosts')
+          .where('chatRoomId', isEqualTo: widget.chatroomid)
+          .where('status', isEqualTo: 'Applied')
+          .get();
+
+      if (querySnapshot.docs.isNotEmpty) {
+        print('Exists cannot delete chatroom');
+      } else {
+        if (widget.chatroomid != null) {
+          _chatController.deleteChat(widget.chatroomid!);
+          print('Doesn\'t exist can delete chatroom');
+        } else {
+          print('chatroomid is null, cannot delete chatroom');
+        }
+        print('Doesn\'t exist can delete chatroom');
+      }
+    } catch (error) {
+      print('Error checking applied status: $error');
+    }
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -355,6 +387,7 @@ class _statusPageState extends State<statusPage> {
                                                         transaction.update(docRef, {'totalapplied': newTotalApplied});
                                                       }
                                                     });
+                                                    await checkAppliedStatus();
                                                     Get.back(); // Going back using getx
                                                     Get.back(); // Going back using getx
                                                     Get.back(); // Going back using getx

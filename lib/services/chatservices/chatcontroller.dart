@@ -7,12 +7,8 @@ class ChatController extends GetxController {
   final FirebaseFirestore _fireStore = FirebaseFirestore.instance;
 
   // Function to delete the chat
-  Future<void> deleteChat(String otherUserId) async {
+  Future<void> deleteChat(String chatRoomId) async {
     try {
-      // Construct chat room id from user ids (sorted to ensure consistency)
-      List<String> ids = [_firebaseAuth.currentUser!.uid, otherUserId];
-      ids.sort();
-      String chatRoomId = ids.join("_");
 
       // Delete all messages in the chat room
       await _fireStore

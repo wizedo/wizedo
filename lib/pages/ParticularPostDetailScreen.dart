@@ -22,6 +22,7 @@ class ParticularPostDetailScreen extends StatefulWidget {
   final String? finalDate;
   final String? emailid;
   final String? googledrivelink;
+  final String? chatroomid;
 
 
   const ParticularPostDetailScreen({
@@ -34,7 +35,8 @@ class ParticularPostDetailScreen extends StatefulWidget {
     this.finalDate,
     this.postid,
     this.emailid,
-    this.googledrivelink
+    this.googledrivelink,
+    this.chatroomid
   }) : super(key: key);
 
 
@@ -287,7 +289,8 @@ class _ParticularPostDetailScreenState extends State<ParticularPostDetailScreen>
                       MaterialPageRoute(
                         builder: (context) => statusPage(
                           postid: widget.postid,
-                          priceRange:widget.priceRange
+                          priceRange:widget.priceRange,
+                          chatroomid:widget.chatroomid
                         ),
                       ),
                     );

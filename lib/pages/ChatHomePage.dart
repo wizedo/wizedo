@@ -25,8 +25,10 @@ class _ChatHomePageState extends State<ChatHomePage> {
   final ChatService _chatService = ChatService(); // Add this line
   String userCollegee = 'null';
   String userEmail='null';
-  Set<String> existingChatRoomIds = {}; // Set to store existing chat room IDs
+  RxSet<String> existingChatRoomIds = <String>{}.obs;
   RxList<Map<String, dynamic>> userList = <Map<String, dynamic>>[].obs;
+  RxList<Map<String, dynamic>> postlist = <Map<String, dynamic>>[].obs;
+
 
 
   Future<String> getUserEmailLocally() async {
@@ -145,83 +147,115 @@ class _ChatHomePageState extends State<ChatHomePage> {
 
   Widget _buildUserList() {
     return Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 5),
-        child: FutureBuilder(
-            future: _fetchUserList(),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return Center(child: CircularProgressIndicator());
+      padding: const EdgeInsets.symmetric(horizontal: 5),
+      child: FutureBuilder(
+        future: _fetchUserList(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(child: CircularProgressIndicator());
+          }
+
+          if (snapshot.hasError) {
+            print('Error: ${snapshot.error}');
+            return Center(child: Text('Error: ${snapshot.error}'));
+          }
+
+          return Obx(() {
+            List<Widget> userItems = userList.map((userData) {
+              String displayName;
+              if (userData['workeremail'] == userEmail) {
+                displayName = userData['recieveremail'].split('@').first;
+              } else {
+                displayName = userData['workeremail'].split('@').first;
               }
 
-              if (snapshot.hasError) {
-                print('Error: ${snapshot.error}');
-                return Center(child: Text('Error: ${snapshot.error}'));
-              }
+              String lastMessage = userData['lastMessage'].value ?? '';
+              String lastMessageTimestamp = _formatTimestamp(userData['lastMessageTimestamp'].value) ?? '';
 
-              return Obx(() {
-                List<Widget> userItems = userList.map((userData) {
-                  String displayName;
-                  if (userData['workeremail'] == userEmail) {
-                    displayName = userData['recieveremail'].split('@').first;
-                  } else {
-                    displayName = userData['workeremail'].split('@').first;
-                  }
+              return GestureDetector(
+                onTap: () {
+                  Get.to(ChatPage(
+                    receiveruserEmail: userData['emailid'],
+                    receiverUserID: userData['userId'],
+                    workeremail: userData['workeremail'],
+                    recieveremail: userData['recieveremail'],
+                    chatroomid: userData['chatRoomId'],
+                  ));
+                },
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 0),
+                  child: ListTile(
+                    dense: true,
+                    title: Padding(
+                      padding: const EdgeInsets.only(bottom: 2),
+                      child: Row(
+                        children: [
+                          BlackText(displayName, fontSize: 14,),
+                          SizedBox(width: 10,),
+                          BlackText('-',fontSize: 14,),
+                          SizedBox(width: 10,),
+                          FutureBuilder(
+                            future: _fetchSubCategoriesForChatRoom(userData['chatRoomId']),
+                            builder: (context, subCategorySnapshot) {
+                              if (subCategorySnapshot.hasData) {
+                                List<String>? subCategories = subCategorySnapshot.data;
+                                String subCategoriesText = subCategories!.join(', '); // Join subcategories with comma
 
-                  return GestureDetector(
-                    onTap: () {
-                      Get.to(ChatPage(
-                        receiveruserEmail: userData['emailid'],
-                        receiverUserID: userData['userId'],
-                        workeremail: userData['workeremail'],
-                        recieveremail: userData['recieveremail'],
-                        chatroomid: userData['chatRoomId'],
-                      ));
-                    },
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 0),
-                      child: ListTile(
-                        dense: true,
-                        title: Padding(
-                          padding: const EdgeInsets.only(bottom: 2),
-                          child: BlackText(displayName, fontSize: 14,),
-                        ),
-                        subtitle: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                                if (subCategoriesText.length > 27) {
+                                  subCategoriesText = subCategoriesText.substring(0, 30) + '...';
+                                }
+
+                                return Expanded(child: BlackText(subCategoriesText, fontSize: 9));
+                              } else {
+                                return Container();
+                              }
+                            },
+                          ),
+
+                        ],
+                      ),
+                    ),
+                    subtitle: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
                           children: [
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: BlackText(
-                                    userData['lastMessage'].value ?? '',
-                                    overflow: TextOverflow.ellipsis,
-                                    maxLines: 1,
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.normal,
-                                  ),
-                                ),
-                                SizedBox(width: 13),
-                                BlackText(
-                                  _formatTimestamp(userData['lastMessageTimestamp'].value) ?? '',
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.normal,
-                                ),
-                              ],
+                            Expanded(
+                              child: BlackText(
+                                lastMessage,
+                                overflow: TextOverflow.ellipsis,
+                                maxLines: 1,
+                                fontSize: 11,
+                                fontWeight: FontWeight.normal,
+                              ),
+                            ),
+                            SizedBox(width: 13),
+                            BlackText(
+                              lastMessageTimestamp,
+                              fontSize: 11,
+                              fontWeight: FontWeight.normal,
                             ),
                           ],
                         ),
-                      ),
+                      ],
                     ),
-                  );
-                }).toList();
+                  ),
+                ),
+              );
+            }).toList();
 
-                return ListView(
-                  children: userItems,
-                );
-              });
-            },
-        ),
+            return ListView(
+              children: userItems,
+            );
+          });
+        },
+      ),
     );
   }
+
+
+
+
 
 
   String _formatTimestamp(Timestamp? timestamp) {
@@ -280,6 +314,8 @@ class _ChatHomePageState extends State<ChatHomePage> {
             // If it's encountered for the first time, add data to userList
             userList.add(data);
             existingChatRoomIds.add(chatRoomId);
+            existingChatRoomIds.refresh();
+            await _fetchSubCategoriesForChatRoom(chatRoomId);
           }
         } else {
           // If chat room ID doesn't exist, generate a new one
@@ -294,6 +330,8 @@ class _ChatHomePageState extends State<ChatHomePage> {
           // Add data to userList
           userList.add(data);
           existingChatRoomIds.add(chatRoomId);
+          existingChatRoomIds.refresh();
+          await _fetchSubCategoriesForChatRoom(chatRoomId);
         }
       }
     }
@@ -308,6 +346,28 @@ class _ChatHomePageState extends State<ChatHomePage> {
     listenForChatChanges();
     return userList;
   }
+
+  Future<List<String>> _fetchSubCategoriesForChatRoom(String chatRoomId) async {
+    List<String> subCategories = [];
+    QuerySnapshot snapshot = await FirebaseFirestore.instance
+        .collection('colleges')
+        .doc(userCollegee)
+        .collection('collegePosts')
+        .where('chatRoomId', isEqualTo: chatRoomId)
+        .where('status', isEqualTo: 'Applied')
+        .get();
+
+    // Iterate through each document and extract the subCategory field
+    snapshot.docs.forEach((doc) {
+      String subCategory = doc['subCategory'];
+      subCategories.add(subCategory);
+    });
+    print('subcategories are below $subCategories');
+
+    return subCategories;
+  }
+
+
 
   Stream<QuerySnapshot> listenForChatChanges() {
     // Create a StreamController to manage the combined stream
