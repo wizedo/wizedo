@@ -485,7 +485,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                 ],
                               ),
                               messageText: WhiteText(
-                                "Task posters can't apply for their own tasks.",
+                                "You can't apply for your own post.",
                                 fontSize: 12,
                               ),
                             ),

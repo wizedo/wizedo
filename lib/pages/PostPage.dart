@@ -568,6 +568,7 @@ class _RegisterScreenState extends State<RegisterScreen> with WidgetsBindingObse
                       print(userCollegee);
 
 
+
                       // If college name is not available locally, fetch it from Firestore
                       if (userCollege == null) {
                         final userDoc = await firestore.collection('usersDetails').doc(email).get();
@@ -588,6 +589,9 @@ class _RegisterScreenState extends State<RegisterScreen> with WidgetsBindingObse
                         }
                       }
 
+                      //get usere who is posting his firstname
+                      final userDoc = await firestore.collection('usersDetails').doc(email).get();
+                      String firstname = (userDoc['firstname'] ?? 'unknown').toString().toLowerCase();
 
 
                       // Use a transaction for the Firestore write operations
@@ -619,7 +623,8 @@ class _RegisterScreenState extends State<RegisterScreen> with WidgetsBindingObse
                           'status': 'active', // active or rejected or applied
                           'createdAt': FieldValue.serverTimestamp(),
                           'college':userCollegee,
-                          'report':0
+                          'report':0,
+                          'firstname':firstname
                         });
                       });
                       Get.showSnackbar(

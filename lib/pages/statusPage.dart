@@ -203,48 +203,49 @@ class _statusPageState extends State<statusPage> {
                               Row(
                                 children: [
                                   Visibility(
-                                    visible: pstatus != 4 && pstatus != 5 && pstatus !=6 && pstatus !=1,
+                                    visible: pstatus != 4 && pstatus != 5 && pstatus != 6 && pstatus != 1,
                                     child: ElevatedButton(
-                                      onPressed: () async {
+                                      onPressed: pstatus == 3 ? null : () async {
                                         Get.defaultDialog(
-                                          // backgroundColor: Colors.transparent,
-                                            title: 'Confirmation',
-                                            titlePadding: EdgeInsets.only(top: 20),
-                                            contentPadding: EdgeInsets.all(25),
-                                            middleText: "Canceling without payment means you're giving up on completing this task. Are you sure?",
-                                            confirm: TextButton(
-                                                onPressed: () async {
-                                                  final firestore = FirebaseFirestore.instance;
-                                                  await firestore.runTransaction((transaction) async {
-                                                    final collegePostRef = firestore
-                                                        .collection('colleges')
-                                                        .doc(userCollegee)
-                                                        .collection('collegePosts')
-                                                        .doc(widget.postid);
-                                                    transaction.update(collegePostRef, {
-                                                      'pstatus':0,//it should be 1 actually
-                                                      'status':'active'
-                                                    });
-                                                  });
-                                                  Get.back(); // Going back using getx
-                                                  Get.back(); // Going back using getx
-                                                  Get.back(); // Going back using getx
-
-                                                },
-                                                child: Text('Yes')),
-                                            cancel: TextButton(
-                                                onPressed: (){
-                                                  Get.back(); // Going back using getx
-                                                },
-                                                child: Text('No'))
+                                          title: 'Confirmation',
+                                          titlePadding: EdgeInsets.only(top: 20),
+                                          contentPadding: EdgeInsets.all(25),
+                                          middleText: "Canceling without payment means you're giving up on completing this task. Are you sure?",
+                                          confirm: TextButton(
+                                            onPressed: () async {
+                                              final firestore = FirebaseFirestore.instance;
+                                              await firestore.runTransaction((transaction) async {
+                                                final collegePostRef = firestore
+                                                    .collection('colleges')
+                                                    .doc(userCollegee)
+                                                    .collection('collegePosts')
+                                                    .doc(widget.postid);
+                                                transaction.update(collegePostRef, {
+                                                  'pstatus': 0, // it should be 1 actually
+                                                  'status': 'active'
+                                                });
+                                              });
+                                              Get.back(); // Going back using GetX
+                                              Get.back(); // Going back using GetX
+                                              Get.back(); // Going back using GetX
+                                            },
+                                            child: Text('Yes'),
+                                          ),
+                                          cancel: TextButton(
+                                            onPressed: () {
+                                              Get.back(); // Going back using GetX
+                                            },
+                                            child: Text('No'),
+                                          ),
                                         );
                                       },
-                                      child: Text('Cancel'),
+                                      child: Text(pstatus == 3 ? 'Paid' : 'Cancel'),
                                     ),
                                   ),
+
                                   SizedBox(width: 40,),
                                   Visibility(
-                                    visible: pstatus != 4 && pstatus != 5 && pstatus !=6 && pstatus !=1,
+                                    visible: pstatus != 4 && pstatus != 5 && pstatus !=6 && pstatus !=1 && pstatus !=3,
                                     child: MyElevatedButton(
                                       onPressed: () async {
                                         final firestore = FirebaseFirestore.instance;
@@ -375,7 +376,7 @@ class _statusPageState extends State<statusPage> {
                                                       });
                                                     });
 
-
+                                                    await checkAppliedStatus();
                                                     final docRef = FirebaseFirestore.instance.collection('usersDetails').doc(documentData['workeremail']);
                                                     // Use a transaction to update totalapplied
                                                     FirebaseFirestore.instance.runTransaction((transaction) async {
@@ -473,7 +474,7 @@ class _statusPageState extends State<statusPage> {
                                           });
                                         });
 
-                                        Get.snackbar('Success', 'cancelled successfully');
+                                        Get.snackbar('Success', 'Requested for payment approval');
                                       },
                                       child: Text('Request'),
                                     ),

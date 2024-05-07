@@ -86,12 +86,12 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  String cleanUpUserName(String email) {
-    String userName = email.split('@')[0];
-    userName = userName.replaceAll(RegExp(r'[^\w\s]'), '');
-    userName = userName.replaceAll(RegExp(r'\d'), '');
-    return userName;
-  }
+  // String cleanUpUserName(String email) {
+  //   String userName = email.split('@')[0];
+  //   userName = userName.replaceAll(RegExp(r'[^\w\s]'), '');
+  //   userName = userName.replaceAll(RegExp(r'\d'), '');
+  //   return userName;
+  // }
 
   @override
   void initState() {
@@ -198,7 +198,7 @@ class _HomePageState extends State<HomePage> {
                   postid: data['postId'],
                   googledrivelink:data['googledrivelink'],
                   emailid: data['emailid'],
-                  college: data['college']
+                  college: data['college'],
               ),
             ),
           );
@@ -209,7 +209,7 @@ class _HomePageState extends State<HomePage> {
           date: data['createdAt'],
           description: data['description'],
           priceRange: data['totalPayment'],
-          userName: cleanUpUserName(data['emailid']),
+          userName: data['firstname'],
           finalDate: finalDate,
         ),
       );
