@@ -133,18 +133,17 @@ class _LoginPageState extends State<LoginPage> {
             .collection('usersDetails').doc(user.email).get();
         if (userDocSnapshot.exists) {
           // Check if email is verified
-          bool emailVerified = userDocSnapshot['emailVerified'] == 'yes';
-          if (!emailVerified) {
+          String emailVerified = userDocSnapshot['emailVerified'];
+          if (emailVerified == 'no') {
             // User's email is not verified, navigate to verification screen
             Get.to(() =>
                 EmailVerificationScreen(
                   userEmail: emailController.text,
                   userPassword: passController.text,
                 ));
-            return;
           } else {
             // User document does not exist
-            // Get.snackbar('Error', 'User data not found.');
+            Get.snackbar('Error', 'User data not found.');
           }
         } else {
           // Handle the case where user is null
@@ -207,6 +206,7 @@ class _LoginPageState extends State<LoginPage> {
         Get.to(() => UserDetails(userEmail: emailController.text));
       }
     } catch (error) {
+      print('catch error is $error');
       setState(() {
         loading = false;
         hideLoadingDialog();
@@ -591,7 +591,9 @@ class _LoginPageState extends State<LoginPage> {
                           WhiteText('Not a member?', fontSize: 12),
                           MyTextButton(
                             onPressed: () {
-                              Get.to(() => RegisterPage());
+                              Get.snackbar('Access Denied',
+                                  'Please signin with google for now.');
+                              // Get.to(() => RegisterPage());
                             },
                             buttonText: 'Register Now',
                             fontSize: 12,

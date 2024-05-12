@@ -57,7 +57,7 @@ class FAQPage extends StatelessWidget {
                     padding: EdgeInsets.all(8),
                     child: BlackText(
                       faqData[index]['question']!,
-                      fontSize: 16,
+                      fontSize: 15,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -66,7 +66,7 @@ class FAQPage extends StatelessWidget {
                       padding: EdgeInsets.only(left: 25, bottom: 30, right: 20),
                       child: BlackText(
                         faqData[index]['answer']!,
-                        fontSize: 9,
+                        fontSize: 12,
                         fontWeight: FontWeight.normal,
                       ),
                     ),

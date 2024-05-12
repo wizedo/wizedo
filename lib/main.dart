@@ -89,7 +89,8 @@ class MyApp extends StatelessWidget {
         if (userDetailsFilledLocally == true) {
           print('User details for $userEmail is true');
           // If userDetailsFilled locally is true, navigate to the last opened page
-          navigateToLastOpenedPage();
+          // navigateToLastOpenedPage();
+          Get.offAll(() => splashscreen());
         } else {
           Get.to(() => LoginPage());
         }
@@ -102,28 +103,34 @@ class MyApp extends StatelessWidget {
     }
   }
 
-  void navigateToLastOpenedPage() async {
-    String lastOpenedPage = await getLastOpenedPage();
-    switch (lastOpenedPage) {
-      case 'RegisterScreen':
-        Get.offAll(() => RegisterScreen());
-        break;
-    // Add cases for other pages if needed
-      default:
-        Get.offAll(() => splashscreen());
-    }
-  }
+  // void navigateToLastOpenedPage() async {
+  //   String? lastOpenedPage = await getLastOpenedPage();
+  //   switch (lastOpenedPage) {
+  //     case 'RegisterScreen':
+  //       Get.offAll(() => RegisterScreen());
+  //       break;
+  //   // Add cases for other pages if needed
+  //     default:
+  //       Get.offAll(() => splashscreen());
+  //   }
+  // }
 
-  Future<String> getLastOpenedPage() async {
-    try {
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      String lastOpenedPage = prefs.getString('lastOpenedPage') ?? 'splashscreen';
-      return lastOpenedPage;
-    } catch (error) {
-      print('Error getting last opened page: $error');
-      return 'splashscreen'; // Default to splashscreen in case of an error
-    }
-  }
+  // Future<String?> getLastOpenedPage() async {
+  //   try {
+  //     SharedPreferences prefs = await SharedPreferences.getInstance();
+  //     String? lastOpenedPage = prefs.getString('lastOpenedPage');
+  //     print('below is last opened page $lastOpenedPage');
+  //     if (lastOpenedPage == 'seteverythingtoreset') {
+  //       // If last opened page is 'seteverythingtoreset', set it to 'splashscreen'
+  //       lastOpenedPage = 'splashscreen';
+  //     }
+  //     return lastOpenedPage;
+  //   } catch (error) {
+  //     print('Error getting last opened page: $error');
+  //     return 'splashscreen'; // Default to splashscreen in case of an error
+  //   }
+  // }
+
 }
 
 Future<bool> getUserDetailsFilledLocally(String email) async {

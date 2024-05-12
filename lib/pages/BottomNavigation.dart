@@ -125,7 +125,7 @@ class _BottomNavigationState extends State<BottomNavigation> {
                 ),
                 GButton(
                   icon: Icons.sticky_note_2_rounded,
-                  text: 'Applied',
+                  text: 'Proposals',
                   textStyle: TextStyle(fontSize: 12, color: Colors.white),
                   iconSize: 24, // Adjust the icon size if necessary
                   padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4), // Adjust padding if necessary

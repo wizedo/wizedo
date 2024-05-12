@@ -15,7 +15,7 @@ class FilterChipWidget extends StatelessWidget {
     required this.onTap,
     this.width = 100,
     this.height = 30,
-    this.fontSize,
+    this.fontSize =8,
   });
 
   @override
@@ -33,7 +33,7 @@ class FilterChipWidget extends StatelessWidget {
             style: GoogleFonts.mPlusRounded1c(
               textStyle: TextStyle(
                 color: Colors.white,
-                fontSize: fontSize ?? 8,
+                fontSize: fontSize ?? 11,
               ),
             ),
           ),

@@ -424,7 +424,7 @@ class _HomePageState extends State<HomePage> {
   Widget buildListViewForCategory(String category) {
     print('building list view category for $category');
     if (_categoryDocuments[category] == null || _categoryDocuments[category]!.isEmpty) {
-      return Center(child: WhiteText('No data available'));
+      return Center(child: WhiteText('No active posts'));
     } else {
       // Check if the initially fetched posts are less than or equal to 4
       if (_categoryDocuments[category]!.length <= 4) {

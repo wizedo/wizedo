@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart'; // Import Firestore
 import 'package:get/get.dart';
+import '../components/white_text.dart';
 import '../pages/LoginPage.dart';
 import '../pages/UserDetailsPage.dart';
 
@@ -71,9 +72,37 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
       if (user != null) {
         await user.delete();
         Get.offAll(LoginPage());
-        Get.snackbar(
-          'Account Creation Failed',
-          'Email verification failed. Please try registering again.',
+        Get.showSnackbar(
+          GetSnackBar(
+            borderRadius: 8,
+            padding: EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+            animationDuration: Duration(milliseconds: 800),
+            duration: Duration(milliseconds: 3000),
+            margin: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+            snackPosition: SnackPosition.TOP,
+            isDismissible: true,
+            backgroundColor: Color(0xFF955AF2),
+            // Set your desired color here
+            titleText: Row(
+              children: [
+                Icon(
+                  Icons.warning,
+                  color: Colors.white,
+                  size: 20,
+                ),
+                SizedBox(width: 8),
+                WhiteText(
+                  'Account Creation Failed',
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                ),
+              ],
+            ),
+            messageText: WhiteText(
+              'Email verification failed. Please try registering again.',
+              fontSize: 12,
+            ),
+          ),
         );
       }
     } catch (error) {
@@ -96,7 +125,38 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
           _isEmailVerified = true;
         });
         Get.to(() => UserDetails(userEmail: widget.userEmail));
-        Get.snackbar('Email Verified', 'Your email has been verified successfully.');
+        Get.showSnackbar(
+          GetSnackBar(
+            borderRadius: 8,
+            padding: EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+            animationDuration: Duration(milliseconds: 800),
+            duration: Duration(milliseconds: 3000),
+            margin: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+            snackPosition: SnackPosition.TOP,
+            isDismissible: true,
+            backgroundColor: Color(0xFF955AF2),
+            // Set your desired color here
+            titleText: Row(
+              children: [
+                Icon(
+                  Icons.check_circle,
+                  color: Colors.white,
+                  size: 20,
+                ),
+                SizedBox(width: 8),
+                WhiteText(
+                  'Email Verified',
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                ),
+              ],
+            ),
+            messageText: WhiteText(
+              'Your email has been verified successfully.',
+              fontSize: 12,
+            ),
+          ),
+        );
       }
     } catch (error) {
       print('Error checking email verification: $error');

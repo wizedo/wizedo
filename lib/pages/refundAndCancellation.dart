@@ -32,22 +32,23 @@ class RefundAndCancellation extends StatelessWidget {
             children: <Widget>[
               Text('Refund And Cancellation Policy',style: TextStyle(fontSize: screenHeight > 600 ? 15 : 14,color: Colors.red),),
               SizedBox(height: 10,),
-              Text('Last updated on 18-03-2024 14:59:10',style: TextStyle(fontSize: screenHeight > 600 ? 10 : 9,color: Colors.white),),
+              Text('Last updated on ' + getCurrentDate(),style: TextStyle(fontSize: screenHeight > 600 ? 10 : 9,color: Colors.white),),
               SizedBox(height: 10,),
-              Text('SCANPICK PRIVATE LIMITED believes in helping its customers as far as possible, and has therefore a liberal cancellation policy. Under this policy:',style: TextStyle(fontSize: screenHeight > 600 ? 10 : 9,color: Colors.white),),
+              Text('Scanpick Private Limited provides a platform for peer-to-peer learning and knowledge exchange. As such, please note the following guidelines regarding cancellations and refunds:',style: TextStyle(fontSize: screenHeight > 600 ? 10 : 9,color: Colors.white),),
               SizedBox(height: 10,),
-              Text('• Cancellations will be considered only if the request is made immediately after placing the order. However, the cancellation request may not be entertained if the orders have been communicated to the vendors/merchants and they have initiated the process of shipping them.',style: TextStyle(fontSize: screenHeight > 600 ? 10 : 9,color: Colors.white),),
+              Text('• Once a learning session has been initiated between two users, cancellations or refunds will not be facilitated by Scanpick Private Limited. Users are encouraged to resolve any issues or concerns regarding the learning process directly with each other.',style: TextStyle(fontSize: screenHeight > 600 ? 10 : 9,color: Colors.white),),
               SizedBox(height: 10,),
-              Text('• SCANPICK PRIVATE LIMITED does not accept cancellation requests for perishable items like flowers, eatables etc. However, refund/replacement can be made if the customer establishes that the quality of product delivered is not good.',style: TextStyle(fontSize: screenHeight > 600 ? 10 : 9,color: Colors.white),),
-              SizedBox(height: 10,),
-              Text('• In case of receipt of damaged or defective items please report the same to our Customer Service team. The request will, however, be entertained once the merchant has checked and determined the same at his own end. This should be reported within 2 Days days of receipt of the products. In case you feel that the product received is not as shown on the site or as per your expectations, you must bring it to the notice of our customer service within 2 Days days of receiving the product. The Customer Service Team after looking into your complaint will take an appropriate decision.',style: TextStyle(fontSize: screenHeight > 600 ? 10 : 9,color: Colors.white),),
-              SizedBox(height: 10,),
-              Text('• In case of complaints regarding products that come with a warranty from manufacturers, please refer the issue to them. In case of any Refunds approved by the SCANPICK PRIVATE LIMITED, it’ll take 1-2 Days days for the refund to be processed to the end customer.',style: TextStyle(fontSize: screenHeight > 600 ? 10 : 9,color: Colors.white),),
+              Text('• It is the responsibility of both the learner and the instructor to ensure mutual agreement and satisfaction regarding the content and delivery of the learning session. Scanpick Private Limited does not assume liability for any disputes or disagreements arising between users.',style: TextStyle(fontSize: screenHeight > 600 ? 10 : 9,color: Colors.white),),
               SizedBox(height: 10,),
             ],
           ),
         ),
       ),
     );
+  }
+
+  String getCurrentDate() {
+    // Replace this function with your method to get the current date in the desired format
+    return '10-05-2024 21:45:10';
   }
 }

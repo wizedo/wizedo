@@ -16,7 +16,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 5.0.0+6
+version: 5.0.0+10
 
 environment:
   sdk: '>=3.2.0-134.1.beta <4.0.0'
@@ -67,19 +67,29 @@ dependencies:
   url_launcher: ^6.2.4
   razorpay_web: ^1.4.2
   loading_animation_widget: ^1.2.1
+  flutter_launcher_icons: ^0.13.1
 #  google_mlkit_text_recognition: ^0.11.0
 #  permission_handler: ^11.3.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  flutter_launcher_icons: "^0.13.1"
+  flutter_lints: ^3.0.1
+
+
+flutter_launcher_icons:
+    android: "launcher_icon"
+    ios: true
+    image_path: "lib/images/peermateiconlogo.png"
+    min_sdk_android: 21
+
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
   # activated in the `analysis_options.yaml` file located at the root of your
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
-  flutter_lints: ^3.0.1
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -95,9 +105,9 @@ flutter:
     - lib/images/phoneno.png
     - lib/images/password.png
     - lib/images/signup.png
-    - lib/images/pdf.png
     - lib/images/userdetails.png
     - lib/images/peermatelogo.png
+    - lib/images/peermateiconlogo.png
     - lib/images/password.png
     - lib/images/phonescreen.png
 

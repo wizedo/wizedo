@@ -362,7 +362,7 @@ class _settingScreenState extends State<settingScreen> {
                         onTap: (){
                           // sendOTP();
                           // Get.changeTheme(ThemeData.dark());
-                          Get.to(CompletedTasksPage());
+                          // Get.to(CompletedTasksPage());
                         },
                         child: cardSettingContainer(text: 'Payment', iconData: Icons.payment)),
                     InkWell(
@@ -465,19 +465,19 @@ class _settingScreenState extends State<settingScreen> {
                       ),
                     ),
                     //important snippet
-                    Container(
-                      child: TextButton.icon(
-                        onPressed: () {
-                          Get.to(PhoneNumberVerification());
-                        },
-                        icon: Icon(Icons.phone, color: Colors.white),
-                        label: Text('Phone Number Verification', style: TextStyle(color: Colors.white, fontSize: screenHeight < 600 ? 9 : 12)),
-                        style: ButtonStyle(
-                          minimumSize: MaterialStateProperty.all(Size(double.infinity, getFontSize(50, screenHeight))),
-                          alignment: Alignment.centerLeft,
-                        ),
-                      ),
-                    ),
+                    // Container(
+                    //   child: TextButton.icon(
+                    //     onPressed: () {
+                    //       Get.to(PhoneNumberVerification());
+                    //     },
+                    //     icon: Icon(Icons.phone, color: Colors.white),
+                    //     label: Text('Phone Number Verification', style: TextStyle(color: Colors.white, fontSize: screenHeight < 600 ? 9 : 12)),
+                    //     style: ButtonStyle(
+                    //       minimumSize: MaterialStateProperty.all(Size(double.infinity, getFontSize(50, screenHeight))),
+                    //       alignment: Alignment.centerLeft,
+                    //     ),
+                    //   ),
+                    // ),
                     Container(
                       child: TextButton.icon(
                         onPressed: () {

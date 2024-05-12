@@ -91,7 +91,7 @@ class _acceptedPageState extends State<acceptedPage> {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         title: WhiteText(
-          'Pending Jobs',
+          'Proposals & offers',
           fontSize: 20,
           fontWeight: FontWeight.bold,
         ),
@@ -110,30 +110,32 @@ class _acceptedPageState extends State<acceptedPage> {
                     SingleChildScrollView(
                       scrollDirection: Axis.horizontal,
                       child: Padding(
-                        padding: const EdgeInsets.only(top: 5,left: 50),
+                        padding: const EdgeInsets.only(top: 5,left: 40),
                         child: Row(
                           children: [
                             FilterChipWidget(
                               label: 'Applied',
+                              fontSize: 11,
                               selectedCategory: _selectedCategory,
                               onTap: () {
                                 setState(() {
                                   _selectedCategory = 'Applied';
                                 });
                               },
-                              width: 140,
-                              height: 30,
+                              width: 180,
+                              height: 37,
                             ),
                             FilterChipWidget(
                               label: 'Recieved',
+                              fontSize: 11,
                               selectedCategory: _selectedCategory,
                               onTap: () {
                                 setState(() {
                                   _selectedCategory = 'Recieved';
                                 });
                               },
-                              width: 160,
-                              height: 30,
+                              width: 180,
+                              height: 37,
                             ),
                           ],
                         ),
@@ -141,7 +143,7 @@ class _acceptedPageState extends State<acceptedPage> {
                     ),
 
                     Container(
-                      height: 40,
+                      height: 45,
                       color: Color(0xFF211B2E),
                       child: Padding(
                         padding: const EdgeInsets.only(left: 25,top: 5,right: 10),
@@ -214,7 +216,7 @@ class _acceptedPageState extends State<acceptedPage> {
                             );
                           } else {
                             return const Center(
-                              child: WhiteText('No active posts'),
+                              child: WhiteText('No activity yet'),
                             );
                           }
                         }

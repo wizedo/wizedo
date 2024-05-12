@@ -39,7 +39,7 @@ class _RegisterScreenState extends State<RegisterScreen> with WidgetsBindingObse
   void initState() {
     super.initState();
     WidgetsBinding.instance!.addObserver(this);
-    loadSavedValues();
+    // loadSavedValues();
     adloaded();
   }
 
@@ -73,66 +73,67 @@ class _RegisterScreenState extends State<RegisterScreen> with WidgetsBindingObse
 
 
 
-  Future<void> loadSavedValues() async {
-    print('getting field values from locally');
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    setState(() {
-      _projectName.text = prefs.getString('projectName') ?? '';
-      _numberOfPages.text = prefs.getString('numberOfPages') ?? '';
-      _descriptionText.text = prefs.getString('descriptionText') ?? '';
-      _datePicker.text = prefs.getString('datePicker') ?? '';
-      _paymentDetails.text = prefs.getString('paymentDetails') ?? '';
-      _googledrivefilelink.text = prefs.getString('googledrivefilelink') ?? '';
-      _selectedCategory.value = prefs.getString('selectedCategory') ?? 'College Project';
-
-    });
-  }
-
-  Future<void> saveLastOpenedPageAndData() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-
-      print('setting values normally');
-      // Save the values normally
-      prefs.setString('lastOpenedPage', 'RegisterScreen');
-      prefs.setString('projectName', _projectName.text);
-      prefs.setString('numberOfPages', _numberOfPages.text);
-      prefs.setString('descriptionText', _descriptionText.text);
-      prefs.setString('datePicker', _datePicker.text);
-      prefs.setString('paymentDetails', _paymentDetails.text);
-      prefs.setString('googledrivefilelink', _googledrivefilelink.text);
-      prefs.setString('selectedCategory', _selectedCategory.value);
-
-  }
-
-
-  Future<void> resetSharedPreferencesValues() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    prefs.setString('lastOpenedPage', '');
-    prefs.setString('projectName', '');
-    prefs.setString('numberOfPages', '');
-    prefs.setString('descriptionText', '');
-    prefs.setString('datePicker', '');
-    prefs.setString('paymentDetails', '');
-    prefs.setString('googledrivefilelink', '');
-    prefs.setString('selectedCategory', '');
-  }
-
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    if (state == AppLifecycleState.paused) {
-      // Save the last opened page and form data when the app is in the background
-      await saveLastOpenedPageAndData();
-    }else if(state==AppLifecycleState.detached){
-      print('reset  detached state called');
-      prefs.setString('lastOpenedPage', '');
-      await resetSharedPreferencesValues();
-      prefs.setString('lastOpenedPage', '');
-      prefs.setString('lastOpenedPage', '');
-
-      print('Detached state values reset');
-    }
-  }
+  // Future<void> loadSavedValues() async {
+  //   print('getting field values from locally');
+  //   SharedPreferences prefs = await SharedPreferences.getInstance();
+  //   setState(() {
+  //     _projectName.text = prefs.getString('projectName') ?? '';
+  //     _numberOfPages.text = prefs.getString('numberOfPages') ?? '';
+  //     _descriptionText.text = prefs.getString('descriptionText') ?? '';
+  //     _datePicker.text = prefs.getString('datePicker') ?? '';
+  //     _paymentDetails.text = prefs.getString('paymentDetails') ?? '';
+  //     _googledrivefilelink.text = prefs.getString('googledrivefilelink') ?? '';
+  //     _selectedCategory.value = prefs.getString('selectedCategory') ?? 'College Project';
+  //
+  //   });
+  // }
+  //
+  // Future<void> saveLastOpenedPageAndData() async {
+  //   SharedPreferences prefs = await SharedPreferences.getInstance();
+  //
+  //     print('setting values normally');
+  //     // Save the values normally
+  //     prefs.setString('lastOpenedPage', 'RegisterScreen');
+  //     prefs.setString('projectName', _projectName.text);
+  //     prefs.setString('numberOfPages', _numberOfPages.text);
+  //     prefs.setString('descriptionText', _descriptionText.text);
+  //     prefs.setString('datePicker', _datePicker.text);
+  //     prefs.setString('paymentDetails', _paymentDetails.text);
+  //     prefs.setString('googledrivefilelink', _googledrivefilelink.text);
+  //     prefs.setString('selectedCategory', _selectedCategory.value);
+  //
+  // }
+  //
+  //
+  // Future<void> resetSharedPreferencesValues() async {
+  //   print('resetting the values');
+  //   SharedPreferences prefs = await SharedPreferences.getInstance();
+  //   prefs.setString('lastOpenedPage', 'seteverythingtoreset');
+  //   prefs.setString('projectName', '');
+  //   prefs.setString('numberOfPages', '');
+  //   prefs.setString('descriptionText', '');
+  //   prefs.setString('datePicker', '');
+  //   prefs.setString('paymentDetails', '');
+  //   prefs.setString('googledrivefilelink', '');
+  //   prefs.setString('selectedCategory', '');
+  // }
+  //
+  // @override
+  // void didChangeAppLifecycleState(AppLifecycleState state) async {
+  //   SharedPreferences prefs = await SharedPreferences.getInstance();
+  //   if (state == AppLifecycleState.paused) {
+  //     // Save the last opened page and form data when the app is in the background
+  //     await saveLastOpenedPageAndData();
+  //   }else if(state==AppLifecycleState.detached){
+  //     print('reset  detached state called');
+  //     prefs.setString('lastOpenedPage', 'seteverythingtoreset');
+  //     await resetSharedPreferencesValues();
+  //     prefs.setString('lastOpenedPage', 'seteverythingtoreset');
+  //     prefs.setString('lastOpenedPage', 'seteverythingtoreset');
+  //
+  //     print('Detached state values reset');
+  //   }
+  // }
 
   void _showLoadingDialog() {
     Get.dialog(
@@ -627,6 +628,7 @@ class _RegisterScreenState extends State<RegisterScreen> with WidgetsBindingObse
                           'firstname':firstname
                         });
                       });
+
                       Get.showSnackbar(
                         GetSnackBar(
                           borderRadius: 8,

@@ -180,17 +180,17 @@ class _UserDetailsState extends State<UserDetails> with WidgetsBindingObserver {
                         // Capitalize the first letter of the name
                         final capitalizedValue = _capitalizeFirstLetter(value);
 
-                        if (capitalizedValue.length < 5) {
-                          addError(error: 'Name should be at least 5 characters');
-                          return 'Name should be at least 5 characters';
+                        if (capitalizedValue.length < 1) {
+                          addError(error: 'Name should be at least 1 characters');
+                          return 'Name should be at least 1 characters';
                         } else {
-                          removeError(error: 'Name should be at least 5 characters');
+                          removeError(error: 'Name should be at least 1 characters');
                         }
-                        if (capitalizedValue.length > 20) {
-                          addError(error: 'Maximum characters allowed is 20');
-                          return 'Maximum characters allowed is 20';
+                        if (capitalizedValue.length > 40) {
+                          addError(error: 'Maximum characters allowed is 40');
+                          return 'Maximum characters allowed is 40';
                         } else {
-                          removeError(error: 'Maximum characters allowed is 20');
+                          removeError(error: 'Maximum characters allowed is 40');
                         }
                         if (RegExp(r'[0-9]').hasMatch(capitalizedValue)) {
                           addError(error: 'Name should not contain numbers');
@@ -265,11 +265,11 @@ class _UserDetailsState extends State<UserDetails> with WidgetsBindingObserver {
                         // Capitalize the first letter of the name
                         final capitalizedValue = _capitalizeFirstLetter(value);
 
-                        if (capitalizedValue.length < 5) {
-                          addError(error: 'Last Name should be at least 5 characters');
-                          return 'Last Name should be at least 5 characters';
+                        if (capitalizedValue.length < 1) {
+                          addError(error: 'Last Name should be at least 1 characters');
+                          return 'Last Name should be at least 1 characters';
                         } else {
-                          removeError(error: 'Last Name should be at least 5 characters');
+                          removeError(error: 'Last Name should be at least 1 characters');
                         }
 
                         // Check for leading spaces
@@ -298,11 +298,11 @@ class _UserDetailsState extends State<UserDetails> with WidgetsBindingObserver {
                         }
 
 
-                        if (capitalizedValue.length > 27) {
-                          addError(error: 'Maximum characters allowed is 27');
-                          return 'Maximum characters allowed is 27';
+                        if (capitalizedValue.length > 40) {
+                          addError(error: 'Maximum characters allowed is 40');
+                          return 'Maximum characters allowed is 40';
                         } else {
-                          removeError(error: 'Maximum characters allowed is 30');
+                          removeError(error: 'Maximum characters allowed is 40');
                         }
                         if (RegExp(r'[0-9]').hasMatch(capitalizedValue)) {
                           addError(error: 'Last Name should not contain numbers');

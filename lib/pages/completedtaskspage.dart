@@ -173,7 +173,7 @@ class _CompletedTasksPageState extends State<CompletedTasksPage> {
                             );
                           } else {
                             return const Center(
-                              child: WhiteText('No active posts'),
+                              child: WhiteText('No completed tasks'),
                             );
                           }
                         }
