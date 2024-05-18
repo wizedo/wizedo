@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:swipeable_button_view/swipeable_button_view.dart';
@@ -37,7 +38,7 @@ class _UserDetailsState extends State<UserDetails> with WidgetsBindingObserver {
   final TextEditingController ulastnameController = TextEditingController();
   final TextEditingController phonenoController = TextEditingController();
   final TextEditingController userYearController = TextEditingController();
-  bool _sliderValue = false;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final _formKey = GlobalKey<FormState>();
 
   String hexColor = '#211b2e';
@@ -97,6 +98,173 @@ class _UserDetailsState extends State<UserDetails> with WidgetsBindingObserver {
     WidgetsBinding.instance?.removeObserver(this);
 
     super.dispose();
+  }
+
+  Future<dynamic> signInWithGoogle() async {
+    try {
+      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+
+      if (googleUser == null) {
+        // User canceled the sign-in process
+        print('user has clicked out of google sign in pop up');
+        return null;
+      }
+
+      final GoogleSignInAuthentication? googleAuth =
+      await googleUser.authentication;
+
+      final credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth?.accessToken,
+        idToken: googleAuth?.idToken,
+      );
+
+      Get.showSnackbar(
+        GetSnackBar(
+          borderRadius: 8,
+          padding: EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+          animationDuration: Duration(milliseconds: 800),
+          duration: Duration(milliseconds: 3000),
+          margin: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+          snackPosition: SnackPosition.TOP,
+          isDismissible: true,
+          backgroundColor: Color(0xFF955AF2),
+          // Set your desired color here
+          titleText: Row(
+            children: [
+              Icon(
+                Icons.check_circle,
+                color: Colors.white,
+                size: 20,
+              ),
+              SizedBox(width: 8),
+              WhiteText(
+                'Success',
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+              ),
+            ],
+          ),
+          messageText: WhiteText(
+            'You have successfully logged in',
+            fontSize: 12,
+          ),
+        ),
+      );
+
+      String userEmail = googleUser.email;
+      print("useremail through google sign is: $userEmail");
+
+      // Save user Gmail ID locally using shared preferences
+      await saveUserEmailLocally(userEmail);
+
+      // Now, check userDetailsfilled and redirect the user
+      bool userDetailsfilled = await getUserDetailsFilled(userEmail);
+      String userName = await getUserName(userEmail);
+      print(userDetailsfilled);
+      print('Below is username');
+      print(userName);
+      await setUserDetailsFilledLocally(userEmail, userDetailsfilled);
+      await setUserNameLocally(userEmail, userName);
+
+      if (userDetailsfilled == true) {
+        await storeUserCollegeLocally(userEmail);
+        Get.offAll(() => BottomNavigation());
+      } else {
+        Get.to(() => UserDetails(userEmail: userEmail));
+      }
+
+      return await FirebaseAuth.instance.signInWithCredential(credential);
+    } catch (e) {
+      // Handle exceptions appropriately
+      print('exception->$e');
+      return null;
+    }
+  }
+
+
+  Future<void> storeUserCollegeLocally(String userEmail) async {
+    try {
+      print("in try block of storeusercollegelocally");
+      final docSnapshot =
+      await _firestore.collection('usersDetails').doc(userEmail).get();
+      if (docSnapshot.exists) {
+        final userData = docSnapshot.data() as Map<String, dynamic>;
+        final userCollege = userData['college'];
+        print('User College stored locally: $userCollege');
+
+        // Store the user's college name locally
+        await saveCollegeLocally(userCollege, userEmail);
+      } else {
+        print('User details document does not exist');
+      }
+    } catch (error) {
+      print('Error fetching user details: $error');
+    }
+  }
+
+  Future<void> setUserNameLocally(String email, String name) async {
+    try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      await prefs.setString('userName_$email', name);
+    } catch (error) {
+      print('Error setting user name locally: $error');
+    }
+  }
+
+  Future<void> saveUserEmailLocally(String userEmail) async {
+    try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      await prefs.setString('userEmail', userEmail);
+    } catch (error) {
+      print('Error saving user email locally: $error');
+    }
+  }
+
+  Future<bool> getUserDetailsFilled(String userEmail) async {
+    try {
+      if (userEmail.isEmpty) {
+        print('Error: Empty email passed to getUserDetailsFilled');
+        return false;
+      }
+      DocumentReference userDocRef =
+      _firestore.collection('usersDetails').doc(userEmail);
+      DocumentSnapshot userDocSnapshot = await userDocRef.get();
+      if (userDocSnapshot.exists) {
+        bool userDetailsfilled = userDocSnapshot['userDetailsfilled'];
+        print('User details value printed');
+        print('userDetailsfilled value for $userEmail: $userDetailsfilled');
+        return userDetailsfilled ?? false;
+      } else {
+        return false;
+      }
+    } catch (error) {
+      print('Error getting user details: $error');
+      return false;
+    }
+  }
+
+  Future<String> getUserName(String userEmail) async {
+    try {
+      if (userEmail.isEmpty) {
+        print('Error: Empty email passed to getUserName');
+        return ''; // Return an empty string or handle the error case accordingly
+      }
+      DocumentReference userDocRef =
+      _firestore.collection('usersDetails').doc(userEmail);
+      DocumentSnapshot userDocSnapshot = await userDocRef.get();
+
+      if (userDocSnapshot.exists) {
+        String username = userDocSnapshot['firstname'];
+        print('User details value printed');
+        print('username value for $userEmail: $username');
+        return username;
+      } else {
+        return ''; // Return an empty string or handle the case where the document doesn't exist
+      }
+    } catch (error) {
+      print('Error getting user details: $error');
+      return ''; // Return an empty string or handle the error case accordingly
+    }
   }
 
   @override
@@ -656,15 +824,16 @@ class _UserDetailsState extends State<UserDetails> with WidgetsBindingObserver {
                                     print(
                                         'userDetailsFilledLocally: $userDetailsFilledLocally');
 
-                                    Get.snackbar('Success', 'Please login into your account');
+                                    // Get.snackbar('Success', 'Please login into your account');
 
-                                    await Navigator.push(
-                                      context,
-                                      PageTransition(
-                                        type: PageTransitionType.fade,
-                                        child: LoginPage(),
-                                      ),
-                                    );
+                                    await signInWithGoogle();
+                                    // await Navigator.push(
+                                    //   context,
+                                    //   PageTransition(
+                                    //     type: PageTransitionType.fade,
+                                    //     child:BottomNavigation(),
+                                    //   ),
+                                    // );
 
                                     setState(() {
                                       _isLoading = false; // Set loading to false when operation is complete
@@ -672,7 +841,7 @@ class _UserDetailsState extends State<UserDetails> with WidgetsBindingObserver {
                                   }
                                 } catch (error) {
                                   print('Error updating user details: $error');
-                                  Get.snackbar('Error', 'Failed to update user details');
+                                  // Get.snackbar('Error', 'Failed to update user details');
                                   setState(() {
                                     _isLoading = false; // Set loading to false when operation fails
                                   });

@@ -7,7 +7,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:wizedo/components/BlackText.dart';
 import 'package:wizedo/components/colors/sixty.dart';
+import '../components/CustomRichText.dart';
 import '../components/my_elevatedbutton.dart';
 import '../components/my_text_field.dart';
 import '../components/my_textbutton.dart';
@@ -427,188 +429,83 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
-    Color backgroundColor = ColorUtil.hexToColor('#211b2e');
-
     return Scaffold(
-      backgroundColor: Color(0xFF211B2E),
-      body: SafeArea(
-        child: Center(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 25),
-            child: Stack(alignment: Alignment.center, children: [
-              SingleChildScrollView(
+      backgroundColor: Colors.transparent, // Make Scaffold background transparent
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomRight,
+            colors: [
+              Colors.white.withOpacity(1), // Very light white
+              Color(0xFF955AF2), // Your purplish color
+            ],
+            stops: [0.5, 1], // Adjust the stops as needed
+          ),
+        ),
+        child: SafeArea(
+          child: Center(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 30),
+              child: SingleChildScrollView(
                 child: Container(
                   width: 310,
+                  height: MediaQuery.of(context).size.height,
                   child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      SizedBox(height: 50),
-                      Image.asset(
-                        'lib/images/login_animation.png',
-                        width: 400,
-                        height: 160,
-                      ),
-                      Align(
-                        alignment: Alignment.topLeft,
-                        child: WhiteText(
-                          'Login',
-                          fontSize: 36,
-                          fontWeight: FontWeight.bold,
+                      Flexible(
+                        flex: 4, // Adjust flex as needed
+                        child: Align(
+                          alignment: Alignment.center,
+                          child: CustomRichText(
+                            firstText: 'Peer',
+                            secondText: 'mate',
+                            firstColor: Colors.black,
+                            secondColor: Color(0xFF955AF2),
+                            firstFontSize: 35,
+                            secondFontSize: 35,
+                          ),
                         ),
                       ),
-                      Align(
-                        alignment: Alignment.topLeft,
-                        child:
-                            WhiteText('Please login to continue', fontSize: 16),
-                      ),
-                      SizedBox(height: 25),
-                      MyTextField(
-                        controller: emailController,
-                        label: 'Email',
-                        obscureText: false,
-                        keyboardType: TextInputType.emailAddress,
-                        prefixIcon: Icon(
-                          Icons.mail,
-                          color: Colors.white,
-                        ),
-                        fontSize: 11.5,
-                      ),
-                      SizedBox(height: 25),
-                      MyTextField(
-                        controller: passController,
-                        label: 'Password',
-                        obscureText: !passwordVisibility,
-                        prefixIcon: Icon(
-                          Icons.password,
-                          color: Colors.white,
-                        ),
-                        suffixIcon: GestureDetector(
+                      Flexible(
+                        flex: 1, // Adjust flex as needed
+                        child: GestureDetector(
                           onTap: () {
-                            setState(() {
-                              passwordVisibility = !passwordVisibility;
-                            });
+                            signInWithGoogle();
                           },
-                          child: Icon(
-                            passwordVisibility
-                                ? Icons.visibility_off
-                                : Icons.visibility,
-                            color: Colors.white,
-                            size: 20,
-                          ),
-                        ),
-                        fontSize: 11.5,
-                      ),
-                      Align(
-                        alignment: Alignment.topRight,
-                        child: MyTextButton(
-                          onPressed: () {
-                            resetPassword(
-                                context); // Call the resetPassword method on button press
-                          },
-                          buttonText: 'Forgot Password?',
-                          fontSize: 12,
-                        ),
-                      ),
-                      SizedBox(height: 15),
-                      MyElevatedButton(
-                        onPressed: () {
-                          login(context);
-                        },
-                        buttonText: 'Login',
-                        fontWeight: FontWeight.bold,
-                      ),
-                      SizedBox(height: 19),
-                      Row(
-                        children: [
-                          Expanded(
-                            flex: 3,
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(10),
                             child: Container(
-                              height: 1.5,
-                              decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                                  begin: Alignment.centerLeft,
-                                  end: Alignment.centerRight,
-                                  stops: [0.0, 0.5, 1.0, 1.0],
-                                  colors: [
-                                    Colors.transparent,
-                                    Color(0xFF955AF2),
-                                    Color(0xFF955AF2),
-                                    Colors.transparent,
+                              color: Color(0xFF955AF2),
+                              width: 300,
+                              height: 55,
+                              child: Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Row(
+                                  children: [
+                                    Image.asset(
+                                      'lib/images/google.png',
+                                      width: 45,
+                                      height: 45,
+                                    ),
+                                    SizedBox(width: 18,),
+                                    Center(child: WhiteText('Sign in with Google',fontWeight: FontWeight.bold,))
                                   ],
                                 ),
                               ),
                             ),
                           ),
-                          Expanded(
-                            flex: 5,
-                            child: Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 8),
-                              child: PurpleText(
-                                'Or Continue with',
-                                fontSize: 12,
-                                textAlign: TextAlign.center,
-                              ),
-                            ),
-                          ),
-                          Expanded(
-                            flex: 3,
-                            child: Container(
-                              height: 1.5,
-                              decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                                  begin: Alignment.centerLeft,
-                                  end: Alignment.centerRight,
-                                  stops: [0.0, 0.0, 0.5, 1.0],
-                                  colors: [
-                                    Colors.transparent,
-                                    Color(0xFF955AF2),
-                                    Color(0xFF955AF2),
-                                    Colors.transparent,
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      SizedBox(height: 25),
-                      GestureDetector(
-                        onTap: () {
-                          signInWithGoogle();
-                        },
-                        child: Image.asset(
-                          'lib/images/google.png',
-                          width: 45,
-                          height: 45,
                         ),
                       ),
-
-                      SizedBox(height: 15),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          WhiteText('Not a member?', fontSize: 12),
-                          MyTextButton(
-                            onPressed: () {
-                              Get.snackbar('Access Denied',
-                                  'Please signin with google for now.');
-                              // Get.to(() => RegisterPage());
-                            },
-                            buttonText: 'Register Now',
-                            fontSize: 12,
-                          ),
-                        ],
-                      ),
-                      // SizedBox(height: MediaQuery.of(context).viewInsets.bottom + 150),
                     ],
                   ),
                 ),
               ),
-            ]),
+            ),
           ),
         ),
       ),
     );
   }
+
 }
