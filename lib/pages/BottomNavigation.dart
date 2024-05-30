@@ -120,6 +120,7 @@ class _BottomNavigationState extends State<BottomNavigation> {
                   iconSize: 24, // Adjust the icon size if necessary
                   padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4), // Adjust padding if necessary
                   onPressed: () {
+                    controller.changePage(0);
                     // Add your onPressed logic here
                   },
                 ),
@@ -130,7 +131,7 @@ class _BottomNavigationState extends State<BottomNavigation> {
                   iconSize: 24, // Adjust the icon size if necessary
                   padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4), // Adjust padding if necessary
                   onPressed: () {
-                    // Add your onPressed logic here
+                    controller.changePage(1);
                   },
                 ),
                 GButton(
@@ -140,7 +141,7 @@ class _BottomNavigationState extends State<BottomNavigation> {
                   iconSize: 23, // Adjust the icon size if necessary
                   padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4), // Adjust padding if necessary
                   onPressed: () {
-                    // Add your onPressed logic here
+                    controller.changePage(2);
                   },
                 ),
                 GButton(
@@ -150,7 +151,7 @@ class _BottomNavigationState extends State<BottomNavigation> {
                   iconSize: 24, // Adjust the icon size if necessary
                   padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4), // Adjust padding if necessary
                   onPressed: () {
-                    // Add your onPressed logic here
+                    controller.changePage(3);
                   },
                 ),
               ],

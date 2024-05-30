@@ -7,6 +7,7 @@ import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_rx/src/rx_workers/utils/debouncer.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:liquid_pull_to_refresh/liquid_pull_to_refresh.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wizedo/components/CustomRichText.dart';
 import 'package:wizedo/components/white_text.dart';
@@ -372,6 +373,13 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  // Future<void> _handleRefresh() async{
+  //   await Future.delayed(Duration(seconds: 5));
+  //   setState(() {
+  //     print('page refreshed');
+  //   });
+  // }
+
 
 
   // Widget to build the "Load More" button for each category
@@ -430,37 +438,48 @@ class _HomePageState extends State<HomePage> {
       if (_categoryDocuments[category]!.length <= 4) {
         // If so, don't show the "Load More" button
         return Obx(() => CustomScrollView(
-          slivers: [
-            SliverList(
-              delegate: SliverChildBuilderDelegate(
-                    (BuildContext context, int index) {
-                  var data = _categoryDocuments[category]![index].data() as Map<String, dynamic>;
-                  return buildStreamBuilder(data['postId']);
-                },
-                childCount: _categoryDocuments[category]!.length,
-              ),
-            ),
-          ],
-        ));
-      } else {
-        // If there are more than 4 initially fetched posts, show the "Load More" button
-        return Obx(() => CustomScrollView(
-          slivers: [
-            SliverList(
-              delegate: SliverChildBuilderDelegate(
-                    (BuildContext context, int index) {
-                  if (index < _categoryDocuments[category]!.length) {
+            slivers: [
+              SliverList(
+                delegate: SliverChildBuilderDelegate(
+                      (BuildContext context, int index) {
                     var data = _categoryDocuments[category]![index].data() as Map<String, dynamic>;
                     return buildStreamBuilder(data['postId']);
-                  } else {
-                    // Render the "Load More" button
-                    return buildLoadMoreButton(category);
-                  }
-                },
-                childCount: _categoryDocuments[category]!.length + 1,
+                  },
+                  childCount: _categoryDocuments[category]!.length,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
+        );
+      } else {
+        // If there are more than 4 initially fetched posts, show the "Load More" button
+        return Obx(() => RefreshIndicator(
+          onRefresh: () async{
+            await Future.delayed(Duration(seconds: 5));
+            fetchMoreDocuments(category);
+            _categoryDocuments.refresh();
+          },
+          color: Colors.white,
+          backgroundColor: Color(0xFF955AF2),
+          // showChildOpacityTransition: false,
+          child: CustomScrollView(
+            slivers: [
+              SliverList(
+                delegate: SliverChildBuilderDelegate(
+                      (BuildContext context, int index) {
+                    if (index < _categoryDocuments[category]!.length) {
+                      var data = _categoryDocuments[category]![index].data() as Map<String, dynamic>;
+                      return buildStreamBuilder(data['postId']);
+                    } else {
+                      // Render the "Load More" button
+                      return buildLoadMoreButton(category);
+                    }
+                  },
+                  childCount: _categoryDocuments[category]!.length + 1,
+                ),
+              ),
+            ],
+          ),
         ));
       }
     }

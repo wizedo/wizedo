@@ -1,10 +1,9 @@
-import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
-import 'package:wizedo/pages/HomePage.dart';
+import 'package:flutter/cupertino.dart';
 
-import 'package:wizedo/pages/acceptedJobs.dart';
-import 'package:wizedo/pages/settings.dart';
-
+import '../pages/HomePage.dart';
+import '../pages/acceptedJobs.dart';
+import '../pages/settings.dart';
 import '../pages/ChatHomePage.dart';
 
 class BottomNavigationController extends GetxController {
@@ -23,5 +22,9 @@ class BottomNavigationController extends GetxController {
       settingScreen(),
     ];
   }
-}
 
+  // Method to change the selected index
+  void changePage(int pageIndex) {
+    index.value = pageIndex;
+  }
+}

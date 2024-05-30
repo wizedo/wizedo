@@ -50,6 +50,7 @@ class _ChatPageState extends State<ChatPage> {
   // for textfield focus
   FocusNode myFocusNode=FocusNode();
   bool _messagesLoaded = false;
+  bool _isSending = false;
 
 
   @override
@@ -127,13 +128,23 @@ class _ChatPageState extends State<ChatPage> {
     }
   }
 
-  void sendMessage()async{
-    //only send message if there is something is send
-    if(_messageController.text.isNotEmpty){
-      await _chatService.sendMessage(widget.receiverUserID, _messageController.text,widget.chatroomid!);
+  void sendMessage() async {
+    // Only send message if there is something to send and no message is currently being sent
+    if (_messageController.text.isNotEmpty && !_isSending) {
+      // Set _isSending to true to prevent multiple sends
+      _isSending = true;
 
-      //clear the text contorller after sending message
+      // Send the message
+      await _chatService.sendMessage(widget.receiverUserID, _messageController.text, widget.chatroomid!);
+
+      // Clear the text controller after sending the message
       _messageController.clear();
+
+      // Wait for a short duration before allowing the button to be pressed again
+      await Future.delayed(Duration(seconds: 2));
+
+      // Set _isSending back to false to allow sending messages again
+      _isSending = false;
     }
   }
 

@@ -299,24 +299,24 @@ class _RegisterScreenState extends State<RegisterScreen> with WidgetsBindingObse
                         }
                         // Check for leading spaces
                         if (value != null && value.startsWith(' ')) {
-                          addError(error: 'Leading spaces at the beginning are not allowed');
-                          return 'Leading spaces at the beginning are not allowed';
+                          addError(error: 'Leading spaces at the beginning are not allowed in project name');
+                          return 'Leading spaces at the beginning are not allowed in project name';
                         } else {
-                          removeError(error: 'Leading spaces at the beginning are not allowed');
+                          removeError(error: 'Leading spaces at the beginning are not allowed in project name');
                         }
                         // Check for trailing spaces
                         if (value != null && value.endsWith(' ')) {
-                          addError(error: 'Spaces at the end are not allowed');
-                          return 'Spaces at the end are not allowed';
+                          addError(error: 'Spaces at the end are not allowed in project name');
+                          return 'Spaces at the end are not allowed in project name';
                         } else {
-                          removeError(error: 'Spaces at the end are not allowed');
+                          removeError(error: 'Spaces at the end are not allowed in project name');
                         }
                         // Check for consecutive spaces
                         if (value != null && value.contains(RegExp(r'\s{2,}'))) {
-                          addError(error: 'Consecutive spaces are not allowed');
-                          return 'Consecutive spaces within the text are not allowed';
+                          addError(error: 'Consecutive spaces are not allowed in project name');
+                          return 'Consecutive spaces are not allowed in project name';
                         } else {
-                          removeError(error: 'Consecutive spaces are not allowed');
+                          removeError(error: 'Consecutive spaces are not allowed in project name');
                         }
                         if (value != null && value.replaceAll(RegExp(r'\s'), '').length < 10) {
                           addError(error: 'Project Name should be of at least 10 characters');
@@ -366,26 +366,26 @@ class _RegisterScreenState extends State<RegisterScreen> with WidgetsBindingObse
 
                           // Check for leading spaces
                           if (value != null && value.startsWith(' ')) {
-                            addError(error: 'Leading spaces at the beginning are not allowed');
-                            return 'Leading spaces at the beginning are not allowed';
+                            addError(error: 'Leading spaces at the beginning are not allowed in description');
+                            return 'Leading spaces at the beginning are not allowed in description';
                           } else {
-                            removeError(error: 'Leading spaces at the beginning are not allowed');
+                            removeError(error: 'Leading spaces at the beginning are not allowed in description');
                           }
 
                           // Check for trailing spaces
                           if (value != null && value.endsWith(' ')) {
-                            addError(error: 'Spaces at the end are not allowed');
-                            return 'Spaces at the end are not allowed';
+                            addError(error: 'Spaces at the end are not allowed in description');
+                            return 'Spaces at the end are not allowed in description';
                           } else {
-                            removeError(error: 'Spaces at the end are not allowed');
+                            removeError(error: 'Spaces at the end are not allowed in description');
                           }
 
                           // Check for consecutive spaces
                           if (value != null && value.contains(RegExp(r'\s{2,}'))) {
-                            addError(error: 'Consecutive spaces are not allowed');
-                            return 'Consecutive spaces within the text are not allowed';
+                            addError(error: 'Consecutive spaces are not allowed in description');
+                            return 'Consecutive spaces are not allowed in description';
                           } else {
-                            removeError(error: 'Consecutive spaces are not allowed');
+                            removeError(error: 'Consecutive spaces are not allowed in description');
                           }
 
                           if (value != null && value.replaceAll(RegExp(r'\s'), '').length < 100) {
@@ -395,10 +395,10 @@ class _RegisterScreenState extends State<RegisterScreen> with WidgetsBindingObse
                             removeError(error: 'Description should be of at least 20 words');
                           }
                           if (value != null && value.replaceAll(RegExp(r'\s'), '').length > 250) {
-                            addError(error: 'Maximum characters allowed is 250');
-                            return 'Maximum characters allowed is 250';
+                            addError(error: 'Maximum characters allowed in description is 250');
+                            return 'Maximum characters allowed in description is 250';
                           } else {
-                            removeError(error: 'Maximum characters allowed is 250');
+                            removeError(error: 'Maximum characters allowed in description is 250');
                           }
 
                           // Rest of your validation logic...
@@ -484,6 +484,7 @@ class _RegisterScreenState extends State<RegisterScreen> with WidgetsBindingObse
                     style: mPlusRoundedText.copyWith(fontSize: 12),
                   ),
                   SizedBox(height: 10),
+                  // Google Drive Link field with conditional validation
                   Container(
                     width: double.infinity,
                     child: MyPostTextField(
@@ -493,9 +494,9 @@ class _RegisterScreenState extends State<RegisterScreen> with WidgetsBindingObse
                       obscureText: false,
                       hint: 'Google Drive Link',
                       validator: (value) {
-                        _selectedCategory.refresh();
+                        // Check if the selected category is 'Assignment'
                         if (_selectedCategory.value == 'Assignment') {
-                          // Validate the Google Drive link only if the selected category is "Assignment"
+                          // Validate the Google Drive link only if the selected category is 'Assignment'
                           if (value == null || value.isEmpty) {
                             addError(error: 'Google Drive link is required for assignments');
                             return 'Google Drive link is required for assignments';
@@ -505,9 +506,9 @@ class _RegisterScreenState extends State<RegisterScreen> with WidgetsBindingObse
                         }
                         return null;
                       },
-
                     ),
                   ),
+
 
 
                   SizedBox(height: 10),
@@ -532,6 +533,14 @@ class _RegisterScreenState extends State<RegisterScreen> with WidgetsBindingObse
                         } else {
                           removeError(error: 'Expected pay is required');
                         }
+
+                        if (double.parse(_paymentDetails.text) < 50) {
+                          addError(error: 'Expected pay should be equal to or greater than 50');
+                          return 'Expected pay should be equal to or greater than 50';
+                        } else {
+                          removeError(error: 'Expected pay should be equal to or greater than 50');
+                        }
+
                         return null;
                       },
                     ),
@@ -702,11 +711,12 @@ class _RegisterScreenState extends State<RegisterScreen> with WidgetsBindingObse
 
 
   bool _validateInputs() {
-    bool isValid = errors.isEmpty;
+    bool isValid = true; // Start assuming inputs are valid
 
     // Check for empty due date
     if (_datePicker.text.isEmpty || _datePicker.text == 'null') {
       addError(error: 'Please select a valid due date');
+      Get.rawSnackbar(message: "Please select a valid due date");
       isValid = false;
     } else {
       removeError(error: 'Please select a valid due date');
@@ -715,17 +725,151 @@ class _RegisterScreenState extends State<RegisterScreen> with WidgetsBindingObse
     // Check for null due date
     if (_datePicker.text == null || _datePicker.text.trim().isEmpty) {
       addError(error: 'Due date cannot be null');
+      if (isValid) {
+        Get.rawSnackbar(message: "Due date cannot be null");
+      }
       isValid = false;
     } else {
       removeError(error: 'Due date cannot be null');
     }
 
-    if (!isValid) {
-      Get.rawSnackbar(message: "Please give a valid input");
+    // Add more specific validations as needed
+    if (_projectName.text.isEmpty) {
+      addError(error: 'Project Name is required');
+      if (isValid) {
+        Get.rawSnackbar(message: "Project Name is required");
+      }
+      isValid = false;
+    } else if (_projectName.text.startsWith(' ')) {
+      addError(error: 'Leading spaces at the beginning are not allowed in project name');
+      if (isValid) {
+        Get.rawSnackbar(message: "Leading spaces at the beginning are not allowed in project name");
+      }
+      isValid = false;
+    } else if (_projectName.text.endsWith(' ')) {
+      addError(error: 'Spaces at the end are not allowed in project name');
+      if (isValid) {
+        Get.rawSnackbar(message: "Spaces at the end are not allowed in project name");
+      }
+      isValid = false;
+    } else if (_projectName.text.contains(RegExp(r'\s{2,}'))) {
+      addError(error: 'Consecutive spaces are not allowed in project name');
+      if (isValid) {
+        Get.rawSnackbar(message: "Consecutive spaces are not allowed in project name");
+      }
+      isValid = false;
+    } else if (_projectName.text.replaceAll(RegExp(r'\s'), '').length < 10) {
+      addError(error: 'Project Name should be of at least 10 characters');
+      if (isValid) {
+        Get.rawSnackbar(message: "Project Name should be of at least 10 characters");
+      }
+      isValid = false;
+    } else if (_projectName.text.replaceAll(RegExp(r'\s'), '').length > 24) {
+      addError(error: 'Maximum characters allowed in project name is 25');
+      if (isValid) {
+        Get.rawSnackbar(message: "Maximum characters allowed in project name is 25");
+      }
+      isValid = false;
+    } else if (RegExp(r'[0-9]').hasMatch(_projectName.text)) {
+      addError(error: 'Project Name should not contain numbers');
+      if (isValid) {
+        Get.rawSnackbar(message: "Project Name should not contain numbers");
+      }
+      isValid = false;
+    } else {
+      removeError(error: 'Project Name is required');
+      removeError(error: 'Leading spaces at the beginning are not allowed in project name');
+      removeError(error: 'Spaces at the end are not allowed in project name');
+      removeError(error: 'Consecutive spaces are not allowed in project name');
+      removeError(error: 'Project Name should be of at least 10 characters');
+      removeError(error: 'Maximum characters allowed in project name is 25');
+      removeError(error: 'Project Name should not contain numbers');
+    }
+
+    // Check for Description
+    if (_descriptionText.text.isEmpty) {
+      addError(error: 'Description is required');
+      if (isValid) {
+        Get.rawSnackbar(message: "Description is required");
+      }
+      isValid = false;
+    } else if (_descriptionText.text.startsWith(' ')) {
+      addError(error: 'Leading spaces at the beginning are not allowed in description');
+      if (isValid) {
+        Get.rawSnackbar(message: "Leading spaces at the beginning are not allowed in description");
+      }
+      isValid = false;
+    } else if (_descriptionText.text.endsWith(' ')) {
+      addError(error: 'Spaces at the end are not allowed in description');
+      if (isValid) {
+        Get.rawSnackbar(message: "Spaces at the end are not allowed in description");
+      }
+      isValid = false;
+    } else if (_descriptionText.text.contains(RegExp(r'\s{2,}'))) {
+      addError(error: 'Consecutive spaces are not allowed in description');
+      if (isValid) {
+        Get.rawSnackbar(message: "Consecutive spaces are not allowed in description");
+      }
+      isValid = false;
+    } else if (_descriptionText.text.replaceAll(RegExp(r'\s'), '').length < 100) {
+      addError(error: 'Description should be of at least 20 words');
+      if (isValid) {
+        Get.rawSnackbar(message: "Description should be of at least 20 words");
+      }
+      isValid = false;
+    } else if (_descriptionText.text.replaceAll(RegExp(r'\s'), '').length > 250) {
+      addError(error: 'Maximum characters allowed in description is 250');
+      if (isValid) {
+        Get.rawSnackbar(message: "Maximum characters allowed in description is 250");
+      }
+      isValid = false;
+    } else {
+      removeError(error: 'Description is required');
+      removeError(error: 'Leading spaces at the beginning are not allowed in description');
+      removeError(error: 'Spaces at the end are not allowed in description');
+      removeError(error: 'Consecutive spaces are not allowed in description');
+      removeError(error: 'Description should be of at least 20 words');
+      removeError(error: 'Maximum characters allowed in description is 250');
+    }
+
+    // Check for expected pay
+    if (_paymentDetails.text.isEmpty) {
+      addError(error: 'Expected pay is required');
+      if (isValid) {
+        Get.rawSnackbar(message: "Expected pay is required");
+      }
+      isValid = false;
+    } else {
+      removeError(error: 'Expected pay is required');
+    }
+
+    if (double.parse(_paymentDetails.text) < 50) {
+      addError(error: 'Expected pay should be equal to or greater than 50');
+      if (isValid) {
+        Get.rawSnackbar(message: "Expected pay should be equal to or greater than 50");
+      }
+      isValid = false;
+    } else {
+      removeError(error: 'Expected pay should be equal to or greater than 50');
+    }
+
+
+
+
+    // Check for Google Drive link if category is 'Assignment'
+    if (_selectedCategory.value == 'Assignment' && (_googledrivefilelink.text.isEmpty || !_googledrivefilelink.text.startsWith('https://'))) {
+      addError(error: 'Google Drive link is required for assignments');
+      if (isValid) {
+        Get.rawSnackbar(message: "Google Drive link is required for assignments");
+      }
+      isValid = false;
+    } else {
+      removeError(error: 'Google Drive link is required for assignments');
     }
 
     return isValid;
   }
+
 
 
 }

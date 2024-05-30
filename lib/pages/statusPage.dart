@@ -11,8 +11,10 @@ import 'package:wizedo/pages/HomePage.dart';
 import '../components/mPlusRoundedText.dart';
 import '../components/myCustomAppliedCard.dart';
 import '../components/my_elevatedbutton.dart';
+import '../controller/BottomNavigationController.dart';
 import '../services/chatservices/chatcontroller.dart';
 import 'BottomNavigation.dart';
+import 'ChatHomePage.dart';
 import 'ParticularPostDetailScreen.dart';
 
 class statusPage extends StatefulWidget {
@@ -35,6 +37,7 @@ class _statusPageState extends State<statusPage> {
   String userCollegee = 'null';
   String userEmail = 'null';
   final ChatController _chatController = Get.put(ChatController());
+  final BottomNavigationController _bottomNavigationController = Get.find<BottomNavigationController>();
 
 
   Future<String> getUserEmailLocally() async {
@@ -46,6 +49,16 @@ class _statusPageState extends State<statusPage> {
     } catch (error) {
       print('Error fetching user email locally: $error');
       return '';
+    }
+  }
+
+  Future<void> saveRefreshKeyLocally() async {
+    try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      await prefs.setString('refreshKey', 'yes');
+      print('Refresh key saved locally');
+    } catch (error) {
+      print('Error saving refresh key locally: $error');
     }
   }
 
@@ -289,13 +302,16 @@ class _statusPageState extends State<statusPage> {
                                             'amountpaid': 'yes',
                                             'chatRoomId': chatRoomId,
                                           });
-                                          setState(() {
-                                            //this for reloadin the chathomepage
-                                            // print('new state');
-                                          });
+
+                                          saveRefreshKeyLocally();
+                                          Get.snackbar('Success', 'Paid successfully');
+                                          await Future.delayed(Duration(seconds: 5));
+
+                                          Get.to(BottomNavigation());
+                                          _bottomNavigationController.changePage(2);
+                                          // Navigate to the chat page
                                         });
 
-                                        Get.snackbar('Success', 'Paid successfully');
                                       },
                                       width: 180,
                                       height: 40,
@@ -451,7 +467,6 @@ class _statusPageState extends State<statusPage> {
                                       WhiteText('Amount Paid', fontWeight: FontWeight.bold, fontSize: 16,),
                                       WhiteText('Complete the assigned task and request approval for payment.', fontSize: 12),
                                       WhiteText("Note: Funds will be credited to your registered phone number. Ensure it is linked to your bank account.", fontSize: 9),
-
                                     ],
                                   ),
                                 ),

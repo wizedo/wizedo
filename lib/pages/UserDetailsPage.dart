@@ -774,10 +774,11 @@ class _UserDetailsState extends State<UserDetails> with WidgetsBindingObserver {
                           onPressed: _isLoading
                               ? null
                               : () async {
-                            setState(() {
-                              _isLoading = true; // Set loading to true when button is pressed
-                            });
                             if (_formKey.currentState!.validate()) {
+                              setState(() {
+                                _isLoading = true; // Set loading to true when validation passes
+                              });
+
                               _formKey.currentState!.save();
 
                               bool isValid = _validateInputs();
@@ -788,8 +789,7 @@ class _UserDetailsState extends State<UserDetails> with WidgetsBindingObserver {
                                   if (user != null) {
                                     final firestore = FirebaseFirestore.instance;
                                     final email = user.email!;
-                                    final docRef =
-                                    firestore.collection('usersDetails').doc(email);
+                                    final docRef = firestore.collection('usersDetails').doc(email);
 
                                     await firestore.runTransaction((transaction) async {
                                       final docSnapshot = await transaction.get(docRef);
@@ -801,10 +801,8 @@ class _UserDetailsState extends State<UserDetails> with WidgetsBindingObserver {
                                       // Update the document
                                       transaction.set(docRef, {
                                         'id': email,
-                                        'firstname':
-                                        _capitalizeFirstLetter(unameController.text),
-                                        'lastname':
-                                        _capitalizeFirstLetter(ulastnameController.text),
+                                        'firstname': _capitalizeFirstLetter(unameController.text),
+                                        'lastname': _capitalizeFirstLetter(ulastnameController.text),
                                         // 'phoneNumber': int.tryParse(phonenoController.text) ?? 0,
                                         'country': _selectedState,
                                         'college': _selectedCollege,
@@ -819,10 +817,8 @@ class _UserDetailsState extends State<UserDetails> with WidgetsBindingObserver {
                                     });
 
                                     await setUserDetailsFilledLocally(email, true);
-                                    bool userDetailsFilledLocally =
-                                    await getUserDetailsFilledLocally(email);
-                                    print(
-                                        'userDetailsFilledLocally: $userDetailsFilledLocally');
+                                    bool userDetailsFilledLocally = await getUserDetailsFilledLocally(email);
+                                    print('userDetailsFilledLocally: $userDetailsFilledLocally');
 
                                     // Get.snackbar('Success', 'Please login into your account');
 
@@ -846,6 +842,10 @@ class _UserDetailsState extends State<UserDetails> with WidgetsBindingObserver {
                                     _isLoading = false; // Set loading to false when operation fails
                                   });
                                 }
+                              }else {
+                                setState(() {
+                                  _isLoading = false; // Set loading to false when inputs are invalid
+                                });
                               }
                             }
                           },
@@ -872,7 +872,6 @@ class _UserDetailsState extends State<UserDetails> with WidgetsBindingObserver {
                         ),
                       ),
                     ),
-
                   ],
                   ),
                 ),
@@ -884,11 +883,88 @@ class _UserDetailsState extends State<UserDetails> with WidgetsBindingObserver {
   }
 
   bool _validateInputs() {
-    bool isValid = errors.isEmpty;
+    bool isValid = true;
 
-    if (!isValid) {
-      Get.rawSnackbar(message: "Please Give a valid INPUT");
+    if (unameController.text.isEmpty) {
+      Get.rawSnackbar(message: "First Name is required");
+      isValid = false;
+      setState(() {
+        _isLoading = false;
+      });
+    } else if (RegExp(r'[0-9]').hasMatch(unameController.text)) {
+      Get.rawSnackbar(message: "First Name should not contain numbers");
+      isValid = false;
+      setState(() {
+        _isLoading = false;
+      });
+    } else if (unameController.text.length > 40) {
+      Get.rawSnackbar(message: "First Name should not exceed 40 characters");
+      isValid = false;
+      setState(() {
+        _isLoading = false;
+      });
     }
+
+    if (ulastnameController.text.isEmpty) {
+      Get.rawSnackbar(message: "Last Name is required");
+      isValid = false;
+      setState(() {
+        _isLoading = false;
+      });
+    } else if (RegExp(r'[0-9]').hasMatch(ulastnameController.text)) {
+      Get.rawSnackbar(message: "Last Name should not contain numbers");
+      isValid = false;
+      setState(() {
+        _isLoading = false;
+      });
+    } else if (ulastnameController.text.length > 40) {
+      Get.rawSnackbar(message: "Last Name should not exceed 40 characters");
+      isValid = false;
+      setState(() {
+        _isLoading = false;
+      });
+    } else if (ulastnameController.text.startsWith(' ') || ulastnameController.text.endsWith(' ') || ulastnameController.text.contains(RegExp(r'\s{2,}'))) {
+      Get.rawSnackbar(message: "Last Name should not have leading, trailing, or consecutive spaces");
+      isValid = false;
+      setState(() {
+        _isLoading = false;
+      });
+    }
+
+    if (_selectedState == null) {
+      Get.rawSnackbar(message: "Please select your state");
+      isValid = false;
+      setState(() {
+        _isLoading = false;
+      });
+    }
+
+    if (_selectedCollege == null) {
+      Get.rawSnackbar(message: "Please select your college");
+      isValid = false;
+      setState(() {
+        _isLoading = false;
+      });
+    }
+
+    if (_selectedCourse == null) {
+      Get.rawSnackbar(message: "Please select your course");
+      isValid = false;
+      setState(() {
+        _isLoading = false;
+      });
+    }
+
+    if (userYearController.text.isEmpty) {
+      Get.rawSnackbar(message: "Please select your course start year");
+      isValid = false;
+      setState(() {
+        _isLoading = false;
+      });
+    }
+
     return isValid;
   }
+
+
 }

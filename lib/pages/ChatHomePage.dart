@@ -86,7 +86,27 @@ class _ChatHomePageState extends State<ChatHomePage> {
   Future<void> initializeData() async {
     userEmail = await getUserEmailLocally();
     getUserCollege();
+
+    // Check the refresh key initially
+    checkRefreshKey();
   }
+
+  // Check the refresh key stored locally
+  Future<void> checkRefreshKey() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? refreshKey = prefs.getString('refreshKey');
+
+    if (refreshKey == 'yes') {
+      // Call setState to refresh the page after a slight delay
+      Future.delayed(Duration(seconds: 3), () {
+        setState(() {
+          print('set state called for yes');
+        });
+      });
+      await prefs.setString('refreshKey', 'no');
+    }
+  }
+
 
   Future<Timestamp?> _getLastMessageTimestamp(String chatRoomId) async {
     try {
@@ -129,7 +149,13 @@ class _ChatHomePageState extends State<ChatHomePage> {
                 onTap: (){
                   listenForChatChanges();
                 },
-                child: WhiteText('Messages',fontSize: 17,)
+                child: InkWell(
+                    onTap: (){
+                      setState(() {
+
+                      });
+                    },
+                    child: WhiteText('Messages',fontSize: 17,))
             ),),
           backgroundColor: backgroundColor,
           actions: [
@@ -244,8 +270,18 @@ class _ChatHomePageState extends State<ChatHomePage> {
               );
             }).toList();
 
-            return ListView(
-              children: userItems,
+            return RefreshIndicator(
+              onRefresh: () async{
+                await Future.delayed(Duration(seconds: 3));
+                setState(() {
+
+                });
+              },
+              color: Colors.white,
+              backgroundColor: backgroundColor,
+              child: ListView(
+                children: userItems,
+              ),
             );
           });
         },
