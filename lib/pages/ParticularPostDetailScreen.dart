@@ -254,7 +254,7 @@ class _ParticularPostDetailScreenState extends State<ParticularPostDetailScreen>
                   }
                 },
                 child: WhiteText(
-                  widget.googledrivelink ?? 'No reference material available',
+                  widget.googledrivelink != null && widget.googledrivelink != '' ? widget.googledrivelink! : 'No reference material available',
                   fontSize: 12,
                 ),
               ),

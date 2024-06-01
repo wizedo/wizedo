@@ -16,6 +16,8 @@ class MyTextMulitilineField extends StatefulWidget {
   final Color? textColor; // Added parameter for text color
   final double? height; // Added parameter for height
   final double? width; // Added parameter for width
+  final Color? backgroundColor; // Added parameter for background color
+  final Color? hintTextColor; // Added parameter for hint text color
 
   const MyTextMulitilineField({
     Key? key,
@@ -33,6 +35,8 @@ class MyTextMulitilineField extends StatefulWidget {
     this.textColor,
     this.height,
     this.width,
+    this.backgroundColor, // Initialize the parameter
+    this.hintTextColor, // Initialize the parameter
   }) : super(key: key);
 
   @override
@@ -56,7 +60,7 @@ class _MyTextMulitilineFieldState extends State<MyTextMulitilineField> {
 
   @override
   Widget build(BuildContext context) {
-    Color backgroundColor = Color(0xFF39304D);
+    Color backgroundColor = widget.backgroundColor ?? Color(0xFF39304D); // Use provided background color or default
     Color vTextColor = Color(0xFF955AF2);
 
     return Column(
@@ -68,7 +72,7 @@ class _MyTextMulitilineFieldState extends State<MyTextMulitilineField> {
           height: widget.height ?? 51,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(15),
-            color: backgroundColor,
+            color: backgroundColor, // Use provided background color
           ),
           child: TextFormField(
             controller: widget.controller,
@@ -83,7 +87,7 @@ class _MyTextMulitilineFieldState extends State<MyTextMulitilineField> {
             ),
             decoration: InputDecoration(
               hintText: widget.hint,
-              hintStyle: TextStyle(color: Colors.white, fontSize: 13),
+              hintStyle: TextStyle(color: widget.hintTextColor ?? Colors.white, fontSize: 13), // Optional hint text color
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(15),
                 borderSide: BorderSide(color: backgroundColor),

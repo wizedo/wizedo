@@ -8,6 +8,7 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wizedo/components/cardContainerSettings.dart';
 import 'package:wizedo/components/white_text.dart';
+import 'package:wizedo/pages/FeedbackForm.dart';
 import 'package:wizedo/pages/contactUs.dart';
 import 'package:wizedo/pages/privacyPolicy.dart';
 import 'package:wizedo/pages/profilepage.dart';
@@ -458,6 +459,23 @@ class _settingScreenState extends State<settingScreen> {
                         },
                         icon: Icon(Icons.contact_support, color: Colors.white),
                         label: Text('Contact Us', style: TextStyle(color: Colors.white, fontSize: screenHeight < 600 ? 9 : 12)),
+                        style: ButtonStyle(
+                          minimumSize: MaterialStateProperty.all(Size(double.infinity, getFontSize(50, screenHeight))),
+                          alignment: Alignment.centerLeft,
+                        ),
+                      ),
+                    ),
+                    Container(
+                      child: TextButton.icon(
+                        onPressed: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (context) => FeedbackForm(),
+                            ),
+                          );
+                        },
+                        icon: Icon(Icons.contact_support, color: Colors.white),
+                        label: Text('Feedback', style: TextStyle(color: Colors.white, fontSize: screenHeight < 600 ? 9 : 12)),
                         style: ButtonStyle(
                           minimumSize: MaterialStateProperty.all(Size(double.infinity, getFontSize(50, screenHeight))),
                           alignment: Alignment.centerLeft,
