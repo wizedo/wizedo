@@ -350,7 +350,7 @@ class _statusPageState extends State<statusPage> {
                               MyTimeLineTile(
                                 isFirst: false,
                                 isLast: true,
-                                isPast: pstatus >= 4,
+                                isPast: pstatus >= 6,
                                 eventCard: Align(
                                   alignment: Alignment.topLeft,
                                   child: Column(
@@ -368,7 +368,7 @@ class _statusPageState extends State<statusPage> {
                                   children: [
                                     SizedBox(height: 10,),
                                     Visibility(
-                                      visible: pstatus != 1 && pstatus !=2 && pstatus !=3 && pstatus !=6 && pstatus !=5,
+                                      visible: pstatus != 1 && pstatus !=2 && pstatus !=3 && pstatus !=5 && pstatus !=4,
                                       child: MyElevatedButton(
                                         onPressed: () async {
                                           Get.defaultDialog(
@@ -387,7 +387,7 @@ class _statusPageState extends State<statusPage> {
                                                           .collection('collegePosts')
                                                           .doc(widget.postid);
                                                       transaction.update(collegePostRef, {
-                                                        'pstatus':5,
+                                                        'pstatus':8,
                                                         'status':'Completed'
                                                       });
                                                     });
@@ -474,7 +474,7 @@ class _statusPageState extends State<statusPage> {
                               Row(
                                 children: [
                                   Visibility(
-                                    visible: pstatus != 4 && pstatus != 5 && pstatus !=6 && pstatus !=1 && pstatus !=2, // Show the button when pstatus is not 4 or 5
+                                    visible: pstatus != 4 && pstatus != 5 && pstatus != 6 && pstatus != 1 && pstatus != 2, // Show the button when pstatus is not 4, 5, 6, 1, or 2
                                     child: ElevatedButton(
                                       onPressed: () async {
                                         final firestore = FirebaseFirestore.instance;
@@ -489,14 +489,35 @@ class _statusPageState extends State<statusPage> {
                                           });
                                         });
 
-                                        Get.snackbar('Success', 'Requested for payment approval');
+                                        Get.to(BottomNavigation());
+                                        _bottomNavigationController.changePage(2);
                                       },
-                                      child: Text('Request'),
+                                      child: Text('Chat'),
                                     ),
                                   ),
-                                  SizedBox(width: 40,),
+                                  Visibility(
+                                    visible: pstatus == 4, // Show the "Request Payment" button only when pstatus is 4
+                                    child: ElevatedButton(
+                                      onPressed: () async {
+                                        final firestore = FirebaseFirestore.instance;
+                                        await firestore.runTransaction((transaction) async {
+                                          final collegePostRef = firestore
+                                              .collection('colleges')
+                                              .doc(userCollegee)
+                                              .collection('collegePosts')
+                                              .doc(widget.postid);
+                                          transaction.update(collegePostRef, {
+                                            'pstatus': 6, // Update pstatus to 5
+                                          });
+                                        });
+                                      },
+                                      child: Text('Request Payment'),
+                                    ),
+                                  ),
+                                  SizedBox(width: 40),
                                 ],
                               ),
+
                             ],
                           ),
                         );
@@ -506,7 +527,7 @@ class _statusPageState extends State<statusPage> {
                           MyTimeLineTile(
                             isFirst: false,
                             isLast: false,
-                            isPast: pstatus >= 5,
+                            isPast: pstatus >= 7,
                             eventCard: Align(
                               alignment: Alignment.topLeft,
                               child: Column(
@@ -524,7 +545,7 @@ class _statusPageState extends State<statusPage> {
                           MyTimeLineTile(
                             isFirst: false,
                             isLast: true,
-                            isPast: pstatus >= 6,
+                            isPast: pstatus >= 8,
                             eventCard: Align(
                               alignment: Alignment.topLeft,
                               child: Column(

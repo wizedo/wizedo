@@ -211,8 +211,8 @@ class ProfilePage extends StatelessWidget {
                       buildInfoRow(context, Icons.book_outlined, '${userDetails.course}'),
                       SizedBox(height: 20),
                       buildInfoRow(context, Icons.school, '${userDetails.college}'),
-                      SizedBox(height: 50),
-                      MyElevatedButton(onPressed: confirmDeletion, buttonText: 'Delete Account',customPrimaryColor: Colors.transparent,)
+                      // SizedBox(height: 50),
+                      // MyElevatedButton(onPressed: confirmDeletion, buttonText: 'Delete Account',customPrimaryColor: Colors.transparent,)
                       // SizedBox(height: 20),
                       // buildInfoRow(context, Icons.phone, '${userDetails.phone}'),
                     ],

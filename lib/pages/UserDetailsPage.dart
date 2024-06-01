@@ -354,6 +354,31 @@ class _UserDetailsState extends State<UserDetails> with WidgetsBindingObserver {
                         } else {
                           removeError(error: 'Name should be at least 1 characters');
                         }
+
+                        if (capitalizedValue != null && capitalizedValue.startsWith(' ')) {
+                          addError(error: 'Leading spaces at the beginning are not allowed');
+                          return 'Leading spaces at the beginning are not allowed';
+                        } else {
+                          removeError(
+                              error: 'Leading spaces at the beginning are not allowed');
+                        }
+
+                        // Check for trailing spaces
+                        if (capitalizedValue != null && capitalizedValue.endsWith(' ')) {
+                          addError(error: 'Spaces at the end are not allowed');
+                          return 'Spaces at the end are not allowed';
+                        } else {
+                          removeError(error: 'Spaces at the end are not allowed');
+                        }
+
+                        // Check for consecutive spaces
+                        if (capitalizedValue != null && capitalizedValue.contains(RegExp(r'\s{2,}'))) {
+                          addError(error: 'Consecutive spaces are not allowed');
+                          return 'Consecutive spaces within the text are not allowed';
+                        } else {
+                          removeError(error: 'Consecutive spaces are not allowed');
+                        }
+
                         if (capitalizedValue.length > 40) {
                           addError(error: 'Maximum characters allowed is 40');
                           return 'Maximum characters allowed is 40';
@@ -903,7 +928,14 @@ class _UserDetailsState extends State<UserDetails> with WidgetsBindingObserver {
       setState(() {
         _isLoading = false;
       });
+    } else if (unameController.text.startsWith(' ') ||
+        unameController.text.endsWith(' ') ||
+        unameController.text.contains(RegExp(r'\s{2,}'))) {
+      Get.rawSnackbar(message: "First Name should not have leading, trailing, or consecutive spaces");
+      isValid = false;
     }
+
+
 
     if (ulastnameController.text.isEmpty) {
       Get.rawSnackbar(message: "Last Name is required");

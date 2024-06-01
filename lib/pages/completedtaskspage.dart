@@ -8,6 +8,7 @@ import 'package:wizedo/components/JobCard.dart';
 import 'package:wizedo/components/mPlusRoundedText.dart';
 import 'package:wizedo/components/white_text.dart';
 import '../components/FliterChip.dart';
+import '../components/HistoryCard.dart';
 import '../components/myCustomAppliedCard.dart';
 import 'ParticularPostDetailScreen.dart';
 import 'detailsPage.dart';
@@ -20,10 +21,9 @@ class CompletedTasksPage extends StatefulWidget {
 }
 
 class _CompletedTasksPageState extends State<CompletedTasksPage> {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  String _selectedCategory = 'Applied';
   String userCollegee = 'null';
   String userEmail='null';
+  double screenHeight = Get.height;
 
 
   // Function to clean up the username
@@ -120,7 +120,7 @@ class _CompletedTasksPageState extends State<CompletedTasksPage> {
                 Center(
                   child: Container(
                     width: 360,
-                    height: 500,
+                    height: screenHeight*0.9,
                     child: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
                       stream: FirebaseFirestore.instance
                           .collection('colleges')
@@ -162,7 +162,7 @@ class _CompletedTasksPageState extends State<CompletedTasksPage> {
                                       ),
                                     );
                                   },
-                                  child: MyCustomCard(
+                                  child: HistoryCard(
                                     subject: data['subCategory'],
                                     createdAt: data['createdAt'],
                                     priceRange: data['totalPayment'].toString(), // Check for null
