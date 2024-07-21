@@ -1,0 +1,38 @@
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:get/get.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+
+import '../../components/debugcusprint.dart';
+
+class ChatController extends GetxController {
+  final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
+  final FirebaseFirestore _fireStore = FirebaseFirestore.instance;
+
+  // Function to delete the chat
+  Future<void> deleteChat(String chatRoomId) async {
+    try {
+
+      // Delete all messages in the chat room
+      await _fireStore
+          .collection('chat_rooms')
+          .doc(chatRoomId)
+          .collection('messages')
+          .get()
+          .then((snapshot) {
+        for (DocumentSnapshot ds in snapshot.docs) {
+          // For each message, the delete() function is called on its reference (ds.reference) to delete the message document.
+          ds.reference.delete();
+        }
+      });
+
+      // Delete the chat room itself
+      await _fireStore.collection('chat_rooms').doc(chatRoomId).delete();
+
+      // After successful deletion, you can perform additional actions if needed,
+      // such as updating the UI or showing a confirmation message.
+    } catch (error) {
+      // Handle the error, if any, such as showing an error message to the user.
+      debugLog("Error deleting chat: $error");
+    }
+  }
+}

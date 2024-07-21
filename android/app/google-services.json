@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "529074365849",
+    "project_id": "peermatee",
+    "storage_bucket": "peermatee.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:529074365849:android:6e535c5f643dd95ff81f08",
+        "android_client_info": {
+          "package_name": "com.scanpick.peermatee"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "529074365849-na0ga5hcbt4nc6pvutujssot3sube33n.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBpK1MhlHA3TaEIizuTasfHHFkVFF8c81Y"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "529074365849-na0ga5hcbt4nc6pvutujssot3sube33n.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
