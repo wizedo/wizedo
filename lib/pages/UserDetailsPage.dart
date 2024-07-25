@@ -106,6 +106,7 @@ class _UserDetailsState extends State<UserDetails> with WidgetsBindingObserver {
 
 
   Future<dynamic> signInWithGoogle() async {
+    // print('inside signinwithgogole function in userdetails');
     try {
       final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
 
@@ -838,6 +839,7 @@ class _UserDetailsState extends State<UserDetails> with WidgetsBindingObserver {
   }
 
   void _joinButtonPressed() async {
+    // print('inside join button');
     if (_formKey.currentState!.validate()) {
       setState(() {
         _isLoading = true; // Set loading to true when validation passes
@@ -848,9 +850,14 @@ class _UserDetailsState extends State<UserDetails> with WidgetsBindingObserver {
       bool isValid = _validateInputs();
 
       if (isValid) {
+        // print('inside join valid');
+
         try {
+          // print('inside try');
           final user = FirebaseAuth.instance.currentUser;
+          // print('current user is $user');
           if (user != null) {
+            // print('just before null check');
             final firestore = FirebaseFirestore.instance;
             final email = user.email!;
             final docRef = firestore.collection('usersDetails').doc(email);
@@ -859,9 +866,11 @@ class _UserDetailsState extends State<UserDetails> with WidgetsBindingObserver {
               final docSnapshot = await transaction.get(docRef);
 
               if (!docSnapshot.exists) {
+                // print('inside join exists');
                 // Handle the case where the document does not exist
-                transaction.set(docRef, {}); // Ensure the document exists
               }
+              // print('just before transcation setting');
+
 
               // Update the document
               transaction.set(docRef, {
@@ -879,6 +888,7 @@ class _UserDetailsState extends State<UserDetails> with WidgetsBindingObserver {
               }, SetOptions(merge: true)); // Use merge to update only the provided fields
             });
 
+            print('just before signinwithgoogle');
             await signInWithGoogle();
 
             setState(() {

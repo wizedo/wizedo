@@ -289,7 +289,8 @@ class _LoginPageState extends State<LoginPage> {
         await saveUserDetailsLocally(userDetails);
       } else {
         debugLog('User details not found in Firestore');
-        return null;
+        await FirebaseAuth.instance.signInWithCredential(credential);
+        Get.to(() => UserDetails(userEmail: userEmail));
       }
 
       Get.put(UserController());

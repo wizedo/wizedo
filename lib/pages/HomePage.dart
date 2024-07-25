@@ -600,6 +600,8 @@ class _HomePageState extends State<HomePage>  {
                           onTap: () async {
                             debugLog('Fetch more tapped');
                             debugLog(postsOpenedCount);
+                            // print('width is ${Get.width}');
+                            // print('hieght is ${Get.height}');
                             // isLoading.value = true;
                             // await fetchMoreDocuments(_selectedCategory);
                           },
