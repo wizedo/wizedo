@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_jailbreak_detection/flutter_jailbreak_detection.dart';
@@ -17,7 +18,23 @@ import 'controller/UserController.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
+  if(kIsWeb){
+    await Firebase.initializeApp(
+        options: FirebaseOptions(
+            apiKey: "AIzaSyDdm7lmUOPjC7CJEtaE3TXJw8e_GXikNiM",
+            authDomain: "peermatee.firebaseapp.com",
+            projectId: "peermatee",
+            storageBucket: "peermatee.appspot.com",
+            messagingSenderId: "529074365849",
+            appId: "1:529074365849:web:037aebcd135ee063f81f08",
+            measurementId: "G-3N3X43LNFT"
+        )
+    );
+  }else{
+    await Firebase.initializeApp();
+  }
+
+
 
   await FirebaseAppCheck.instance.activate(
     webProvider: ReCaptchaV3Provider('recaptcha-v3-site-key'),
@@ -25,11 +42,14 @@ void main() async {
     // appleProvider: AppleProvider.appAttest,//for ios
   );
 
-  bool jailBroken = await _checkJailBreak();
 
-  if (jailBroken) {
-    runApp(const RestrictedApp());
-    return;
+
+  if (!kIsWeb) {
+    bool jailBroken = await _checkJailBreak();
+    if (jailBroken) {
+      runApp(const RestrictedApp());
+      return;
+    }
   }
 
   await GetStorage.init();
@@ -44,7 +64,10 @@ void main() async {
       .then((value) => runApp(const MyApp()));
 }
 
+
+
 Future<bool> _checkJailBreak() async {
+  print('in jailbreak');
   try {
     bool isJailBroken = await FlutterJailbreakDetection.jailbroken;// here instead of jailbroken i can use developermmode too
     // print('isjailbroken or not: $isJailBroken');
@@ -123,6 +146,7 @@ class MyApp extends StatelessWidget {
 }
 
 Future<bool> getUserDetailsFilledLocally() async {
+  print('in userdetails');
   try {
     var box = await Hive.openBox('userdetails');
     bool userDetailsFilled = box.get('userDetails', defaultValue: {})['userDetailsfilled'] ?? false;

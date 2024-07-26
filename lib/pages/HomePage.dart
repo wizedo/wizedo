@@ -232,30 +232,30 @@ class _HomePageState extends State<HomePage>  {
           .where('description', isLessThanOrEqualTo: '$searchTerm\uf8ff')
           .get();
 
-        // Create a new list and add elements from _categoryDocuments[category]
-        _tempDocuments[category] = List.from(_categoryDocuments[category]!);
-        debugLog('below is temp documents');
-        debugLog(_tempDocuments[category]);
+      // Create a new list and add elements from _categoryDocuments[category]
+      _tempDocuments[category] = List.from(_categoryDocuments[category]!);
+      debugLog('below is temp documents');
+      debugLog(_tempDocuments[category]);
 
-        // Store the fetched post IDs in the list
-        List<String> newPostIds = snapshot.docs.map((doc) => doc['postId'] as String).toList();
+      // Store the fetched post IDs in the list
+      List<String> newPostIds = snapshot.docs.map((doc) => doc['postId'] as String).toList();
 
-        // Print the number of posts/documents fetched
-        debugLog('Number of documents fetched: ${newPostIds.length}');
+      // Print the number of posts/documents fetched
+      debugLog('Number of documents fetched: ${newPostIds.length}');
 
-        // Add each postId to the searchPostIds list individually
-        for (String postId in newPostIds) {
-          searchedPostIds.add(postId);
-        }
+      // Add each postId to the searchPostIds list individually
+      for (String postId in newPostIds) {
+        searchedPostIds.add(postId);
+      }
 
-        _categoryDocuments[category]?.addAll(snapshot.docs);
+      _categoryDocuments[category]?.addAll(snapshot.docs);
 
-        // Print the length of _categoryDocuments for the specific category
-        debugLog('Length of _categoryDocuments[$category]: ${_categoryDocuments[category]?.length}');
+      // Print the length of _categoryDocuments for the specific category
+      debugLog('Length of _categoryDocuments[$category]: ${_categoryDocuments[category]?.length}');
 
-        debugLog(_categoryDocuments[category]);
-        debugLog('below is again end temp documents');
-        debugLog(_tempDocuments[category]);
+      debugLog(_categoryDocuments[category]);
+      debugLog('below is again end temp documents');
+      debugLog(_tempDocuments[category]);
 
     } catch (error) {
       debugLog('Error fetching documents by search: $error');
@@ -820,68 +820,68 @@ class _HomePageState extends State<HomePage>  {
             ),
             Stack(
               children: [
-              SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              controller: _scrollController,
-              child: Padding(
-                padding: const EdgeInsets.only(top: 5, left: 50),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const SizedBox(width: 10), // Adjust spacing as needed
-                    CustomFilterChip(
-                      label: 'College Project',
-                      chipWidth: 130,
-                      isSelected: _selectedCategory == 'College Project',
-                      onSelected: (isSelected) {
-                        if (!isSelected) return; // If already selected, do nothing
-                        setState(() {
-                          _scrollToCategory('College Project');
-                          _selectedCategory = 'College Project';
-                          searchTerm = ''; // Reset search term
-                          searchFilter.clear(); // Clear search filter text field
-                        });
-                        debugLog('College Chip tapped!');
-                      },
-                    ),
-                    const SizedBox(width: 18), // Adjust spacing as needed
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  controller: _scrollController,
+                  child: Padding(
+                    padding: const EdgeInsets.only(top: 5, left: 50),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const SizedBox(width: 10), // Adjust spacing as needed
+                        CustomFilterChip(
+                          label: 'College Project',
+                          chipWidth: 130,
+                          isSelected: _selectedCategory == 'College Project',
+                          onSelected: (isSelected) {
+                            if (!isSelected) return; // If already selected, do nothing
+                            setState(() {
+                              _scrollToCategory('College Project');
+                              _selectedCategory = 'College Project';
+                              searchTerm = ''; // Reset search term
+                              searchFilter.clear(); // Clear search filter text field
+                            });
+                            debugLog('College Chip tapped!');
+                          },
+                        ),
+                        const SizedBox(width: 18), // Adjust spacing as needed
 
-                    CustomFilterChip(
-                      label: 'Personal Development',
-                      chipWidth: 180,
-                      isSelected: _selectedCategory == 'Personal Development',
-                      onSelected: (isSelected) {
-                        if (!isSelected) return; // If already selected, do nothing
-                        setState(() {
-                          _scrollToCategory('Personal Development');
-                          _selectedCategory = 'Personal Development';
-                          searchTerm = ''; // Reset search term
-                          searchFilter.clear(); // Clear search filter text field
-                        });
-                        debugLog('Personal Chip tapped!');
-                      },
-                    ),
-                    const SizedBox(width: 18), // Adjust spacing as needed
+                        CustomFilterChip(
+                          label: 'Personal Development',
+                          chipWidth: 180,
+                          isSelected: _selectedCategory == 'Personal Development',
+                          onSelected: (isSelected) {
+                            if (!isSelected) return; // If already selected, do nothing
+                            setState(() {
+                              _scrollToCategory('Personal Development');
+                              _selectedCategory = 'Personal Development';
+                              searchTerm = ''; // Reset search term
+                              searchFilter.clear(); // Clear search filter text field
+                            });
+                            debugLog('Personal Chip tapped!');
+                          },
+                        ),
+                        const SizedBox(width: 18), // Adjust spacing as needed
 
-                    CustomFilterChip(
-                      label: 'Assignment',
-                      isSelected: _selectedCategory == 'Assignment',
-                      onSelected: (isSelected) {
-                        if (!isSelected) return; // If already selected, do nothing
-                        setState(() {
-                          _scrollToCategory('Assignment');
-                          _selectedCategory = 'Assignment';
-                          searchTerm = ''; // Reset search term
-                          searchFilter.clear(); // Clear search filter text field
-                        });
-                        debugLog('Assignment Chip tapped!');
-                      },
+                        CustomFilterChip(
+                          label: 'Assignment',
+                          isSelected: _selectedCategory == 'Assignment',
+                          onSelected: (isSelected) {
+                            if (!isSelected) return; // If already selected, do nothing
+                            setState(() {
+                              _scrollToCategory('Assignment');
+                              _selectedCategory = 'Assignment';
+                              searchTerm = ''; // Reset search term
+                              searchFilter.clear(); // Clear search filter text field
+                            });
+                            debugLog('Assignment Chip tapped!');
+                          },
+                        ),
+                        const SizedBox(width: 20), // Adjust spacing as needed
+                      ],
                     ),
-                    const SizedBox(width: 20), // Adjust spacing as needed
-                  ],
+                  ),
                 ),
-              ),
-            ),
                 GestureDetector(
                   onTap: () {
                     _showCategoryPopover(context); // Show popover on tap
